@@ -28,7 +28,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
-# cambio para forzar nuevo deploy en Render
+# cambio render deploy
 
 
 
