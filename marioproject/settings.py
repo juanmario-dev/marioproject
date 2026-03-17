@@ -25,7 +25,14 @@ SECRET_KEY = 'django-insecure-rd_7pm6)(4tha*i^)l0)^w%pmeps5+y#el-7opdhk!piuce89e
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+
+ALLOWED_HOSTS = [
+    "marioproject-1.onrender.com",
+    "localhost",
+    "127.0.0.1",
+]
+
+
 
 
 # Application definition
