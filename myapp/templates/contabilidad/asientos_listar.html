@@ -1,0 +1,68 @@
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Asientos contables</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f7f7f7; }
+    h1 { margin-bottom: 16px; }
+    .actions { margin-bottom: 20px; }
+    .btn { display:inline-block; padding:8px 14px; background:#007bff; color:#fff; text-decoration:none; border-radius:6px; margin-right: 10px; }
+    .btn:hover { background:#0056b3; }
+    table { width:100%; border-collapse: collapse; background:#fff; }
+    th, td { border:1px solid #ddd; padding:8px; text-align:left; }
+    th { background:#f2f2f2; }
+    tr:nth-child(even) { background:#fafafa; }
+    .search { margin-bottom: 12px; }
+    input[type="text"] { padding:6px; width:250px; }
+  </style>
+</head>
+<body>
+  <h1>Asientos contables</h1>
+
+  <div class="actions">
+    <a class="btn" href="{% url 'asiento_crear' %}">➕ Nuevo asiento</a>
+    <a class="btn" href="{% url 'contabilidad' %}">← Volver a Contabilidad</a>
+  </div>
+
+  <form method="get" class="search">
+    <input type="text" name="q" value="{{ q }}" placeholder="Buscar por descripción o tipo doc...">
+    <button type="submit" class="btn">Buscar</button>
+  </form>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Fecha</th>
+        <th>Documento</th>
+        <th>Número</th>
+        <th>Descripción</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for a in asientos %}
+        <tr>
+          <td>{{ a.fecha }}</td>
+          <td>{{ a.documento.codigo }}</td>
+          <td>{{ a.numero }}</td>
+          <td>{{ a.descripcion|default:"-" }}</td>
+          <td>
+        
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="5">No hay asientos registrados.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
+</html>
+

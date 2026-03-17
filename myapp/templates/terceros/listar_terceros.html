@@ -1,0 +1,63 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Terceros</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+            text-align: left;
+        }
+        a {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Terceros Registrados</h1>
+    <table>
+        <tr>
+            <th>Tipo ID</th>
+            <th>Número</th>
+            <th>Nombre / Razón Social</th>
+            <th>Correo</th>
+            <th>Teléfono</th>
+            <th>Tipo de Tercero</th>
+            <th>Acciones</th>
+        </tr>
+        {% for tercero in terceros %}
+        <tr>
+            <td>{{ tercero.tipo_identificacion }}</td>
+            <td>{{ tercero.numero_identificacion }}</td>
+            <td>
+                {{ tercero.razon_social|default:"" }}
+                {{ tercero.primer_nombre }} {{ tercero.segundo_nombre }}
+                {{ tercero.primer_apellido }} {{ tercero.segundo_apellido }}
+            </td>
+            <td>{{ tercero.correo }}</td>
+            <td>{{ tercero.telefono }}</td>
+            <td>{{ tercero.tipo_tercero }}</td>
+            <td>
+                <a href="{% url 'editar_tercero' tercero.id %}">Editar</a>
+                <a href="{% url 'eliminar_tercero' tercero.id %}" onclick="return confirm('¿Seguro que quieres eliminar este tercero?');">Eliminar</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="7">No hay terceros registrados.</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <br>
+    <a href="{% url 'registrar_tercero' %}">Registrar Nuevo</a>
+</body>
+</html>

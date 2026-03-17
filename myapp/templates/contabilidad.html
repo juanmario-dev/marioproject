@@ -1,0 +1,147 @@
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Módulo Contabilidad</title>
+
+<style>
+
+body{
+    font-family: Arial, Helvetica, sans-serif;
+    margin:0;
+    padding:0;
+    background:linear-gradient(180deg,#eef4fb 0%,#f7f9fc 100%);
+    text-align:center;
+}
+
+/* HEADER */
+
+header{
+    background:#021224;
+    color:white;
+    padding:16px 0;
+    font-size:22px;
+    font-weight:bold;
+    box-shadow:0 5px 15px rgba(0,0,0,0.2);
+}
+
+/* CONTENEDOR */
+
+.container{
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    min-height:82vh;
+}
+
+/* MENU */
+
+.menu{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:24px;
+    max-width:900px;
+}
+
+/* BOTONES CIRCULARES */
+
+.menu a{
+    width:150px;
+    height:150px;
+
+    border-radius:50%;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    text-align:center;
+
+    background:#2563eb;
+
+    color:white;
+
+    font-size:15px;
+    font-weight:bold;
+
+    text-decoration:none;
+
+    padding:14px;
+
+    transition:all .25s ease;
+
+    box-shadow:0 10px 20px rgba(37,99,235,0.35);
+}
+
+.menu a:hover{
+    transform:scale(1.07);
+    background:#1d4ed8;
+}
+
+/* TEXTO */
+
+.menu a span{
+    max-width:90%;
+}
+
+/* BOTÓN VOLVER */
+
+.back{
+    margin-top:28px;
+}
+
+.back a{
+    text-decoration:none;
+    font-weight:bold;
+    color:#2563eb;
+    font-size:13px;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+Módulo Contabilidad
+</header>
+
+<div class="container">
+
+<div class="menu">
+
+<a href="{% url 'asiento_crear' %}">
+<span>Registrar Documento</span>
+</a>
+
+<a href="{% url 'asientos_listar' %}">
+<span>Consultar Documento</span>
+</a>
+
+<a href="{% url 'registrar_tercero' %}">
+<span>Registrar Terceros</span>
+</a>
+
+<a href="{% url 'configuracion' %}">
+<span>Configuración</span>
+</a>
+
+<a href="{% url 'reportes_subpanel_contabilidad' %}">
+<span>Reportes</span>
+</a>
+
+</div>
+
+<div class="back">
+<a href="{% url 'home' %}">← Regresar</a>
+</div>
+
+</div>
+
+</body>
+</html>

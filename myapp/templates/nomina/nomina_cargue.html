@@ -1,0 +1,1794 @@
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+  <style>
+    .titulo-modulo{
+      background: linear-gradient(90deg, #109155, #34c782);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,.08);
+    }
+    :root{
+      --bg:#f7f8fb;
+      --card:#ffffff;
+      --border:#d8dee9;
+      --text:#0f172a;
+      --muted:#64748b;
+      --blue:#0d6efd;
+      --blue-dark:#0b5ed7;
+      --shadow: 0 10px 25px rgba(2,18,36,.10);
+      --zebra:#fafafa;
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: Arial, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      font-size: 13px;
+    }
+
+    .wrap{
+      max-width: 1900px;
+      margin: 0 auto;
+      padding: 10px 12px 14px;
+    }
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:8px;
+      padding:10px;
+      box-shadow: var(--shadow);
+      margin-bottom:10px;
+    }
+
+    /* ==========================
+       FILTROS: 1 SOLA FILA + SCROLL
+       ========================== */
+    .filters{
+      display:flex;
+      flex-wrap: nowrap;          /* ✅ todo en una sola fila */
+      gap:10px;
+      align-items:flex-end;       /* alinea inputs */
+      overflow-x:auto;            /* ✅ scroll horizontal si no cabe */
+      overflow-y:hidden;
+      padding-bottom: 6px;        /* espacio para scrollbar */
+    }
+
+    .filters .field{
+      flex: 0 0 auto;             /* no se estira ni se aplasta */
+      min-width: 0;
+    }
+
+    .field label{
+      display:block;
+      font-size:10.5px;
+      font-weight:800;
+      color:#111;
+      margin:0 0 4px;
+    }
+
+    .field input,
+    .field select{
+      width:100%;
+      height:26px;                 /* compacto */
+      padding:4px 8px;
+      border-radius:6px;
+      border:1px solid #cfd6e3;
+      font-size:12px;
+      background:#fff;
+      outline:none;
+    }
+
+    /* Selects multiselect más cómodos */
+    .field select{
+      height: 26px;
+      padding:6px 8px;
+      font-size:12.5px;
+    }
+
+    /* Anchos por orden (NO requiere cambiar HTML) */
+    .filters .field:nth-child(1){ width:100px; } /* Empleado */
+    .filters .field:nth-child(2){ width:240px; } /* Tipo nómina */
+    .filters .field:nth-child(3){ width:240px; } /* Área */
+    .filters .field:nth-child(4){ width:240px; } /* Tipo contrato */
+    .filters .field:nth-child(5){ width:190px; } /* Centro de costo */
+    .filters .field:nth-child(6){ width:120px; } /* Fecha inicio */
+    .filters .field:nth-child(7){ width:120px; } /* Fecha fin */
+
+    /* Multiselect: select + botón */
+    .multi-wrap{
+      display:grid;
+      grid-template-columns: 1fr 55px;
+      gap:4px;
+      align-items:center;
+    }
+
+    .btn-add{
+      height:30px;
+      padding:0 8px;
+      font-size:10px;
+      font-weight:600;
+      border-radius:6px;
+      border:0;
+      cursor:pointer;
+      color:#fff;
+      background: linear-gradient(120deg, var(--blue) 0%, var(--blue-dark) 100%);
+      white-space:nowrap;
+    }
+
+    /* Chips compactos */
+    .chips{
+      margin-top:5px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:4px;
+
+      height:28px;         /* fijo */
+      overflow-y:auto;      /* scroll interno */
+      overflow-x:hidden;
+      align-content:flex-start;
+      padding:2px 2px;
+    }
+
+    .chip{
+      display:inline-flex;
+      gap:6px;
+      align-items:center;
+      padding:2px 6px;
+      border-radius:999px;
+      border:1px solid rgba(0,0,0,.12);
+      background:#fff;
+      font-size:10px;
+      font-weight:400;     /* sin negrilla */
+      color:#111;
+      line-height: 1.1;
+      max-width: 100%;
+    }
+    .chip span{
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      max-width: 260px;
+      display:inline-block;
+    }
+    .chip button{
+      border:0;
+      background:transparent;
+      cursor:pointer;
+      font-weight:800;
+      font-size:11px;
+      line-height:1;
+      padding:0;
+      opacity:.75;
+    }
+    .chip button:hover{ opacity:1; }
+
+    .chips::-webkit-scrollbar{ width: 8px; }
+    .chips::-webkit-scrollbar-thumb{ background:#cbd5e1; border-radius: 999px; }
+    .chips::-webkit-scrollbar-track{ background:#eef2f7; border-radius: 999px; }
+
+    /* Acciones */
+    .actions-row{
+      display:flex;
+      justify-content:flex-end;
+      align-items:center;
+      gap:10px;
+      margin-top:10px;
+      flex-wrap:wrap;
+    }
+
+    .btn{
+      border:0;
+      cursor:pointer;
+      border-radius:6px;
+      padding:8px 12px;
+      font-weight:900;
+      font-size:12px;
+      height: 34px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      text-decoration:none;
+      white-space:nowrap;
+    }
+
+    .btn-primary{
+      color:#fff;
+      background: linear-gradient(120deg, var(--blue) 0%, var(--blue-dark) 100%);
+    }
+
+    .btn-dark{
+      background:#111;
+      color:#fff;
+    }
+
+    .note{
+      margin-top:6px;
+      color: var(--muted);
+      font-size: 11.5px;
+      font-weight: 600;
+    }
+
+    /* ==========================
+       TABLA (Excel-ish)
+       ========================== */
+    .table-wrap{
+      overflow:auto;
+      border:1px solid rgba(0,0,0,.08);
+      border-radius:6px;
+      background:#fff;
+    }
+
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      min-width: 2000px;
+      background:#fff;
+      font-size: 11.5px;
+    }
+
+    thead th{
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background:#fff;
+      color:#000;
+      font-weight:900;
+      font-size:11px;
+      padding:6px 6px;
+      text-align:left;
+      border:0;
+      white-space:nowrap;
+    }
+
+    tbody td{
+      padding:4px 6px;
+      border:0;
+      background:#fff;
+      white-space:nowrap;
+      vertical-align: middle;
+    }
+
+    tbody tr:nth-child(even) td{
+      background: var(--zebra);
+    }
+
+    td input, td select{
+      border:0;
+      background:transparent;
+      padding:2px 2px;
+      font-size:11.5px;
+      outline:none;
+      width: 100%;
+      min-width: 90px;
+    }
+
+    .money{ text-align:right; }
+
+    /* anchos base */
+    .w-contrato{ min-width:110px; }
+    .w-cedula{ min-width:120px; }
+    .w-nombre{ min-width:260px; }
+    .w-cargo{ min-width:180px; }
+    .w-tnomina{ min-width:160px; }
+    .w-tcontrato{ min-width:160px; }
+    .w-area{ min-width:160px; }
+    .w-sueldo{ min-width:130px; }
+    .w-dias{ min-width:120px; }
+    .w-total{ min-width:130px; }
+    .w-var{ min-width:160px; }
+  </style>
+</head>
+
+<body>
+  
+  <div class="titulo-modulo">
+  DataCounter : Cargue de Nómina
+  </div>
+
+    <!-- ================== FILTROS ================== -->
+    <div class="card">
+         {% if messages %}
+           <div style="margin-bottom:8px;">
+             {% for m in messages %}
+               <div style="padding:8px 10px; border-radius:6px; background:#fff3cd; border:1px solid #ffe69c; font-size:12px;">
+                 {{ m }}
+               </div>
+             {% endfor %}
+           </div>
+         {% endif %}
+      <form method="GET" action="">
+        <div class="filters">
+
+          <div class="field">
+            <label>No Nómina</label>
+              <input type="text" name="no_nomina" id="no_nomina"
+                value="{{ request.GET.no_nomina|default:no_nomina|default_if_none:'' }}"
+                placeholder="Digita y Enter para consultar"
+                {% if modo_consulta %}readonly{% endif %}>
+               
+          </div>
+
+          <!-- 1) Empleado -->
+          <div class="field">
+            <label>Empleado</label>
+            <input type="text" name="cedula"
+                   value="{{ request.GET.empleado|default_if_none:'' }}"
+                   placeholder="1069....">
+          </div>
+
+          <!-- 2) Tipo de nómina (multi) -->
+          <div class="field">
+            <label>Tipo de nómina</label>
+            <div class="multi-wrap">
+              <select id="sel_tipos_nomina">
+                <option value="__ALL__">Todas las nóminas</option>
+                {% for t in tipos_nomina %}
+                  <option value="{{ t.id }}">{{ t.consecutivo }} - {{ t.descripcion }}</option>
+                {% endfor %}
+              </select>
+              <button class="btn-add" type="button" data-add="tipos_nomina">Agregar</button>
+            </div>
+            <div class="chips" id="chips_tipos_nomina"></div>
+            <input type="hidden" name="tipos_nomina_ids" id="hid_tipos_nomina_ids" value="">
+          </div>
+
+          <!-- 3) Área (multi) -->
+          <div class="field">
+            <label>Área</label>
+            <div class="multi-wrap">
+              <select id="sel_areas">
+                <option value="__ALL__">Todas las áreas</option>
+                {% for a in areas %}
+                  <option value="{{ a.id }}">{{ a.consecutivo }} - {{ a.descripcion }}</option>
+                {% endfor %}
+              </select>
+              <button class="btn-add" type="button" data-add="areas">Agregar</button>
+            </div>
+            <div class="chips" id="chips_areas"></div>
+            <input type="hidden" name="areas_ids" id="hid_areas_ids" value="">
+          </div>
+
+          <!-- 4) Tipo de contrato (multi) -->
+          <div class="field">
+            <label>Tipo de contrato</label>
+            <div class="multi-wrap">
+              <select id="sel_tipos_contrato">
+                <option value="__ALL__">Todos los contratos</option>
+                {% for c in tipos_contrato %}
+                  <option value="{{ c.id }}">{{ c.consecutivo }} - {{ c.descripcion }}</option>
+                {% endfor %}
+              </select>
+              <button class="btn-add" type="button" data-add="tipos_contrato">Agregar</button>
+            </div>
+            <div class="chips" id="chips_tipos_contrato"></div>
+            <input type="hidden" name="tipos_contrato_ids" id="hid_tipos_contrato_ids" value="">
+          </div>
+
+          <!-- 5) Centros de costo -->
+          <div class="field">
+            <label>Centros de costo</label>
+            <select disabled>
+              <option>-- Pendiente por crear --</option>
+            </select>
+          </div>
+
+          <!-- 6) Fecha inicio -->
+          <div class="field">
+            <label>Fecha inicio</label>
+            <input type="date" name="fecha_ini" value="{{ request.GET.fecha_ini|default_if_none:'' }}">
+          </div>
+
+          <!-- 7) Fecha fin -->
+          <div class="field">
+            <label>Fecha fin</label>
+            <input type="date" name="fecha_fin" value="{{ request.GET.fecha_fin|default_if_none:'' }}">
+          </div>
+
+        </div>
+
+        <div class="actions-row">
+          <button class="btn btn-primary" type="submit" name="cargar" value="1">Cargar</button>
+          <a class="btn btn-dark" href="{% url 'nomina_subpanel' %}">Retroceder</a>
+        </div>
+
+       
+      </form>
+    </div>
+
+    <!-- ================== TABLA ================== -->
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <!-- Fijas -->
+              <th style="min-width:50px;">✔</th>
+              <th class="w-contrato">Contrato</th>
+              <th class="w-cedula">Cédula</th>
+              <th class="w-nombre">Nombre del empleado</th>
+              <th class="w-cargo">Cargo</th>
+              <th class="w-tnomina">Tipo de nómina</th>
+              <th class="w-tcontrato">Tipo de contrato</th>
+              <th class="w-area">Área</th>
+              <th class="w-sueldo">Sueldo</th>
+              <th class="w-dias">Días laborados</th>
+
+              <!-- Variables: DEVENGOS -->
+              {% for c in conceptos_devengos %}
+                <th class="w-var">{{ c.nombre }}</th>
+              {% endfor %}
+
+              <th class="w-total">Total salario</th>
+
+              <!-- Variables: DEDUCCIONES -->
+              {% for c in conceptos_deducciones %}
+                <th class="w-var">{{ c.nombre }}</th>
+              {% endfor %}
+
+              <th class="w-total">Total deducciones</th>
+              <th class="w-total">Total a pagar</th>
+
+              <!-- Variables: CARGA PRESTACIONAL -->
+              {% for c in conceptos_carga %}
+                <th class="w-var">{{ c.nombre }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+
+          
+          <tbody>
+            {% for e in empleados %}
+              <tr data-empid="{{ e.id }}" data-tnid="{{ e.tipo_nomina_id }}">
+                <td style="text-align:center;">
+                  <input type="checkbox" class="row-check">
+                </td>
+
+                <td><input type="text" value="{{ e.contrato|default_if_none:'' }}" readonly></td>
+                <td><input type="text" value="{{ e.cedula|default_if_none:'' }}" readonly></td>
+                <td><input type="text" value="{{ e.nombre|default_if_none:'' }}" readonly></td>
+                <td><input type="text" value="{{ e.cargo|default_if_none:'' }}" readonly></td>
+                <td><input type="text" value="{{ e.tipo_nomina|default_if_none:'' }}" readonly></td>
+                <td><input type="text" value="{{ e.tipo_contrato|default_if_none:'' }}" readonly></td>
+                <td><input type="text" value="{{ e.area|default_if_none:'' }}" readonly></td>
+                <td><input type="text" class="money" value="{{ e.sueldo|default_if_none:'' }}" readonly></td>
+
+                <td><input type="number" min="0" name="dias_{{ e.id }}" value="{{ e.dias_laborados|default_if_none:'' }}"></td>
+
+                {% for c in conceptos_devengos %}
+                  <td>
+                    <input type="text"
+                      class="money concept-dev"
+                      data-cid="{{ c.id }}"
+                      data-concept="{{ c.nombre|lower }}"
+                      name="dev_{{ e.id }}_{{ c.id }}"
+                      placeholder="0">
+                  </td>
+                {% endfor %}
+
+                <td><input type="text" class="money row-total-salario" name="total_salario_{{ e.id }}" readonly></td>
+
+                {% for c in conceptos_deducciones %}
+                  <td>
+                    <input type="text"
+                      class="money concept-ded"
+                      data-cid="{{ c.id }}"
+                      data-concept="{{ c.nombre|lower }}"
+                      name="ded_{{ e.id }}_{{ c.id }}"
+                      placeholder="0">
+                  </td>
+                {% endfor %}
+
+                  <td><input type="text" class="money row-total-deducciones" name="total_deducciones_{{ e.id }}" readonly></td>
+                  <td><input type="text" class="money row-total-pagar" name="total_pagar_{{ e.id }}" readonly></td>
+
+                {% for c in conceptos_carga %}
+                  <td>
+                    <input type="text"
+                      class="money concept-car"
+                      data-cid="{{ c.id }}"
+                      data-concept="{{ c.nombre|lower }}"
+                      name="car_{{ e.id }}_{{ c.id }}"
+                      placeholder="0">
+                  </td>
+                {% endfor %}
+              </tr>
+           {% empty %}
+            <tr>
+              <td colspan="999" style="padding:10px; color:#64748b; font-weight:700;">
+                 No hay empleados cargados. Usa los filtros y presiona “Cargar”.
+              </td>
+            </tr>
+           {% endfor %}
+          </tbody>
+            
+        
+        <tfoot>
+          <tr style="background:#fff; border-top:1px solid rgba(0,0,0,.12);">
+            <!-- Fijas (10 columnas) -->
+            <td colspan="10" style="font-weight:900; padding:6px 6px;">TOTALES</td>
+
+            <!-- Totales por columna: DEVENGOS -->
+            {% for c in conceptos_devengos %}
+              <td>
+               <input type="text" class="money" id="col_total_dev_{{ c.id }}" readonly>
+              </td>
+            {% endfor %}
+
+            <!-- Total salario (columna) -->
+            <td><input type="text" class="money" id="col_total_salario" readonly></td>
+
+            <!-- Totales por columna: DEDUCCIONES -->
+            {% for c in conceptos_deducciones %}
+             <td>
+               <input type="text" class="money" id="col_total_ded_{{ c.id }}" readonly>
+             </td>
+            {% endfor %}
+
+            <!-- Total deducciones + Total a pagar (columna) -->
+            <td><input type="text" class="money" id="col_total_deducciones" readonly></td>
+            <td><input type="text" class="money" id="col_total_pagar" readonly></td>
+
+            <!-- Totales por columna: CARGA (opcional, pero ya queda listo) -->
+            {% for c in conceptos_carga %}
+             <td>
+              <input type="text" class="money" id="col_total_car_{{ c.id }}" readonly>
+             </td>
+            {% endfor %}
+          </tr>
+        </tfoot>
+
+        </table>
+      </div>
+       <div class="actions-row" style="justify-content:flex-end; margin-top:12px;">
+       <button class="btn btn-primary" type="button" id="btn_guardar">Guardar</button>
+       <button class="btn btn-dark" type="button" id="btn_eliminar">Eliminar</button>
+       <button class="btn btn-primary" type="button" id="btn_exportar">Exportar</button>
+       <button class="btn btn-dark" type="button" id="btn_pdf">PDF</button>
+      </div>
+
+       <div id="msg_box" class="note" style="margin-top:8px;"></div>
+      </div>
+
+  </div>
+
+
+{{ initial_values|json_script:"INIT_NOMINA_VALUES" }}
+
+
+<script>
+
+  const URL_GUARDAR = "{% url 'nomina_cargue_guardar' %}";
+  const URL_ELIMINAR = "{% url 'nomina_cargue_eliminar' %}";
+  const URL_EXPORTAR = "{% url 'nomina_cargue_exportar_excel' %}";
+
+    // ✅ URLs renderizadas por Django (quedan como texto real)
+  const URL_NOVEDADES = "{% url 'nomina_novedades_data' %}";
+  const URL_AUXILIO   = "{% url 'nomina_auxilio_info' %}";
+  const URL_PARAMCALC = "{% url 'nomina_param_calc_data' %}";
+  const URL_REMOVE    = "{% url 'nomina_cargue_remove_line' %}";
+
+
+  // ==========================
+  // MULTI-SELECT CON CHIPS
+  // ==========================
+  function setupMulti(key){
+    const sel = document.getElementById("sel_" + key);
+    const chips = document.getElementById("chips_" + key);
+    const hid = document.getElementById("hid_" + key + "_ids");
+
+    const state = { all:false, items:[] };
+
+    function syncHidden(){
+      if(state.all){
+        hid.value = "__ALL__";
+        return;
+      }
+      hid.value = state.items.map(x => x.id).join(",");
+    }
+
+    function render(){
+      chips.innerHTML = "";
+
+      if(state.all){
+        const chip = document.createElement("span");
+        chip.className = "chip";
+        chip.innerHTML = `<span>Todas</span><button type="button" title="Quitar">×</button>`;
+        chip.querySelector("button").addEventListener("click", () => {
+          state.all = false;
+          state.items = [];
+          syncHidden();
+          render();
+        });
+        chips.appendChild(chip);
+        return;
+      }
+
+      state.items.forEach((it, idx) => {
+        const chip = document.createElement("span");
+        chip.className = "chip";
+        chip.innerHTML = `<span>${it.text}</span><button type="button" title="Quitar">×</button>`;
+        chip.querySelector("button").addEventListener("click", () => {
+          state.items.splice(idx, 1);
+          syncHidden();
+          render();
+        });
+        chips.appendChild(chip);
+      });
+    }
+
+    function addSelected(){
+      const val = sel.value;
+      const text = sel.options[sel.selectedIndex]?.text || "";
+
+      if(val === "__ALL__"){
+        state.all = true;
+        state.items = [];
+        syncHidden();
+        render();
+        return;
+      }
+
+      if(state.all){
+        state.all = false;
+        state.items = [];
+      }
+
+      if(state.items.some(x => x.id === val)) return;
+
+      state.items.push({id:val, text});
+      syncHidden();
+      render();
+    }
+
+    syncHidden();
+    render();
+    return { addSelected };
+  }
+
+  const multiTiposNomina = setupMulti("tipos_nomina");
+  const multiAreas = setupMulti("areas");
+  const multiTiposContrato = setupMulti("tipos_contrato");
+
+  document.querySelectorAll("[data-add]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const k = btn.getAttribute("data-add");
+      if(k === "tipos_nomina") multiTiposNomina.addSelected();
+      if(k === "areas") multiAreas.addSelected();
+      if(k === "tipos_contrato") multiTiposContrato.addSelected();
+    });
+  });
+
+  // ==========================
+  // FORMATO MILES (es-CO)
+  // ==========================
+  
+  function parseMoney(str){
+    if(str == null) return 0;
+    let s = String(str).trim();
+    if(!s) return 0;
+
+    // Quitar espacios (incluye espacios no-break)
+    s = s.replace(/\s|\u00A0/g, "");
+
+    // Caso 1: Formato es-CO con miles y opcional decimales:
+    // 3.401.000  | 249.005 | 1.234.567,89
+    const isEsCO = /^\d{1,3}(\.\d{3})+(,\d+)?$/.test(s);
+      if(isEsCO){
+        s = s.replace(/\./g, "");  // quitar miles
+        s = s.replace(",", ".");   // coma -> punto decimal
+        const n = parseFloat(s);
+        return isNaN(n) ? 0 : n;
+      }
+
+      // Caso 2: “backend” o número normal con punto decimal:
+      // 3401000  | 3401000.00 | 1200.5
+      const isPlain = /^\d+(\.\d+)?$/.test(s);
+      if(isPlain){
+        const n = parseFloat(s);
+        return isNaN(n) ? 0 : n;
+      }
+
+      // Caso 3: Si viene con comas como miles (raro), limpiamos:
+      // 3,401,000 o 3,401,000.00
+      // Quitamos miles por coma, dejamos punto decimal.
+      if(/^\d{1,3}(,\d{3})+(\.\d+)?$/.test(s)){
+        s = s.replace(/,/g, "");
+        const n = parseFloat(s);
+        return isNaN(n) ? 0 : n;
+      }
+
+     // Último recurso: quitar todo excepto dígitos, coma, punto, signo
+     // y volver a intentar como es-CO
+     s = s.replace(/[^\d,.\-]/g, "");
+     // si tiene coma, asumimos coma decimal
+     if(s.includes(",")){
+       s = s.replace(/\./g, "");
+       s = s.replace(",", ".");
+      }else{
+        // si solo tiene puntos, asumimos miles si hay grupos de 3
+        if(/^\d{1,3}(\.\d{3})+$/.test(s)){
+         s = s.replace(/\./g, "");
+        }
+      }
+
+      const n = parseFloat(s);
+      return isNaN(n) ? 0 : n; 
+   }
+
+
+
+
+
+  function formatMoney(n, decimals=0){
+    const num = (n == null || n === "") ? 0 : Number(n);
+    const opts = { minimumFractionDigits: decimals, maximumFractionDigits: decimals };
+    return new Intl.NumberFormat("es-CO", opts).format(isNaN(num) ? 0 : num);
+  }
+
+  // Solo inputs editables (para que readonly no se “desformatee” al dar click)
+  function attachMoneyFormat(){
+    document.querySelectorAll("input.money").forEach(inp => {
+      if(inp.readOnly) return;
+
+      inp.addEventListener("focus", () => {
+        const n = parseMoney(inp.value);
+        inp.value = (inp.value.trim() === "") ? "" : String(n);
+        inp.select?.();
+      });
+
+      inp.addEventListener("blur", () => {
+        if(inp.value.trim() === ""){
+          inp.value = "";
+          return;
+        }
+        const n = parseMoney(inp.value);
+        inp.value = formatMoney(n, 0);
+      });
+    });
+  }
+
+  function initialFormatMoney(){
+    document.querySelectorAll("input.money").forEach(inp => {
+      if(inp.value && inp.value.trim() !== ""){
+        const n = parseMoney(inp.value);
+        inp.value = formatMoney(n, 0);
+      }
+    });
+  }
+
+  attachMoneyFormat();
+  initialFormatMoney();
+
+  // ==========================
+  // HELPERS: conceptos / fila
+  // ==========================
+  function normConceptName(s){
+    return (s || "")
+      .toString()
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, " ");
+  }
+
+  // OJO: sueldo y auxilio se buscan SOLO en devengos (concept-dev)
+  function findDevConceptInput(tr, conceptName){
+    const target = normConceptName(conceptName);
+    return Array.from(tr.querySelectorAll("input.concept-dev"))
+      .find(i => normConceptName(i.dataset.concept) === target);
+  }
+
+  function getSueldoFijoInput(tr){
+    // Columna "Sueldo" fijo (readonly). En tu HTML es td 9.
+    return tr.querySelector("td:nth-child(9) input.money[readonly]");
+  }
+
+  function getDiasInput(tr){
+    return tr.querySelector('input[type="number"][name^="dias_"]');
+  }
+
+  function getYearFromFilters(){
+    const ini = document.querySelector('input[name="fecha_ini"]')?.value || "";
+    const fin = document.querySelector('input[name="fecha_fin"]')?.value || "";
+    const pick = ini || fin;
+    if(!pick || pick.length < 4) return "";
+    return pick.slice(0,4);
+  }
+
+  // ==========================
+  // TOTALES: fila + footer
+  // ==========================
+  function setMoneyValue(inp, n){
+    if(!inp) return;
+    inp.value = formatMoney(Number(n || 0), 0);
+  }
+
+  function recalcRow(tr){
+    const devs = tr.querySelectorAll("input.concept-dev");
+    const deds = tr.querySelectorAll("input.concept-ded");
+
+    let totalSalario = 0;
+    devs.forEach(inp => totalSalario += parseMoney(inp.value));
+
+    let totalDeducciones = 0;
+    deds.forEach(inp => totalDeducciones += parseMoney(inp.value));
+
+    const totalPagar = totalSalario - totalDeducciones;
+
+    setMoneyValue(tr.querySelector("input.row-total-salario"), totalSalario);
+    setMoneyValue(tr.querySelector("input.row-total-deducciones"), totalDeducciones);
+    setMoneyValue(tr.querySelector("input.row-total-pagar"), totalPagar);
+  }
+
+  function recalcFooter(){
+    // Inicializar TODOS los totales del footer en 0 (para que no queden vacíos)
+    document.querySelectorAll('tfoot input[id^="col_total_dev_"]').forEach(inp => setMoneyValue(inp, 0));
+    document.querySelectorAll('tfoot input[id^="col_total_ded_"]').forEach(inp => setMoneyValue(inp, 0));
+    document.querySelectorAll('tfoot input[id^="col_total_car_"]').forEach(inp => setMoneyValue(inp, 0));
+
+    setMoneyValue(document.getElementById("col_total_salario"), 0);
+    setMoneyValue(document.getElementById("col_total_deducciones"), 0);
+    setMoneyValue(document.getElementById("col_total_pagar"), 0);
+
+    // Devengos por columna
+    document.querySelectorAll("tbody tr[data-empid] input.concept-dev").forEach(inp => {
+      const id = inp.dataset.cid;
+      const out = document.getElementById("col_total_dev_" + id);
+      if(!out) return;
+      const cur = parseMoney(out.value);
+      setMoneyValue(out, cur + parseMoney(inp.value));
+    });
+
+    // Deducciones por columna
+    document.querySelectorAll("tbody tr[data-empid] input.concept-ded").forEach(inp => {
+      const id = inp.dataset.cid;
+      const out = document.getElementById("col_total_ded_" + id);
+      if(!out) return;
+      const cur = parseMoney(out.value);
+      setMoneyValue(out, cur + parseMoney(inp.value));
+    });
+
+    // Carga por columna (opcional)
+    document.querySelectorAll("tbody tr[data-empid] input.concept-car").forEach(inp => {
+      const id = inp.dataset.cid;
+      const out = document.getElementById("col_total_car_" + id);
+      if(!out) return;
+      const cur = parseMoney(out.value);
+      setMoneyValue(out, cur + parseMoney(inp.value));
+    });
+
+    // Totales globales (sumando lo ya calculado por fila)
+    let sumSal = 0, sumDed = 0, sumPay = 0;
+    document.querySelectorAll("tbody tr[data-empid]").forEach(tr => {
+      sumSal += parseMoney(tr.querySelector("input.row-total-salario")?.value);
+      sumDed += parseMoney(tr.querySelector("input.row-total-deducciones")?.value);
+      sumPay += parseMoney(tr.querySelector("input.row-total-pagar")?.value);
+    });
+
+    setMoneyValue(document.getElementById("col_total_salario"), sumSal);
+    setMoneyValue(document.getElementById("col_total_deducciones"), sumDed);
+    setMoneyValue(document.getElementById("col_total_pagar"), sumPay);
+  }
+
+  function recalcAll(){
+    document.querySelectorAll("tbody tr[data-empid]").forEach(tr => recalcRow(tr));
+    recalcFooter();
+  }
+
+  function hookTotals(){
+    const tbody = document.querySelector("tbody");
+    if(!tbody) return;
+
+    // recalcular al escribir
+    tbody.addEventListener("input", (ev) => {
+      const inp = ev.target;
+      if(!(inp instanceof HTMLInputElement)) return;
+
+      if(inp.classList.contains("concept-dev") ||
+         inp.classList.contains("concept-ded") ||
+         inp.classList.contains("concept-car") ||
+         (inp.name || "").startsWith("dias_")){
+
+        const tr = inp.closest('tr[data-empid]');
+        if(tr) recalcRow(tr);
+        recalcFooter();
+      }
+    });
+
+    // recalcular al salir (después del formato miles)
+    tbody.addEventListener("blur", (ev) => {
+      const inp = ev.target;
+      if(!(inp instanceof HTMLInputElement)) return;
+
+      if(inp.classList.contains("concept-dev") ||
+         inp.classList.contains("concept-ded") ||
+         inp.classList.contains("concept-car")){
+
+        const tr = inp.closest('tr[data-empid]');
+        if(tr) recalcRow(tr);
+        recalcFooter();
+      }
+    }, true);
+
+    // inicial
+    recalcAll();
+  }
+
+  // ==========================
+  // MENÚ CONTEXTUAL POR FILA
+  // ==========================
+  const menu = document.createElement("div");
+  menu.style.position = "fixed";
+  menu.style.zIndex = "9999";
+  menu.style.minWidth = "160px";
+  menu.style.background = "#fff";
+  menu.style.border = "1px solid rgba(0,0,0,.15)";
+  menu.style.borderRadius = "8px";
+  menu.style.boxShadow = "0 10px 30px rgba(0,0,0,.12)";
+  menu.style.padding = "6px";
+  menu.style.display = "none";
+
+  menu.innerHTML = `
+    <div data-act="clear" style="padding:8px 10px; cursor:pointer; border-radius:6px; font-size:12px;">🧹 Limpiar línea</div>
+    <div data-act="delete" style="padding:8px 10px; cursor:pointer; border-radius:6px; font-size:12px; color:#b91c1c;">🗑️ Eliminar línea</div>
+  `;
+  document.body.appendChild(menu);
+
+  function hideMenu(){ menu.style.display = "none"; menu.dataset.empid = ""; }
+  window.addEventListener("click", hideMenu);
+  window.addEventListener("scroll", hideMenu);
+
+  function getCsrfToken(){
+    const m = document.cookie.match(/csrftoken=([^;]+)/);
+    return m ? m[1] : "";
+  }
+
+  function bindContextMenu(){
+    document.querySelectorAll("tbody tr[data-empid]").forEach(tr => {
+      tr.addEventListener("contextmenu", (ev) => {
+        ev.preventDefault();
+        const empid = tr.getAttribute("data-empid");
+        menu.dataset.empid = empid;
+
+        menu.style.left = ev.clientX + "px";
+        menu.style.top  = ev.clientY + "px";
+        menu.style.display = "block";
+      });
+    });
+  }
+
+  bindContextMenu();
+
+  // ==========================
+  // AUTO: SUELDO (concepto devengo llamado "sueldo")
+  // ==========================
+  
+
+  function calcSueldoConceptoForRow(tr){
+    const sueldoBaseInp = getSueldoFijoInput(tr);
+    const diasInp = getDiasInput(tr);
+    const sueldoConceptInp = findDevConceptInput(tr, "sueldo");
+
+    if(!sueldoBaseInp || !diasInp || !sueldoConceptInp) return;
+    if(sueldoConceptInp.dataset.manual === "1") return;
+
+    const sueldoBase = parseMoney(sueldoBaseInp.value);
+    const dias = Number(diasInp.value || 0);
+    const valorCalc = (sueldoBase / 30) * dias;
+
+    const nov = parseMoney(sueldoConceptInp.dataset.nov || "0"); // ✅ conservar novedad
+
+    sueldoConceptInp.dataset.auto = "1";
+    sueldoConceptInp.value = formatMoney(valorCalc + nov, 0);     // ✅ suma novedad
+
+    recalcRow(tr);
+    recalcFooter();
+  }
+
+  function hookSueldoConcepto(){
+    document.querySelectorAll('tbody tr[data-empid]').forEach(tr => {
+      const diasInp = getDiasInput(tr);
+      const sueldoConceptInp = findDevConceptInput(tr, "sueldo");
+
+      calcSueldoConceptoForRow(tr);
+
+      if(diasInp){
+        diasInp.addEventListener("input", () => calcSueldoConceptoForRow(tr));
+        diasInp.addEventListener("change", () => calcSueldoConceptoForRow(tr));
+      }
+
+      if(sueldoConceptInp){
+        sueldoConceptInp.addEventListener("input", () => { sueldoConceptInp.dataset.manual = "1"; });
+        sueldoConceptInp.addEventListener("blur", () => {
+          if((sueldoConceptInp.value || "").trim() === ""){
+            sueldoConceptInp.dataset.manual = "0";
+            calcSueldoConceptoForRow(tr);
+          }
+        });
+      }
+    });
+  }
+
+  // ==========================
+  // AUTO: AUXILIO DE TRANSPORTE
+  // ==========================
+  const auxCache = {}; // key = anio
+  let LAST_AUX_INFO = null;
+
+  async function fetchAuxInfo(anio){
+    if(auxCache[anio]) return auxCache[anio];
+
+    const url = URL_AUXILIO + `?anio=${encodeURIComponent(anio)}`;
+    const res = await fetch(url, { method:"GET" });
+    const json = await res.json().catch(()=> ({}));
+
+    if(!res.ok || !json.ok){
+      throw new Error(json.error || "No se pudo consultar auxilio.");
+    }
+
+    auxCache[anio] = json;
+    return json;
+  }
+
+  function calcAuxilioForRow(tr, auxInfo){
+    const auxInp = findDevConceptInput(tr, "auxilio de transporte");
+    if(!auxInp) return;
+    if(auxInp.dataset.manual === "1") return;
+
+    const sueldoBaseInp = getSueldoFijoInput(tr);
+    const diasInp = getDiasInput(tr);
+    if(!sueldoBaseInp || !diasInp) return;
+
+    const sueldoBase = parseMoney(sueldoBaseInp.value);
+    const dias = Number(diasInp.value || 0);
+
+    const salarioMin = parseMoney(auxInfo.salario_minimo);
+    const auxilioMes = parseMoney(auxInfo.auxilio);
+
+    let valorCalc = 0;
+
+    if(salarioMin && auxilioMes){
+      if(sueldoBase <= (2 * salarioMin)){
+        valorCalc = (auxilioMes / 30) * dias;
+      }
+    }
+
+    const nov = parseMoney(auxInp.dataset.nov || "0"); // ✅ conservar novedad
+
+    auxInp.dataset.auto = "1";
+    auxInp.value = formatMoney(valorCalc + nov, 0);    // ✅ suma novedad
+
+    recalcRow(tr);
+    recalcFooter();
+  }
+
+  async function hookAuxilioTransporte(){
+    const anio = getYearFromFilters();
+    if(!anio) return;
+
+    let auxInfo;
+    try{
+      auxInfo = await fetchAuxInfo(anio);
+      LAST_AUX_INFO = auxInfo;
+    }catch(e){
+      return;
+    }
+
+    document.querySelectorAll('tbody tr[data-empid]').forEach(tr => {
+      calcAuxilioForRow(tr, auxInfo);
+
+      const diasInp = getDiasInput(tr);
+      if(diasInp){
+        diasInp.addEventListener("input", () => calcAuxilioForRow(tr, auxInfo));
+        diasInp.addEventListener("change", () => calcAuxilioForRow(tr, auxInfo));
+      }
+
+      const auxInp = findDevConceptInput(tr, "auxilio de transporte");
+      if(auxInp){
+        auxInp.addEventListener("input", () => auxInp.dataset.manual = "1");
+        auxInp.addEventListener("blur", () => {
+          if((auxInp.value||"").trim() === ""){
+            auxInp.dataset.manual = "0";
+            calcAuxilioForRow(tr, auxInfo);
+          }
+        });
+      }
+    });
+  }
+
+  // ==========================
+  // MENU ACTIONS
+  // ==========================
+  menu.addEventListener("click", async (ev) => {
+    const item = ev.target.closest("[data-act]");
+    if(!item) return;
+
+    const act = item.getAttribute("data-act");
+    const empid = menu.dataset.empid;
+    const tr = document.querySelector(`tbody tr[data-empid="${empid}"]`);
+    if(!tr){ hideMenu(); return; }
+
+    if(act === "clear"){
+      // limpiar inputs editables
+      tr.querySelectorAll("input").forEach(inp => {
+        if(inp.readOnly) return;
+        if(inp.type === "checkbox") return;
+        inp.value = "";
+      });
+
+      // reset manual flags en conceptos (para que vuelva a autocalcular si aplica)
+      tr.querySelectorAll("input.concept-dev, input.concept-ded, input.concept-car").forEach(inp => {
+       inp.dataset.manual = "0";
+       inp.dataset.auto = "0";
+       inp.dataset.nov = "0";       // ✅ reset novedad aplicada
+       inp.dataset.prev_nov = "0";  // ✅ reset control delta
+      });
+
+      // re-autocalcular sueldo/aux si existen
+      calcSueldoConceptoForRow(tr);
+      if(LAST_AUX_INFO) calcAuxilioForRow(tr, LAST_AUX_INFO);
+
+      // recalcular totales
+      recalcRow(tr);
+      recalcFooter();
+
+      hideMenu();
+      return;
+    }
+
+    if(act === "delete"){
+      if(!confirm("¿Eliminar esta línea del cargue?")){ hideMenu(); return; }
+
+      // quitar en pantalla
+      tr.remove();
+      recalcAll();
+      hideMenu();
+
+      // quitar en servidor (session)
+      try{
+        await fetch(URL_REMOVE, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "X-CSRFToken": getCsrfToken()
+          },
+          body: "emp_id=" + encodeURIComponent(empid)
+        });
+      }catch(e){}
+    }
+  });
+
+  // ==========================
+  // INIT (una sola vez)
+  // ==========================
+  // 1) Primero engancha totales para que cualquier cambio dispare recalculo
+  hookTotals();
+
+  // 2) Luego autocalculos (estos internamente recalculan totales)
+  hookSueldoConcepto();
+  hookAuxilioTransporte();
+
+ 
+
+
+
+  // ==========================
+  // AUTO-CÁLCULO DEDUCCIONES / CARGA (según parametrización)
+  // ==========================
+  //const PARAM_CACHE = {}; // tipo_nomina_id -> {conceptos:{...}}
+  window.__PARAM_CACHE_NOMINA = window.__PARAM_CACHE_NOMINA || {};
+  const PARAM_CACHE = window.__PARAM_CACHE_NOMINA;
+
+  async function fetchParamForTipoNomina(tipoNominaId){
+    const tn = String(tipoNominaId || "").trim();
+    if(!tn) return null;
+    if(PARAM_CACHE[tn]) return PARAM_CACHE[tn];
+
+    const url = URL_PARAMCALC + `?tipo_nomina_id=${encodeURIComponent(tn)}`;
+    const res = await fetch(url, { method:"GET" });
+    const json = await res.json().catch(()=> ({}));
+
+    if(!res.ok || !json.ok){
+      console.warn("param-calc error:", json);
+      PARAM_CACHE[tn] = null;
+      return null;
+    }
+
+    PARAM_CACHE[tn] = json; // {ok, tipo_nomina_id, conceptos}
+    return json;
+  }
+
+  function getDevInputByConceptId(tr, devConceptId){
+    // Busca en la MISMA fila el devengo (input.concept-dev) cuyo data-cid == devConceptId
+    return tr.querySelector(`input.concept-dev[data-cid="${CSS.escape(String(devConceptId))}"]`);
+  }
+
+  function findTarifaPct(base, tarifas){
+    // tarifas: [{min,max,pct}]
+    // Aplica 0 si no hay match
+    const b = Number(base || 0);
+
+    for(const r of (tarifas || [])){
+      const mi = Number(r.min ?? 0);
+      const ma = Number(r.max ?? 0);
+      const pct = Number(r.pct ?? 0);
+
+      // Si el usuario parametrizó mal (min > max), lo ignoramos (no matamos el cálculo)
+      if(!isFinite(mi) || !isFinite(ma) || mi > ma) continue;
+
+      if(b >= mi && b <= ma) return pct;
+    }
+    return 0;
+  }
+
+  // let AUTO_UPDATING = false;
+  window.__AUTO_UPDATING_NOMINA = window.__AUTO_UPDATING_NOMINA || false;
+  let AUTO_UPDATING = window.__AUTO_UPDATING_NOMINA;
+
+  function setAutoValue(inp, value){
+   if(!inp) return;
+   if(inp.dataset.manual === "1") return;
+
+   const nov = parseMoney(inp.dataset.nov || "0"); // ✅ lo que ya aplicó novedades
+   const base = Number(value || 0);
+
+   AUTO_UPDATING = true;
+   window.__AUTO_UPDATING_NOMINA = true;
+
+   inp.dataset.auto = "1";
+   inp.value = formatMoney(base + nov, 0);         // ✅ conserva la novedad
+
+   AUTO_UPDATING = false;
+   window.__AUTO_UPDATING_NOMINA = false;
+  }
+
+  function bindManualFlag(selector){
+    document.querySelectorAll(selector).forEach(inp => {
+      // si el usuario escribe, se vuelve manual
+      inp.addEventListener("input", () => {
+        if(AUTO_UPDATING) return;
+        inp.dataset.manual = "1";
+      });
+
+      // si el usuario borra el valor, vuelve a automático
+      inp.addEventListener("blur", () => {
+        if(AUTO_UPDATING) return;
+        if((inp.value || "").trim() === ""){
+          inp.dataset.manual = "0";
+        }
+      });
+    });
+  }
+
+  bindManualFlag("input.concept-ded");
+  bindManualFlag("input.concept-car");
+  bindManualFlag("input.concept-dev");
+
+  async function recalcVariableColsForRow(tr){
+    const tipoNominaId = tr.getAttribute("data-tnid");
+    if(!tipoNominaId) return;
+
+    const pack = await fetchParamForTipoNomina(tipoNominaId);
+    const confByConcept = pack?.conceptos || {};
+
+    // ===== DEDUCCIONES =====
+    tr.querySelectorAll("input.concept-ded").forEach(inp => {
+      const conceptId = String(inp.dataset.cid || "");
+      const conf = confByConcept[conceptId];
+
+      // Si no hay conf o no hay base+tarifa => 0
+      const bases = conf?.bases || [];
+      const tarifas = conf?.tarifas || [];
+      if(!conf || bases.length === 0 || tarifas.length === 0){
+        setAutoValue(inp, 0);
+        return;
+      }
+
+      // Base = suma de devengos marcados
+      let base = 0;
+      for(const devId of bases){
+        const devInp = getDevInputByConceptId(tr, devId);
+        base += parseMoney(devInp?.value);
+      }
+
+      const pct = findTarifaPct(base, tarifas);
+      const val = base * (pct / 100);
+
+      setAutoValue(inp, val);
+    });
+
+    // ===== CARGA PRESTACIONAL =====
+    tr.querySelectorAll("input.concept-car").forEach(inp => {
+      const conceptId = String(inp.dataset.cid || "");
+      const conf = confByConcept[conceptId];
+
+      const bases = conf?.bases || [];
+      const tarifas = conf?.tarifas || [];
+      if(!conf || bases.length === 0 || tarifas.length === 0){
+        setAutoValue(inp, 0);
+        return;
+      }
+
+      let base = 0;
+      for(const devId of bases){
+        const devInp = getDevInputByConceptId(tr, devId);
+        base += parseMoney(devInp?.value);
+      }
+
+      const pct = findTarifaPct(base, tarifas);
+      const val = base * (pct / 100);
+
+      setAutoValue(inp, val);
+    });
+  }
+
+  async function recalcVariableColsAll(){
+    const rows = Array.from(document.querySelectorAll('tbody tr[data-empid]'));
+    for(const tr of rows){
+      await recalcVariableColsForRow(tr);
+      // luego de setear auto valores, recalculamos totales fila/footer
+      recalcRow(tr);
+    }
+    recalcFooter();
+  }
+
+  function hookVariableRecalc(){
+    const tbody = document.querySelector("tbody");
+    if(!tbody) return;
+
+    // Cuando cambian DEVENGOS o días (que afectan sueldo/aux devengo) => recalcular ded/carga
+    tbody.addEventListener("input", async (ev) => {
+      const inp = ev.target;
+      if(!(inp instanceof HTMLInputElement)) return;
+      if(AUTO_UPDATING) return;
+
+      if(inp.classList.contains("concept-dev") || (inp.name || "").startsWith("dias_")){
+        const tr = inp.closest('tr[data-empid]');
+        if(!tr) return;
+
+        await recalcVariableColsForRow(tr);
+        recalcRow(tr);
+        recalcFooter();
+      }
+    });
+
+    // También al “blur” por si el formateo cambia el número final
+    tbody.addEventListener("blur", async (ev) => {
+      const inp = ev.target;
+      if(!(inp instanceof HTMLInputElement)) return;
+      if(AUTO_UPDATING) return;
+
+      if(inp.classList.contains("concept-dev")){
+        const tr = inp.closest('tr[data-empid]');
+        if(!tr) return;
+
+        await recalcVariableColsForRow(tr);
+        recalcRow(tr);
+        recalcFooter();
+      }
+    }, true);
+  }
+
+
+
+
+  
+
+
+  // ==========================
+  // NOVEDADES -> SUMA A COLUMNAS VARIABLES + DESCUENTA DÍAS
+  // ==========================
+  const NOV_CACHE = {
+    key: null,
+    data: null
+  };
+
+  function getNominaDateRange(){
+    const ini = document.querySelector('input[name="fecha_ini"]')?.value || "";
+    const fin = document.querySelector('input[name="fecha_fin"]')?.value || "";
+    return { ini, fin };
+  }
+
+  function getCedulasFromTable(){
+    const cedulas = [];
+    document.querySelectorAll('tbody tr[data-empid]').forEach(tr => {
+      const ced = (tr.querySelector("td:nth-child(3) input")?.value || "").trim(); // Cédula (3ra col fija)
+      if(ced) cedulas.push(ced);
+    });
+    return cedulas;
+  }
+
+  function getInputForConceptId(tr, conceptId){
+    const cid = String(conceptId);
+    return (
+      tr.querySelector(`input.concept-dev[data-cid="${CSS.escape(cid)}"]`) ||
+      tr.querySelector(`input.concept-ded[data-cid="${CSS.escape(cid)}"]`) ||
+      tr.querySelector(`input.concept-car[data-cid="${CSS.escape(cid)}"]`)
+    );
+  }
+
+  function applyNovedadDeltaToInput(inp, newNovValue){
+    if(!inp) return;
+
+    const nov = Number(newNovValue || 0);
+    inp.dataset.nov = String(nov);          // ✅ guardamos la novedad
+
+    const cur = parseMoney(inp.value);
+    // Si ya tenía otra novedad antes, quítala y pon la nueva
+    const prev = parseMoney(inp.dataset.prev_nov || "0");
+    const base = cur - prev;
+
+    inp.dataset.prev_nov = String(nov);
+    inp.value = formatMoney(base + nov, 0);
+  }
+
+  function applyDescuentaDiasToRow(tr, newDescDias){
+    const diasInp = getDiasInput(tr);
+    if(!diasInp) return;
+
+    const prev = Number(diasInp.dataset.nov_dias || 0);
+    const cur = Number(diasInp.value || 0);
+    const base = cur + prev; // porque antes ya habíamos restado prev
+
+    const nd = Number(newDescDias || 0);
+    diasInp.dataset.nov_dias = String(nd);
+
+    // regla: dias_laborados = base - nd (clamp >= 0)
+    const out = Math.max(0, Math.round(base - nd));
+    diasInp.value = String(out);
+    // ✅ recalcular sueldo/aux cuando días cambia por novedad
+    calcSueldoConceptoForRow(tr);
+    if(LAST_AUX_INFO) calcAuxilioForRow(tr, LAST_AUX_INFO);
+  }
+
+  async function fetchNovedades(){
+    const { ini, fin } = getNominaDateRange();
+    if(!ini || !fin) return null;
+
+    const cedulas = getCedulasFromTable();
+    if(cedulas.length === 0) return { ok:true, by_cedula:{} };
+
+    const key = `${ini}|${fin}|${cedulas.join(",")}`;
+    if(NOV_CACHE.key === key && NOV_CACHE.data) return NOV_CACHE.data;
+
+    const url = URL_NOVEDADES
+      + `?fecha_ini=${encodeURIComponent(ini)}`
+      + `&fecha_fin=${encodeURIComponent(fin)}`
+      + `&cedulas=${encodeURIComponent(cedulas.join(","))}`;
+
+    const res = await fetch(url, { method: "GET" });
+    const json = await res.json().catch(()=> ({}));
+    if(!res.ok || !json.ok){
+      console.warn("novedades_data error:", json);
+      return null;
+    }
+
+    NOV_CACHE.key = key;
+    NOV_CACHE.data = json;
+    return json;
+  }
+
+  function applyNovedadesToRow(tr, novData){
+    if(!tr || !novData?.by_cedula) return;
+
+    const ced = (tr.querySelector("td:nth-child(3) input")?.value || "").trim();
+    const pack = novData.by_cedula[ced];
+    if(!pack){
+      // limpiar “novedad aplicada” para no dejar residuos
+      tr.querySelectorAll("input.concept-dev,input.concept-ded,input.concept-car").forEach(inp=>{
+        applyNovedadDeltaToInput(inp, 0);
+      });
+      applyDescuentaDiasToRow(tr, 0);
+      return;
+    }
+
+    // 1) suma por concepto
+    const conceptos = pack.conceptos || {};
+    // Primero: set 0 a todos los inputs (para que no queden novedades viejas en columnas que ya no aplican)
+    tr.querySelectorAll("input.concept-dev,input.concept-ded,input.concept-car").forEach(inp=>{
+      applyNovedadDeltaToInput(inp, 0);
+    });
+
+    // Luego aplicamos los que sí tienen valor
+    // Luego aplicamos los que sí tienen valor
+    Object.entries(conceptos).forEach(([cid, val])=>{
+      const inp = getInputForConceptId(tr, cid);
+
+      console.log(
+        "APLICANDO ->",
+        "CED:", ced,
+        "CID:", cid,
+        "VAL:", val,
+        "ENCONTRADO?:", !!inp
+      );
+
+      if(inp) applyNovedadDeltaToInput(inp, val);
+    });
+    
+
+    // 2) descuenta días
+    applyDescuentaDiasToRow(tr, pack.descuenta_dias || 0);
+  }
+
+  async function applyNovedadesAll(){
+    const novData = await fetchNovedades();
+
+    console.log("INI/FIN:", getNominaDateRange());
+    console.log("CEDULAS:", getCedulasFromTable());
+    console.log("NOVDATA:", novData);
+
+    if(!novData) return;
+
+    document.querySelectorAll('tbody tr[data-empid]').forEach(tr=>{
+      applyNovedadesToRow(tr, novData);
+      recalcRow(tr);
+    });
+    recalcFooter();
+  }
+
+  // ==========================
+  // INTEGRACIÓN CON TU MOTOR ACTUAL
+  // ==========================
+  // 1) al cargar: después de que calculas variables por parametrización
+
+  // ===== INIT del motor de variables =====
+  hookVariableRecalc();
+
+  (async () => {
+    await applyNovedadesAll();  
+    await recalcVariableColsAll();  // 1) primero parametrización (ded/carga)
+       // 2) luego novedades (sumas + descuenta días)
+    recalcAll();                    // 3) totales final
+  })();
+ 
+
+
+
+  // 2) cuando cambian devengos o días, tú recalculas ded/carga -> luego re-aplicas novedades SOLO a esa fila
+  (function hookNovedadesOnRecalc(){
+    const tbody = document.querySelector("tbody");
+    if(!tbody) return;
+
+    tbody.addEventListener("change", async (ev) => {
+      const inp = ev.target;
+      if(!(inp instanceof HTMLInputElement)) return;
+      if(AUTO_UPDATING) return;  // ✅ evita loops cuando el sistema escribe valores
+      if(inp.classList.contains("concept-dev") || (inp.name || "").startsWith("dias_")){
+        // refresca cache (por si usuario cambia fechas y recarga)
+        const novData = await fetchNovedades();
+        if(!novData) return;
+
+        const tr = inp.closest('tr[data-empid]');
+        if(!tr) return;
+
+        applyNovedadesToRow(tr, novData);
+        recalcRow(tr);
+        recalcFooter();
+      }
+    });
+
+  })();
+
+  // 3) si el usuario cambia fechas y vuelve a dar "Cargar", la página recarga, así que ok.
+  //    Si en algún momento haces cambio de fechas sin recargar, llama applyNovedadesAll().
+
+
+function getCsrfToken(){
+  const m = document.cookie.match(/csrftoken=([^;]+)/);
+  return m ? m[1] : "";
+}
+
+function getFilterDates(){
+  const ini = document.querySelector('input[name="fecha_ini"]')?.value || "";
+  const fin = document.querySelector('input[name="fecha_fin"]')?.value || "";
+  return { ini, fin };
+}
+
+function collectNominaPayload(){
+  const { ini, fin } = getFilterDates();
+
+  const rows = [];
+  document.querySelectorAll('tbody tr[data-empid]').forEach(tr => {
+    const emp_id = tr.getAttribute("data-empid");
+
+    const contrato = tr.querySelector("td:nth-child(2) input")?.value || "";
+    const cedula   = tr.querySelector("td:nth-child(3) input")?.value || "";
+    const nombre   = tr.querySelector("td:nth-child(4) input")?.value || "";
+    const cargo    = tr.querySelector("td:nth-child(5) input")?.value || "";
+    const tipo_nom = tr.querySelector("td:nth-child(6) input")?.value || "";
+    const tipo_con = tr.querySelector("td:nth-child(7) input")?.value || "";
+    const area     = tr.querySelector("td:nth-child(8) input")?.value || "";
+
+    const sueldo_base = parseMoney(tr.querySelector("td:nth-child(9) input")?.value || "0");
+    const dias_lab = Number(tr.querySelector('input[type="number"][name^="dias_"]')?.value || 0);
+
+    // totales fila (ya los calculas)
+    const total_sal = parseMoney(tr.querySelector("input.row-total-salario")?.value || "0");
+    const total_ded = parseMoney(tr.querySelector("input.row-total-deducciones")?.value || "0");
+    const total_pay = parseMoney(tr.querySelector("input.row-total-pagar")?.value || "0");
+
+    // conceptos: dev/ded/car
+    const conceptos = [];
+
+    tr.querySelectorAll("input.concept-dev").forEach(inp => {
+      conceptos.push({ concepto_id: inp.dataset.cid, tipo: "devengos", valor: parseMoney(inp.value) });
+    });
+    tr.querySelectorAll("input.concept-ded").forEach(inp => {
+      conceptos.push({ concepto_id: inp.dataset.cid, tipo: "deducciones", valor: parseMoney(inp.value) });
+    });
+    tr.querySelectorAll("input.concept-car").forEach(inp => {
+      conceptos.push({ concepto_id: inp.dataset.cid, tipo: "carga", valor: parseMoney(inp.value) });
+    });
+
+    rows.push({
+      emp_id: emp_id ? Number(emp_id) : null,
+      contrato, cedula, nombre, cargo,
+      tipo_nomina: tipo_nom,
+      tipo_contrato: tipo_con,
+      area,
+      sueldo_base,
+      dias_laborados: dias_lab,
+      total_salario: total_sal,
+      total_deducciones: total_ded,
+      total_pagar: total_pay,
+      conceptos
+    });
+  });
+
+  return {
+    fecha_ini: ini,
+    fecha_fin: fin,
+    rows
+  };
+}
+
+function showMsg(text, isOk=true){
+  const box = document.getElementById("msg_box");
+  if(!box) return;
+  box.style.color = isOk ? "#166534" : "#b91c1c";
+  box.textContent = text;
+}
+
+async function guardarNomina(){
+  const payload = collectNominaPayload();
+  if(!payload.fecha_ini || !payload.fecha_fin){
+    showMsg("❌ Debes seleccionar fecha inicio y fecha fin.", false);
+    return { ok:false };
+  }
+  if(!payload.rows.length){
+    showMsg("❌ No hay empleados cargados para guardar.", false);
+    return { ok:false };
+  }
+
+  const res = await fetch(URL_GUARDAR, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": getCsrfToken()
+    },
+    body: JSON.stringify(payload)
+  });
+
+  const json = await res.json().catch(()=> ({}));
+  if(!res.ok || !json.ok){
+    showMsg("❌ " + (json.error || "No se pudo guardar."), false);
+    return { ok:false, json };
+  }
+
+  // set No Nómina en el campo superior
+  const inp = document.getElementById("no_nomina");
+  if(inp) inp.value = json.no_nomina;
+
+  showMsg(json.msg || "✅ Guardado.");
+  return { ok:true, json };
+}
+
+async function eliminarNomina(){
+  const noNom = (document.getElementById("no_nomina")?.value || "").trim();
+  if(!noNom){
+    showMsg("❌ No Nómina está vacío. Primero guarda la nómina.", false);
+    return;
+  }
+  if(!confirm(`¿Seguro que deseas eliminar la nómina ${noNom}?`)) return;
+
+  const res = await fetch(URL_ELIMINAR, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": getCsrfToken()
+    },
+    body: JSON.stringify({ no_nomina: noNom })
+  });
+
+  const json = await res.json().catch(()=> ({}));
+  if(!res.ok || !json.ok){
+    showMsg("❌ " + (json.error || "No se pudo eliminar."), false);
+    return;
+  }
+
+  // limpiar campo
+  const inp = document.getElementById("no_nomina");
+  if(inp) inp.value = "";
+
+  showMsg(json.msg || "🗑️ Eliminada.");
+}
+
+async function exportarNomina(){
+  // Si no está guardada, guardamos primero y luego exportamos
+  let noNom = (document.getElementById("no_nomina")?.value || "").trim();
+  if(!noNom){
+    const r = await guardarNomina();
+    if(!r.ok) return;
+    noNom = r.json.no_nomina;
+  }
+
+  // Descargar archivo
+  window.location.href = URL_EXPORTAR + "?no_nomina=" + encodeURIComponent(noNom);
+}
+
+document.getElementById("btn_guardar")?.addEventListener("click", guardarNomina);
+document.getElementById("btn_eliminar")?.addEventListener("click", eliminarNomina);
+document.getElementById("btn_exportar")?.addEventListener("click", exportarNomina);
+document.getElementById("btn_pdf")?.addEventListener("click", () => {
+  alert("PDF: lo programamos después de terminar el flujo Excel + DB ✅");
+});
+
+
+function applyInitialValuesFromDB(){
+  const tag = document.getElementById("INIT_NOMINA_VALUES");
+  if(!tag) return;
+
+  let data = {};
+  try { data = JSON.parse(tag.textContent || "{}"); } catch(e){ return; }
+
+  document.querySelectorAll('tbody tr[data-empid]').forEach(tr => {
+    const empid = tr.getAttribute("data-empid");
+    const pack = data[String(empid)];
+    if(!pack) return;
+
+    // días
+    const diasInp = tr.querySelector('input[type="number"][name^="dias_"]');
+    if(diasInp && pack.dias != null){
+      diasInp.value = String(pack.dias);
+    }
+
+    // conceptos (dev/ded/car)
+    const conceptos = pack.conceptos || {};
+    Object.entries(conceptos).forEach(([cid, val]) => {
+      const inp =
+        tr.querySelector(`input.concept-dev[data-cid="${CSS.escape(String(cid))}"]`) ||
+        tr.querySelector(`input.concept-ded[data-cid="${CSS.escape(String(cid))}"]`) ||
+        tr.querySelector(`input.concept-car[data-cid="${CSS.escape(String(cid))}"]`);
+
+      if(inp){
+        inp.value = formatMoney(Number(val || 0), 0);
+      }
+    });
+  });
+
+  // después de pintar, recalcular totales
+  recalcAll();
+}
+
+// ✅ llámalo en tu INIT (al final):
+applyInitialValuesFromDB();
+
+
+</script>
+
+
+</body>
+</html>

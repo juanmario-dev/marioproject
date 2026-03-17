@@ -1,0 +1,979 @@
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Inventarios - Productos/Servicios</title>
+
+  <style>
+    body { font-family: Arial, sans-serif; margin:0; background:#f7f8fb; }
+    header { background:#021224; color:#fff; padding:18px 20px; font-size:20px; font-weight:bold; }
+    .wrap { padding: 20px; }
+
+    .card {
+      background:#fff; border:1px solid #e5e7eb; border-radius:12px;
+      padding:16px; margin-bottom:14px; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+
+    .topbar { display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between; }
+    .left { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .hint { color:#555; font-size:12px; }
+
+    .btn {
+      padding:10px 14px; border:none; border-radius:10px; cursor:pointer;
+      font-weight:bold; text-decoration:none; display:inline-flex; align-items:center; gap:8px;
+    }
+    .btn-primary { background:#007bff; color:#fff; }
+    .btn-secondary { background:#70706d; color:#f3f1f1; }
+
+    .table-wrap {
+      border:1px solid #e5e7eb;
+      border-radius:12px;
+      overflow:auto;
+      background:#fff;
+      max-height: 70vh;
+    }
+
+    table { border-collapse:collapse; width: 5500px; }
+    th, td { border:1px solid #ddd; padding:10px; vertical-align:middle; }
+
+    thead th {
+      height: 76px;               /* ✅ más alto */
+      white-space: normal;        /* ✅ permite saltos de línea */
+      line-height: 1.2;
+      vertical-align: middle;
+    }
+
+    th {
+      position: sticky; top:0;
+      background:#f2f2f2; z-index: 10;
+      font-size:12px; text-align:left;
+    }
+
+    td { background:#fff; }
+
+    input {
+      width: 100%;
+      padding:8px;
+      border:1px solid #ccc;
+      border-radius:8px;
+      box-sizing:border-box;
+      font-size: 12px;
+    }
+
+    /* ANCHOS */
+    .w-id { width:50px; }
+    .w-select { width:20px; }      /* ✅ nueva columna selección */
+    .w-producto { width:3020px; }
+    .w-precio { width:1020px; }
+    .w-small { width:140px; }
+    .w-ref { width:560px; }
+    .w-cta { width:880px; }
+    .w-cta-nc { width:880px; }
+    .w-seg { width:1000px; }
+
+    /* Toggle de activación */
+    .toggle-btn {
+      width: 30px;
+      height: 28px;
+      border-radius:8px;
+      border:1px solid #cbd5e1;
+      background:#f1f5f9;
+      cursor:pointer;
+      font-weight:bold;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      user-select:none;
+      font-size:14px;
+      margin: 0 auto;
+    }
+    .toggle-on {
+      background:#dcfce7;
+      border-color:#86efac;
+    }
+
+    /* ✅ Icono selección fila (para eliminar/modificar luego) */
+    .row-select {
+      width: 34px;
+      height: 34px;
+      border-radius:10px;
+      border:1px solid #cbd5e1;
+      background:#ffffff;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      user-select:none;
+      font-size:16px;
+      margin: 0 auto;
+    }
+    .row-select.on {
+      background:#0bb628;
+      border-color:#012910;
+    }
+
+    th.doc-title {
+      background: #dbeafe !important;
+      color:#1e3a8a;
+    }
+
+    /* Estética para input precio */
+    .price-input {
+      text-align: right;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    .actions-bottom{
+     display:flex;
+     gap:10px;
+     flex-wrap:wrap;
+     justify-content:flex-end;
+     margin-top:12px;
+     }
+
+    .btn-danger { background:#dc3545; color:#fff; }
+    .btn-danger:hover { background:#b02a37; }
+  </style>
+
+
+</head>
+
+<body>
+
+<header>INVENTARIOS - Productos y/o Servicios</header>
+
+<div class="wrap">
+
+  <div class="card">
+    <div class="topbar">
+      <div class="left">
+        <button class="btn btn-secondary" id="btnAddRow" type="button">➕ Agregar fila</button>
+        <button class="btn btn-primary" id="btnGuardar" type="button">Guardar</button>
+        <a class="btn btn-secondary" href="{% url 'facturacioncxc' %}">← Volver</a>
+      </div>
+      <div class="hint">
+        * Aquí registrarás productos/servicios con sus parámetros (precio, impuestos, cuentas contables, etc.).  
+        La eliminación/modificación real y el guardado en BD se conectan en la siguiente fase.
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="table-wrap">
+      <table id="invTable">
+        <thead>
+          <tr>
+            <th class="w-id">Id</th>
+            <th class="w-select">Sel</th> <!-- ✅ nueva columna -->
+            <th class="w-producto">Producto y/o servicio</th>
+            <th class="w-precio">Precio</th>
+            <th class="w-small">Descuento %</th>
+            <th class="w-small">Impuestos %</th>
+            <th class="w-ref">Referencia</th>
+
+            <th class="w-small">Activación causación contable</th>
+
+            <th class="w-cta">Cuenta ingreso</th>
+            <th class="w-cta">Cuenta Impuestos</th>
+            <th class="w-cta">Cuenta Retención en la fuente</th>
+            <th class="w-cta">Cuenta Retención de ICA</th>
+            <th class="w-cta">Cuenta otras retenciones</th>
+            <th class="w-cta">Cuenta contrapartida otras retenciones</th>
+            <th class="w-cta">Cuenta abonos</th>
+            <th class="w-cta">Cuenta cartera</th>
+
+            <th class="doc-title w-cta">Documento contable</th>
+
+            <th class="w-cta-nc">Cuenta ingreso (Nota crédito)</th>
+            <th class="w-cta-nc">Cuenta Impuestos (Nota crédito)</th>
+            <th class="w-cta-nc">Cuenta Retención en la fuente (Nota crédito)</th>
+            <th class="w-cta-nc">Cuenta Retención de ICA (Nota crédito)</th>
+            <th class="w-cta-nc">Cuenta otras retenciones (Nota crédito)</th>
+            <th class="w-cta-nc">Cuenta contrapartida otras retenciones (Nota Crédito)</th>
+            <th class="w-cta-nc">Cuenta abonos (Nota Crédito)</th>
+            <th class="w-cta-nc">Cuenta cartera (Nota Crédito)</th>
+
+            <th class="doc-title w-cta-nc">Documento contable (Nota Crédito)</th>
+
+            <th class="w-small">Activación causación contable (Inventario)</th>
+
+            <th class="w-cta">Cuenta Inventario</th>
+            <th class="w-cta">Cuenta costo</th>
+
+            <th class="w-seg">segmento 1</th>
+            <th class="w-seg">segmento 2</th>
+            <th class="w-seg">segmento 3</th>
+            <th class="w-seg">Centro de costo</th>
+            <th class="w-seg">criterio 1</th>
+            <th class="w-seg">criterio 2</th>
+            <th class="w-seg">criterio 3</th>
+          </tr>
+        </thead>
+
+        <tbody id="invBody"></tbody>
+      </table>
+    </div>
+  
+  <p>  </p>
+   <!-- ✅ Botones debajo de la tabla -->
+  <div class="actions-bottom">
+    <button class="btn btn-primary" id="btnGuardar2" type="button">Guardar</button>
+    <button class="btn btn-secondary" id="btnModificar" type="button">Modificar</button>
+    <button class="btn btn-danger" id="btnEliminar" type="button">Eliminar</button>
+
+    <button class="btn btn-secondary" id="btnDescargarXml" type="button">Descargar XML</button>
+    <button class="btn btn-secondary" id="btnPlantillaXml" type="button">Plantilla XML</button>
+
+    <button class="btn btn-secondary" id="btnCargarXml" type="button">Cargar XML</button>
+    <input id="fileXml" type="file" accept=".xml" style="display:none;">
+  </div>
+
+  </div>
+
+</div>
+
+
+{{ cuentas_mov|json_script:"cuentas-mov-data" }}
+{{ docs_contables|json_script:"docs-contables-data" }}
+{{ productos|json_script:"productos-data" }}
+
+
+
+<script>
+  const body = document.getElementById('invBody');
+
+  const PRODUCTOS = JSON.parse(
+  document.getElementById("productos-data").textContent
+  );
+
+
+
+  const DOCS_CONTABLES = JSON.parse(
+   document.getElementById("docs-contables-data").textContent
+  );
+
+  function makeDocumentoSelect(){
+    const sel = document.createElement("select");
+    sel.style.width = "100%";
+    sel.style.padding = "8px";
+    sel.style.border = "1px solid #ccc";
+    sel.style.borderRadius = "8px";
+    sel.style.boxSizing = "border-box";
+    sel.style.fontSize = "12px";
+    sel.style.background = "#fff";
+
+    const opt0 = document.createElement("option");
+    opt0.value = "";
+    opt0.textContent = "— Seleccione documento —";
+    sel.appendChild(opt0);
+
+    DOCS_CONTABLES.forEach(d => {
+      const opt = document.createElement("option");
+      opt.value = d.codigo;
+      opt.textContent = d.codigo; // ✅ solo código
+      sel.appendChild(opt);
+    });
+
+    return sel;
+  }
+
+
+
+
+
+
+  const CUENTAS_MOV = JSON.parse(
+  document.getElementById("cuentas-mov-data").textContent
+  );
+
+  function makeCuentaSelect(){
+   const sel = document.createElement("select");
+   sel.style.width = "100%";
+   sel.style.padding = "8px";
+   sel.style.border = "1px solid #ccc";
+   sel.style.borderRadius = "8px";
+   sel.style.boxSizing = "border-box";
+   sel.style.fontSize = "12px";
+   sel.style.background = "#fff";
+
+  const opt0 = document.createElement("option");
+  opt0.value = "";
+  opt0.textContent = "— Seleccione cuenta —";
+  sel.appendChild(opt0);
+
+  CUENTAS_MOV.forEach(c => {
+    const opt = document.createElement("option");
+    opt.value = c.codigo; // lo que “guardas” es el código
+    opt.textContent = `${c.codigo} - ${c.nombre}`; // lo que “ves” concatenado
+    sel.appendChild(opt);
+  });
+
+  return sel;
+  }
+
+
+
+  function td(el) {
+    const d = document.createElement('td');
+    d.appendChild(el);
+    return d;
+  }
+
+  function makeInput(placeholder = '') {
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.placeholder = placeholder;
+    return inp;
+  }
+
+  // ✅ Precio entero + separadores de miles (es-CO)
+  function makePrice() {
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.className = 'price-input';
+    inp.placeholder = '0';
+    inp.inputMode = 'numeric';
+
+    // guardamos el valor "crudo" sin separadores en data-raw
+    inp.dataset.raw = '';
+
+    const formatter = new Intl.NumberFormat('es-CO', { maximumFractionDigits: 0 });
+
+    function formatValue(rawDigits) {
+      if (!rawDigits) return '';
+      const n = Number(rawDigits);
+      if (Number.isNaN(n)) return '';
+      return formatter.format(n);
+    }
+
+    inp.addEventListener('input', () => {
+      // Solo dígitos
+      const raw = inp.value.replace(/\D/g, '');
+      inp.dataset.raw = raw;
+
+      // Formatea con separadores de miles
+      const formatted = formatValue(raw);
+      inp.value = formatted;
+
+      // Nota: al formatear, el cursor se mueve al final (aceptable para este caso)
+    });
+
+    // opcional: al enfocar, deja el cursor al final
+    inp.addEventListener('focus', () => {
+      const v = inp.value;
+      setTimeout(() => {
+        inp.setSelectionRange(v.length, v.length);
+      }, 0);
+    });
+
+    return inp;
+  }
+
+  function makePercent(placeholder = '%') {
+    const inp = document.createElement('input');
+    inp.type = 'number';
+    inp.placeholder = placeholder;
+    inp.step = '0.01';
+    inp.min = '0';
+    return inp;
+  }
+
+  function makeToggle() {
+    const b = document.createElement('div');
+    b.className = 'toggle-btn';
+    b.textContent = '⬜';
+    b.dataset.value = '0';
+    b.addEventListener('click', () => {
+      const on = b.dataset.value === '1';
+      b.dataset.value = on ? '0' : '1';
+      b.textContent = on ? '⬜' : '✅';
+      b.classList.toggle('toggle-on', !on);
+    });
+    return b;
+  }
+
+  // ✅ Icono seleccionable por fila (para eliminar/modificar luego)
+  function makeRowSelect() {
+    const b = document.createElement('div');
+    b.className = 'row-select';
+    b.textContent = '🟦';   // "sin seleccionar"
+    b.dataset.selected = '0';
+
+    b.addEventListener('click', () => {
+      const sel = b.dataset.selected === '1';
+      b.dataset.selected = sel ? '0' : '1';
+      b.textContent = sel ? '🟦' : '🟥'; // seleccionado
+      b.classList.toggle('on', !sel);
+    });
+
+    return b;
+  }
+
+  function addRow() {
+    const tr = document.createElement('tr');
+    tr.dataset.dbid = '';   // ✅ nueva, aún no existe en BD
+    tr.dataset.tmp = crypto.randomUUID();
+
+    // Id
+    const idCell = document.createElement('td');
+    idCell.textContent = body.children.length + 1;
+    tr.appendChild(idCell);
+
+    // ✅ Sel
+    tr.appendChild(td(makeRowSelect()));
+
+    // Producto y/o servicio
+    tr.appendChild(td(makeInput('Nombre del producto/servicio')));
+
+    // Precio con miles
+    tr.appendChild(td(makePrice()));
+
+    // Descuento % y Impuestos %
+    tr.appendChild(td(makePercent('%')));
+    tr.appendChild(td(makePercent('%')));
+
+    // Referencia
+    tr.appendChild(td(makeInput('Referencia')));
+
+    // Activación causación contable (FV)
+    tr.appendChild(td(makeToggle()));
+
+    // Cuentas FV (placeholders)
+    // const ctasFV = [
+    //   'Cuenta ingreso',
+    //   'Cuenta impuestos',
+    //   'Rte fuente',
+    //   'Rte ICA',
+    //   'Otras retenciones',
+    //   'Contra otras ret.',
+    //   'Cuenta abonos',
+    //   'Cuenta cartera',
+    //   'Documento contable'
+    // ];
+    // ctasFV.forEach(ph => tr.appendChild(td(makeInput(ph))));
+
+    // Cuentas FV: 8 dropdown + 1 input (Documento contable)
+    const ctasFV_select = [
+      'Cuenta ingreso',
+      'Cuenta impuestos',
+      'Rte fuente',
+      'Rte ICA',
+      'Otras retenciones',
+      'Contra otras ret.',
+      'Cuenta abonos',
+      'Cuenta cartera',
+    ];
+    ctasFV_select.forEach(() => tr.appendChild(td(makeCuentaSelect())));
+
+    // Documento contable (se queda como input)
+    // tr.appendChild(td(makeInput('Documento contable')));
+
+    tr.appendChild(td(makeDocumentoSelect())); // Documento contable
+
+
+
+
+
+
+
+
+
+
+    // Cuentas Nota Crédito (placeholders)
+    // const ctasNC = [
+    //   'Ingreso (NC)',
+    //   'Impuestos (NC)',
+    //   'Rte fuente (NC)',
+    //   'Rte ICA (NC)',
+    //   'Otras ret (NC)',
+    //   'Contra otras ret (NC)',
+    //   'Abonos (NC)',
+    //   'Cartera (NC)',
+    //   'Documento (NC)'
+    // ];
+    // ctasNC.forEach(ph => tr.appendChild(td(makeInput(ph))));
+
+    // Cuentas Nota Crédito: 8 dropdown + 1 input (Documento NC)
+    const ctasNC_select = [
+      'Ingreso (NC)',
+      'Impuestos (NC)',
+      'Rte fuente (NC)',
+      'Rte ICA (NC)',
+      'Otras ret (NC)',
+      'Contra otras ret (NC)',
+      'Abonos (NC)',
+      'Cartera (NC)',
+    ];
+    ctasNC_select.forEach(() => tr.appendChild(td(makeCuentaSelect())));
+
+    // Documento (NC) se queda input
+    // tr.appendChild(td(makeInput('Documento (NC)')));
+    tr.appendChild(td(makeDocumentoSelect())); // Documento contable (NC)
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // Activación causación contable (Inventario)
+    tr.appendChild(td(makeToggle()));
+
+    // Cuenta Inventario, Cuenta costo
+    // tr.appendChild(td(makeInput('Cuenta inventario')));
+    // tr.appendChild(td(makeInput('Cuenta costo')));
+
+    tr.appendChild(td(makeCuentaSelect())); // Cuenta inventario
+    tr.appendChild(td(makeCuentaSelect())); // Cuenta costo
+
+
+
+
+
+
+
+    // Segmentos / centro costo / criterios
+    const extra = ['segmento 1','segmento 2','segmento 3','centro costo','criterio 1','criterio 2','criterio 3'];
+    extra.forEach(ph => tr.appendChild(td(makeInput(ph))));
+
+    body.appendChild(tr);
+  }
+
+  document.getElementById('btnAddRow').addEventListener('click', addRow);
+
+  // Inicial
+  
+
+  // ✅ Inicial: si hay productos en BD, cargarlos; si no, una fila vacía
+  if (PRODUCTOS && PRODUCTOS.length) {
+  PRODUCTOS.forEach(p => addRowWithData(p));
+  } else {
+    addRow();
+  }
+
+
+  function addRowWithData(p) {
+  const tr = document.createElement('tr');
+  tr.dataset.dbid = p.id;
+  tr.dataset.tmp = crypto.randomUUID();
+
+  // 0 Id
+  const idCell = document.createElement('td');
+  idCell.textContent = body.children.length + 1;
+  tr.appendChild(idCell);
+
+  // 1 Sel
+  tr.appendChild(td(makeRowSelect()));
+
+  // 2 nombre (producto)
+  const inpNombre = makeInput('Nombre del producto/servicio');
+  inpNombre.value = p.nombre || '';
+  tr.appendChild(td(inpNombre));
+
+  // 3 precio
+  const inpPrecio = makePrice();
+  const raw = String(p.precio ?? '');
+  inpPrecio.dataset.raw = raw.replace(/\D/g,'');
+  inpPrecio.value = raw ? new Intl.NumberFormat('es-CO', { maximumFractionDigits: 0 }).format(Number(raw)) : '';
+  tr.appendChild(td(inpPrecio));
+
+  // 4 descuento
+  const inpDesc = makePercent('%');
+  inpDesc.value = p.descuento_pct ?? '';
+  tr.appendChild(td(inpDesc));
+
+  // 5 impuesto
+  const inpImp = makePercent('%');
+  inpImp.value = p.impuesto_pct ?? '';
+  tr.appendChild(td(inpImp));
+
+  // 6 referencia
+  const inpRef = makeInput('Referencia');
+  inpRef.value = p.referencia || '';
+  tr.appendChild(td(inpRef));
+
+  // 7 toggle causa_fv
+  const tFV = makeToggle();
+  if (p.causa_fv) { tFV.dataset.value = '1'; tFV.textContent = '✅'; tFV.classList.add('toggle-on'); }
+  tr.appendChild(td(tFV));
+
+  // 8..15 cuentas FV (en tu UI hay 8 selects)
+  // PERO en tu modelo solo guardas: cta_ingreso, cta_impuestos, cta_cartera
+  // Entonces: llenamos 3 y las demás las dejamos vacías.
+
+  // 8 cta_ingreso
+  const selIng = makeCuentaSelect();
+  selIng.value = p["cta_ingreso__codigo"] || '';
+  tr.appendChild(td(selIng));
+
+  // 9 cta_impuestos
+  const selImpCta = makeCuentaSelect();
+  selImpCta.value = p["cta_impuestos__codigo"] || '';
+  tr.appendChild(td(selImpCta));
+
+  // 10..13 (rte fuente, rte ica, otras, contra) vacías
+  for (let i=0; i<4; i++) tr.appendChild(td(makeCuentaSelect()));
+
+  // 14 abonos (vacía)
+  tr.appendChild(td(makeCuentaSelect()));
+
+  // 15 cartera (sí la guardas)
+  const selCart = makeCuentaSelect();
+  selCart.value = p["cta_cartera__codigo"] || '';
+  tr.appendChild(td(selCart));
+
+  // 16 documento contable (en tu UI es select)
+  const selDoc = makeDocumentoSelect();
+  // Nota: tu modelo tiene documento_fv (FK) y también doc_fv (CharField)
+  // Si ya estás usando select de códigos, lo más coherente es mostrar documento_fv__codigo
+  selDoc.value = p["documento_fv__codigo"] || p.doc_fv || '';
+  tr.appendChild(td(selDoc));
+
+  // 17..24 cuentas NC (8 selects) -> tu modelo NO las guarda, las dejamos vacías
+  for (let i=0; i<8; i++) tr.appendChild(td(makeCuentaSelect()));
+
+  // 25 documento NC (select) -> tu modelo sí tiene doc_nc (CharField)
+  const selDocNC = makeDocumentoSelect();
+  selDocNC.value = p.doc_nc || '';
+  tr.appendChild(td(selDocNC));
+
+  // 26 toggle inventario
+  const tInv = makeToggle();
+  if (p.causa_inventario) { tInv.dataset.value = '1'; tInv.textContent = '✅'; tInv.classList.add('toggle-on'); }
+  tr.appendChild(td(tInv));
+
+  // 27 cuenta inventario
+  const selInv = makeCuentaSelect();
+  selInv.value = p["cta_inventario__codigo"] || '';
+  tr.appendChild(td(selInv));
+
+  // 28 cuenta costo
+  const selCosto = makeCuentaSelect();
+  selCosto.value = p["cta_costo__codigo"] || '';
+  tr.appendChild(td(selCosto));
+
+  // 29..35 extras vacíos
+  const extra = ['segmento 1','segmento 2','segmento 3','centro costo','criterio 1','criterio 2','criterio 3'];
+  extra.forEach(ph => tr.appendChild(td(makeInput(ph))));
+
+  body.appendChild(tr);
+}
+
+
+  // ==============================
+// A) Capturar datos del grid
+// ==============================
+
+
+function collectRows() {
+  const rows = [];
+  const trs = Array.from(body.querySelectorAll('tr'));
+  
+
+  trs.forEach(tr => {
+   
+
+    const dbid = tr.dataset.dbid || '';
+
+    // ✅ Solo si la fila está marcada (🟥)
+    const sel = tr.querySelector('.row-select');
+    const isSelected = sel && sel.dataset.selected === '1';
+    if (!isSelected) return;
+
+    const tds = tr.querySelectorAll('td');
+
+    const producto = tds[2]?.querySelector('input')?.value?.trim() || '';
+    const precioRaw = tds[3]?.querySelector('input')?.dataset?.raw || '0';
+    const descuento = tds[4]?.querySelector('input')?.value || '0';
+    const impuestos = tds[5]?.querySelector('input')?.value || '0';
+    const referencia = tds[6]?.querySelector('input')?.value?.trim() || '';
+
+    const causa_fv = (tds[7]?.querySelector('.toggle-btn')?.dataset?.value === '1');
+
+    // Cuentas FV (8 selects)
+    const ctas_fv = [];
+    for (let i = 8; i <= 15; i++) {
+      ctas_fv.push(tds[i]?.querySelector('select')?.value || '');
+    }
+
+    const doc_fv = tds[16]?.querySelector('select')?.value || '';
+
+    // Cuentas NC (8 selects)
+    const ctas_nc = [];
+    for (let i = 17; i <= 24; i++) {
+      ctas_nc.push(tds[i]?.querySelector('select')?.value || '');
+    }
+
+    const doc_nc = tds[25]?.querySelector('select')?.value || '';
+
+    const causa_inventario = (tds[26]?.querySelector('.toggle-btn')?.dataset?.value === '1');
+
+    const cta_inventario = tds[27]?.querySelector('select')?.value || '';
+    const cta_costo = tds[28]?.querySelector('select')?.value || '';
+
+    // ✅ Opcional: si está seleccionada pero no tiene nombre, NO la mandamos
+    if (!producto) return;
+
+    rows.push({
+      id: dbid ? Number(dbid) : null,
+      tmp: tr.dataset.tmp || null,
+      producto,
+      precio: Number(precioRaw || 0),
+      descuento_pct: Number(descuento || 0),
+      impuesto_pct: Number(impuestos || 0),
+      referencia,
+      causa_fv,
+      ctas_fv,
+      doc_fv,
+      ctas_nc,
+      doc_nc,
+      causa_inventario,
+      cta_inventario,
+      cta_costo,
+    });
+  });
+
+  return rows;
+}
+
+
+
+
+// ==============================
+// B) CSRF token (necesario para POST en Django)
+// ==============================
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+  return '';
+}
+
+
+
+
+
+
+
+
+  function getSelectedRows() {
+  // Una fila es "seleccionada" si tiene algún .row-select con data-selected="1"
+  return Array.from(body.querySelectorAll('tr')).filter(tr => {
+    const sel = tr.querySelector('.row-select');
+    return sel && sel.dataset.selected === '1';
+  });
+}
+
+function renumberIds() {
+  Array.from(body.querySelectorAll('tr')).forEach((tr, idx) => {
+    const idCell = tr.querySelector('td'); // primera celda es Id
+    if (idCell) idCell.textContent = idx + 1;
+  });
+}
+
+// Botón Guardar (debajo) -> por ahora igual que el de arriba
+// document.getElementById('btnGuardar2').addEventListener('click', () => {
+//   alert('Guardar: pendiente (fase siguiente: persistir en BD).');
+// });
+
+
+document.getElementById('btnGuardar2').addEventListener('click', async () => {
+  const rows = collectRows();
+  if (!rows.length) {
+    alert("Selecciona al menos 1 fila (Sel) para guardar.");
+    return;
+  }
+
+  const resp = await fetch("{% url 'inventarios_guardar' %}", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": getCookie("csrftoken"),
+    },
+    body: JSON.stringify({ mode: "upsert", rows }),
+  });
+
+  const data = await resp.json();
+  if (!data.ok) {
+    alert("Error: " + (data.error || "desconocido"));
+    return;
+  }
+
+  if (data.errores && data.errores.length) {
+    alert("Guardado con errores:\n- " + data.errores.join("\n- "));
+  } else {
+    alert(`OK ✅ Creados: ${data.creados} | Actualizados: ${data.actualizados}`);
+  }
+
+  window.location.reload();
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Modificar -> placeholder (luego abrimos modal o habilitamos edición guiada)
+
+document.getElementById('btnModificar').addEventListener('click', async () => {
+  const rows = collectRows();
+  if (rows.length !== 1) {
+    alert("Para MODIFICAR selecciona exactamente 1 fila.");
+    return;
+  }
+  if (!rows[0].id) {
+    alert("Esa fila aún no existe en BD. Usa Guardar para crearla primero.");
+    return;
+  }
+
+  const resp = await fetch("{% url 'inventarios_guardar' %}", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": getCookie("csrftoken"),
+    },
+    body: JSON.stringify({ mode: "update_only", rows }),
+  });
+
+  const data = await resp.json();
+  if (!data.ok) {
+    alert("Error: " + (data.error || "desconocido"));
+    return;
+  }
+
+  if (data.errores && data.errores.length) {
+    alert("Errores:\n- " + data.errores.join("\n- "));
+  } else {
+    alert(`OK ✅ Actualizados: ${data.actualizados}`);
+  }
+
+  window.location.reload();
+});
+
+
+
+
+
+
+// Eliminar -> funcional desde ya
+document.getElementById('btnEliminar').addEventListener('click', async () => {
+  const selected = getSelectedRows();
+  if (!selected.length) {
+    alert("Selecciona al menos 1 fila para eliminar.");
+    return;
+  }
+
+  const ok = confirm(`¿Eliminar ${selected.length} fila(s) seleccionada(s)?`);
+  if (!ok) return;
+
+  // ids reales en BD
+  const ids = selected
+    .map(tr => tr.dataset.dbid)
+    .filter(x => x && String(x).trim() !== '')
+    .map(x => Number(x));
+
+  // Si hay filas nuevas (sin dbid), las quitamos solo del DOM
+  selected.forEach(tr => tr.remove());
+  renumberIds();
+
+  // Si no hay ids, listo.
+  if (!ids.length) return;
+
+  const resp = await fetch("{% url 'inventarios_eliminar' %}", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": getCookie("csrftoken"),
+    },
+    body: JSON.stringify({ ids }),
+  });
+
+  const data = await resp.json();
+  if (!data.ok) {
+    alert("Error eliminando: " + (data.error || "desconocido"));
+    return;
+  }
+
+  if (data.errores && data.errores.length) {
+    alert("Eliminado con errores:\n- " + data.errores.join("\n- "));
+  } else {
+    alert(`OK ✅ Eliminados: ${data.eliminados}`);
+  }
+
+  window.location.reload();
+});
+
+
+
+
+
+
+
+// XML: descargar (placeholder)
+document.getElementById('btnDescargarXml').addEventListener('click', () => {
+  alert('Descargar XML: pendiente (fase siguiente: exportar datos a XML).');
+});
+
+// XML: plantilla (placeholder con descarga de ejemplo)
+document.getElementById('btnPlantillaXml').addEventListener('click', () => {
+  // Plantilla básica de ejemplo (luego la hacemos con tu estructura real)
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<inventarios>
+  <item>
+    <producto></producto>
+    <precio></precio>
+    <descuento></descuento>
+    <impuestos></impuestos>
+    <referencia></referencia>
+  </item>
+</inventarios>`;
+
+  const blob = new Blob([xml], { type: 'application/xml' });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'plantilla_inventarios.xml';
+  a.click();
+
+  URL.revokeObjectURL(url);
+});
+
+// Cargar XML: abre selector
+const fileXml = document.getElementById('fileXml');
+document.getElementById('btnCargarXml').addEventListener('click', () => fileXml.click());
+
+fileXml.addEventListener('change', async () => {
+  const file = fileXml.files[0];
+  if (!file) return;
+
+  const text = await file.text();
+  alert('XML cargado (lectura OK). En la siguiente fase parseamos y llenamos filas automáticamente.');
+  // Aquí después parseamos: DOMParser().parseFromString(text, "application/xml")
+  fileXml.value = '';
+});
+
+</script>
+
+</body>
+</html>
+
+
+

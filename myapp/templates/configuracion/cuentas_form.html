@@ -1,0 +1,42 @@
+
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ titulo }}</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background:#f7f7f7; }
+    h1 { margin-bottom: 16px; }
+    form { background:#fff; padding:20px; border-radius:8px; max-width:600px; }
+    label { font-weight:bold; }
+    input, select { width:100%; padding:8px; margin:6px 0 12px; border:1px solid #ccc; border-radius:4px; }
+    button { background:#007bff; color:white; padding:10px 16px; border:none; border-radius:6px; cursor:pointer; }
+    button:hover { background:#0056b3; }
+    .errorlist { color: #c00; margin-bottom: 10px; }
+    a { display:inline-block; margin-top:14px; }
+    .hint { color:#555; font-size:14px; margin-bottom:10px; }
+  </style>
+</head>
+<body>
+  <h1>{{ titulo }}</h1>
+
+  {% if request.GET.parent %}
+    <div class="hint">Sugerencia: estás creando bajo el prefijo <strong>{{ request.GET.parent }}</strong>. Completa los siguientes 2 dígitos (p.ej. si es 1102, podrías crear 110201, 110202...).</div>
+  {% endif %}
+
+  {% if form.errors %}
+    <div class="errorlist">{{ form.errors }}</div>
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Guardar</button>
+  </form>
+
+  <a href="{% url 'plan_cuentas' %}">← Volver al listado</a>
+</body>
+</html>
+

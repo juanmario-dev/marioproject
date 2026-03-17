@@ -1,0 +1,813 @@
+
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Ingreso de personal</title>
+
+  <style>
+    :root{
+      --bg:#f7f8fb;
+      --nav:#021224;
+      --card:#fff;
+      --border:#e5e7eb;
+      --text:#0f172a;
+      --muted:#64748b;
+      --blue:#0d6efd;
+      --blue-dark:#0b5ed7;
+      --danger:#dc3545;
+      --ok:#198754;
+      --shadow: 0 10px 25px rgba(2,18,36,.10);
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    header{
+      background: var(--nav);
+      color:#fff;
+      padding:18px 20px;
+      text-align:center;
+      font-size:20px;
+      font-weight:bold;
+      letter-spacing:.3px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 6px 18px rgba(2,18,36,.18);
+    }
+    .wrap{
+      max-width: 1150px;
+      margin: 0 auto;
+      padding: 18px 16px 40px;
+    }
+    .topbar{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
+      padding: 10px 14px;
+      font-weight: 700;
+      text-decoration:none;
+      cursor:pointer;
+      transition: all .15s ease;
+      box-shadow: 0 6px 14px rgba(2,18,36,.08);
+    }
+    .btn:hover{ transform: translateY(-1px); }
+    .btn-primary{
+      background: linear-gradient(180deg, var(--blue) 0%, var(--blue-dark) 100%);
+      color:#fff;
+      border: none;
+      box-shadow: 0 10px 20px rgba(13,110,253,.28);
+    }
+    .btn-primary:hover{ box-shadow: 0 14px 26px rgba(13,110,253,.35); }
+    .btn-danger{
+      background: #fff;
+      border: 1px solid #f1c1c6;
+      color: var(--danger);
+    }
+
+    .panel{
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+
+    .section-title{
+      margin: 18px 0 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: #f3f6fb;
+      border: 1px solid var(--border);
+      font-weight: 800;
+      color: #021224;
+      letter-spacing:.2px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    @media (max-width: 980px){ .grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 620px){ .grid{ grid-template-columns: repeat(1, minmax(0, 1fr)); } }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap: 6px;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #fff;
+    }
+    .field label{
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .field input, .field select, .field textarea{
+      width: 100%;
+      padding: 10px 10px;
+      border-radius: 10px;
+      border: 1px solid #dbe2ea;
+      outline: none;
+      font-size: 14px;
+      background:#fff;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus{
+      border-color: rgba(13,110,253,.55);
+      box-shadow: 0 0 0 4px rgba(13,110,253,.12);
+    }
+
+    .full{ grid-column: 1 / -1; }
+
+    /* TABLA */
+    .table-wrap{
+      overflow:auto;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background:#fff;
+    }
+    table{
+      width:100%;
+      border-collapse: collapse;
+      min-width: 620px;
+    }
+    th, td{
+      padding: 10px 10px;
+      border-bottom: 1px solid #eef2f7;
+      text-align:left;
+      font-size: 14px;
+    }
+    th{
+      background: #f8fafc;
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .6px;
+    }
+    .pct{
+      max-width: 160px;
+    }
+    .totals-row td{
+      font-weight: 800;
+      background:#fbfdff;
+    }
+    .total-badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background:#fff;
+      font-weight: 900;
+    }
+    .total-badge.ok{
+      border-color: rgba(25,135,84,.25);
+      box-shadow: 0 0 0 4px rgba(25,135,84,.10);
+    }
+    .total-badge.bad{
+      border-color: rgba(220,53,69,.30);
+      box-shadow: 0 0 0 4px rgba(220,53,69,.10);
+    }
+    .muted{
+      color: var(--muted);
+      font-size: 12.5px;
+      margin-top: 8px;
+    }
+    .note{
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px dashed #dbe2ea;
+      background: #fbfdff;
+      color: #334155;
+      font-size: 12.5px;
+    }
+  </style>
+</head>
+
+<body>
+<header>INGRESO DE PERSONAL</header>
+
+<div class="wrap">
+
+  <div class="topbar">
+    <a class="btn" href="{% url 'nomina_panel' %}">← Volver a Nómina</a>
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+     <!-- GUARDAR -->
+     <button class="btn btn-primary" type="submit" form="form-personal" name="action" value="save">
+       Guardar
+     </button>
+
+     <!-- ELIMINAR -->
+     <button class="btn btn-danger" type="submit" form="form-personal" name="action" value="delete" id="btnEliminar">
+       Eliminar
+    </button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <form id="form-personal" method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <!-- ===================== DATOS GENERALES ===================== -->
+      <div class="section-title">Datos generales</div>
+      <div class="grid">
+
+        <div class="field">
+          <label>Fecha de ingreso</label>
+          <input type="date" name="fecha_ingreso" required>
+        </div>
+
+        <div class="field">
+          <label>Nombre 1</label>
+          <input type="text" name="nombre_1" maxlength="80" required>
+        </div>
+
+        <div class="field">
+          <label>Nombre 2</label>
+          <input type="text" name="nombre_2" maxlength="80">
+        </div>
+
+        <div class="field">
+          <label>Apellido 1</label>
+          <input type="text" name="apellido_1" maxlength="80" required>
+        </div>
+
+        <div class="field">
+          <label>Apellido 2</label>
+          <input type="text" name="apellido_2" maxlength="80">
+        </div>
+
+        <div class="field">
+          <label>Cédula</label>
+          <input type="text" name="cedula" maxlength="30" required>
+        </div>
+
+        <div class="field">
+          <label>No. contrato</label>
+          <input type="text" name="no_contrato" maxlength="40" required>
+        </div>
+
+        <div class="field">
+          <label>Tipo de contrato</label>
+          <select name="tipo_contrato" required>
+            <option value="">-- Selecciona --</option>
+            {% for r in tipos_contrato %}
+              <option value="{{ r.id }}">{{ r.consecutivo }} - {{ r.descripcion }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Fecha de terminación de contrato</label>
+          <input type="date" name="fecha_terminacion_contrato">
+        </div>
+
+        <div class="field">
+          <label>Fecha de nacimiento</label>
+          <input type="date" name="fecha_nacimiento">
+        </div>
+
+        <div class="field">
+          <label>Correo electrónico</label>
+          <input type="email" name="correo_personal" maxlength="120" required>
+        </div>
+
+        <div class="field">
+          <label>Correo electrónico institucional</label>
+          <input type="email" name="correo_institucional" maxlength="120">
+        </div>
+
+        <div class="field">
+          <label>Teléfono 1</label>
+          <input type="text" name="telefono_1" maxlength="30" required>
+        </div>
+
+        <div class="field">
+          <label>Teléfono 2</label>
+          <input type="text" name="telefono_2" maxlength="30">
+        </div>
+
+        <div class="field full">
+          <label>Dirección</label>
+          <input type="text" name="direccion" maxlength="180" required>
+        </div>
+
+      </div>
+
+      <!-- ===================== INFORMACIÓN INSTITUCIONAL ===================== -->
+      <div class="section-title">Información institucional</div>
+      <div class="grid">
+
+        <div class="field">
+          <label>Sueldo</label>
+          <input type="number" name="sueldo" step="0.01" min="0" required>
+        </div>
+
+        <div class="field">
+          <label>Cargo</label>
+          <input type="text" name="cargo" maxlength="80" required>
+        </div>
+
+        <div class="field">
+          <label>Sede</label>
+          <input type="text" name="sede" maxlength="80">
+        </div>
+
+        <div class="field">
+          <label>Oficina</label>
+          <input type="text" name="oficina" maxlength="80">
+        </div>
+
+        <div class="field">
+          <label>Jefe inmediato</label>
+          <input type="text" name="jefe_inmediato" maxlength="120">
+        </div>
+
+        <div class="field">
+          <label>Área</label>
+          <select name="area" required>
+            <option value="">-- Selecciona --</option>
+            {% for r in areas %}
+             <option value="{{ r.id }}">{{ r.consecutivo }} - {{ r.descripcion }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+
+        <div class="field">
+          <label>Tipo de nómina</label>
+          <select name="tipo_nomina" required>
+            <option value="">-- Selecciona --</option>
+            {% for r in tipos_nomina %}
+              <option value="{{ r.id }}">{{ r.consecutivo }} - {{ r.descripcion }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+      </div>
+
+      <!-- ===================== CENTROS DE COSTO ===================== -->
+      <div class="section-title">Centros de costo</div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Nombre del centro de costo</th>
+              <th class="pct">Porcentaje</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for i in "1234567890" %}
+            <tr>
+              <td>
+                <select name="cc_nombre_{{ forloop.counter }}">
+                  <option value="">-- Selecciona --</option>
+                  <!-- Después metemos valores -->
+                </select>
+              </td>
+              <td>
+                <input class="cc-pct" type="number" name="cc_pct_{{ forloop.counter }}" step="0.01" min="0" max="100" placeholder="0.00">
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+
+          <tfoot>
+            <tr class="totals-row">
+              <td>Totales</td>
+              <td>
+                <span id="totalBadge" class="total-badge bad">
+                  <span id="totalPct">0.00%</span>
+                </span>
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <div class="muted">
+        Restricción: el total debe sumar exactamente <b>100%</b>. (Puedes dejar filas vacías, pero el total final debe ser 100.)
+      </div>
+
+      <!-- ===================== CUENTA BANCARIA ===================== -->
+      <div class="section-title">Información cuenta bancaria</div>
+      <div class="grid">
+
+        <div class="field">
+          <label>Entidad</label>
+          <input type="text" name="banco_entidad" maxlength="120">
+        </div>
+
+        <div class="field">
+          <label>Tipo de cuenta</label>
+          <select name="banco_tipo_cuenta">
+            <option value="">-- Selecciona --</option>
+            <option value="corriente">Corriente</option>
+            <option value="ahorro">Ahorro</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Número de cuenta</label>
+          <input type="text" name="banco_numero_cuenta" maxlength="40">
+        </div>
+
+        <div class="field full">
+          <label>Certificado bancario (puedes cargar varios)</label>
+          <input type="file" name="certificado_bancario" multiple>
+        </div>
+
+      </div>
+
+      <!-- ===================== HOJA DE VIDA ===================== -->
+      <div class="section-title">Hoja de vida</div>
+
+      <div class="section-title" style="margin-top:10px;">Experiencia académica</div>
+      <div class="grid">
+        <div class="field">
+          <label>Institución</label>
+          <input type="text" name="acad_institucion_1" maxlength="150">
+        </div>
+        <div class="field">
+          <label>Título</label>
+          <input type="text" name="acad_titulo_1" maxlength="150">
+        </div>
+
+        <div class="field">
+          <label>Institución 2</label>
+          <input type="text" name="acad_institucion_2" maxlength="150">
+        </div>
+        <div class="field">
+          <label>Título 2</label>
+          <input type="text" name="acad_titulo_2" maxlength="150">
+        </div>
+
+        <div class="field">
+          <label>Institución 3</label>
+          <input type="text" name="acad_institucion_3" maxlength="150">
+        </div>
+        <div class="field">
+          <label>Título 3</label>
+          <input type="text" name="acad_titulo_3" maxlength="150">
+        </div>
+      </div>
+
+      <div class="section-title">Experiencia laboral</div>
+      <div class="grid">
+        <div class="field full">
+          <label>Experiencia 1</label>
+          <textarea name="laboral_exp_1" rows="2" placeholder="Empresa, cargo, fechas, funciones..."></textarea>
+        </div>
+        <div class="field full">
+          <label>Experiencia 2</label>
+          <textarea name="laboral_exp_2" rows="2"></textarea>
+        </div>
+        <div class="field full">
+          <label>Experiencia 3</label>
+          <textarea name="laboral_exp_3" rows="2"></textarea>
+        </div>
+        <div class="field full">
+          <label>Experiencia 4</label>
+          <textarea name="laboral_exp_4" rows="2"></textarea>
+        </div>
+      </div>
+
+      <!-- ===================== ANTECEDENTES ===================== -->
+      <div class="section-title">Antecedentes</div>
+      <div class="grid">
+
+        <div class="field full">
+          <label>Policía (cargar certificado)</label>
+          <input type="file" name="antecedentes_policia" multiple>
+        </div>
+
+        <div class="field full">
+          <label>Procuraduría (cargar certificado)</label>
+          <input type="file" name="antecedentes_procuraduria" multiple>
+        </div>
+
+        <div class="field full">
+          <label>Contraloría (cargar certificado)</label>
+          <input type="file" name="antecedentes_contraloria" multiple>
+        </div>
+
+      </div>
+
+      <!-- ===================== NÚCLEO FAMILIAR ===================== -->
+      <div class="section-title">Núcleo Familiar</div>
+
+      <div class="section-title" style="margin-top:10px;">Contacto en caso de emergencia</div>
+      <div class="grid">
+        <div class="field">
+          <label>Nombre</label>
+          <input type="text" name="emergencia_nombre" maxlength="120">
+        </div>
+        <div class="field">
+          <label>Teléfono</label>
+          <input type="text" name="emergencia_telefono" maxlength="30">
+        </div>
+      </div>
+
+      <div class="grid" style="margin-top:12px;">
+        <div class="field">
+          <label>Padre</label>
+          <input type="text" name="familia_padre" maxlength="120">
+        </div>
+        <div class="field">
+          <label>Madre</label>
+          <input type="text" name="familia_madre" maxlength="120">
+        </div>
+      </div>
+
+      <div class="section-title">Hijos</div>
+      <div class="grid">
+        <div class="field"><label>Hijo 1</label><input type="text" name="hijo_1" maxlength="120"></div>
+        <div class="field"><label>Hijo 2</label><input type="text" name="hijo_2" maxlength="120"></div>
+        <div class="field"><label>Hijo 3</label><input type="text" name="hijo_3" maxlength="120"></div>
+        <div class="field"><label>Hijo 4</label><input type="text" name="hijo_4" maxlength="120"></div>
+        <div class="field"><label>Hijo 5</label><input type="text" name="hijo_5" maxlength="120"></div>
+        <div class="field"><label>Hijo 6</label><input type="text" name="hijo_6" maxlength="120"></div>
+      </div>
+
+      <!-- ===================== SEGURIDAD SOCIAL Y PENSIÓN ===================== -->
+      <div class="section-title">Seguridad social y pensión</div>
+      <div class="grid">
+
+        <div class="field">
+          <label>Entidad salud</label>
+          <input type="text" name="salud_entidad" maxlength="120" required>
+        </div>
+        <div class="field">
+          <label>Código entidad salud</label>
+          <input type="text" name="salud_codigo" maxlength="40">
+        </div>
+        <div class="field">
+          <label>Nit entidad salud</label>
+          <input type="text" name="salud_nit" maxlength="40" required>
+        </div>
+
+        <div class="field">
+          <label>Entidad pensión</label>
+          <input type="text" name="pension_entidad" maxlength="120" required>
+        </div>
+        <div class="field">
+          <label>Código pensión</label>
+          <input type="text" name="pension_codigo" maxlength="40">
+        </div>
+        <div class="field">
+          <label>Nit entidad pensión</label>
+          <input type="text" name="pension_nit" maxlength="40" required>
+        </div>
+
+        <div class="field">
+          <label>Entidad fondo cesantías</label>
+          <input type="text" name="cesantias_entidad" maxlength="120" required>
+        </div>
+        <div class="field">
+          <label>Código fondo cesantías</label>
+          <input type="text" name="cesantias_codigo" maxlength="40">
+        </div>
+        <div class="field">
+          <label>Nit fondo cesantías</label>
+          <input type="text" name="cesantias_nit" maxlength="40" required>
+        </div>
+
+        <div class="field">
+          <label>Nivel de riesgo ARL</label>
+          <select name="arl_riesgo" required>
+            <option value="">-- Selecciona --</option>
+            <option value="0.522">0.522%</option>
+            <option value="1.44">1.44%</option>
+            <option value="2.6">2.6%</option>
+            <option value="4.55">4.55%</option>
+          </select>
+        </div>
+
+      </div>
+
+      <!-- Lo dejaste repetido al final: “Información institucional” como título -->
+      <div class="section-title">Información institucional</div>
+      <div class="note">
+        (Aquí podemos agregar más campos institucionales si aparecen en tu planeación final.)
+      </div>
+
+    </form>
+  </div>
+</div>
+
+<script>
+  // ====== Centros de costo: total obligatorio 100% ======
+  const pctInputs = () => Array.from(document.querySelectorAll(".cc-pct"));
+  const totalPctEl = document.getElementById("totalPct");
+  const badge = document.getElementById("totalBadge");
+  const form = document.getElementById("form-personal");
+
+  function toNumber(v){
+    const n = parseFloat((v || "").toString().replace(",", "."));
+    return isNaN(n) ? 0 : n;
+  }
+
+  function updateTotal(){
+    const total = pctInputs().reduce((acc, el) => acc + toNumber(el.value), 0);
+    const totalRounded = Math.round(total * 100) / 100;
+
+    totalPctEl.textContent = totalRounded.toFixed(2) + "%";
+
+    // Tolerancia pequeña por decimales (100.00 exacto)
+    const ok = Math.abs(totalRounded - 100) < 0.01;
+
+    badge.classList.toggle("ok", ok);
+    badge.classList.toggle("bad", !ok);
+  }
+
+  pctInputs().forEach(el => el.addEventListener("input", updateTotal));
+  updateTotal();
+
+  // Bloquear submit si no suma 100%
+  form.addEventListener("submit", function(e){
+    const total = pctInputs().reduce((acc, el) => acc + toNumber(el.value), 0);
+    const totalRounded = Math.round(total * 100) / 100;
+    const ok = Math.abs(totalRounded - 100) < 0.01;
+
+    if(!ok){
+      e.preventDefault();
+      alert("❌ Los Centros de costo deben sumar 100%. Total actual: " + totalRounded.toFixed(2) + "%");
+    }
+  });
+
+  
+  // ===== Ventanita "guardado exitosamente" =====
+
+(function(){
+
+  const params = new URLSearchParams(window.location.search);
+
+  if(params.get("saved") === "1"){
+    alert("✅ El empleado ha sido guardado exitosamente");
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+  if(params.get("deleted") === "1"){
+    alert("🗑️ Empleado eliminado correctamente");
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+ 
+  if(params.get("error") === "1"){
+    alert("❌ Debes completar todos los campos obligatorios para guardar el empleado.");
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+  if(params.get("ss_error") === "1"){
+    alert("❌ Entidad de seguridad social no esta creada en contabilidad");
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+  // Este viene desde el backend cuando renderizamos el template
+  if ("{{ ss_error|default:'' }}" === "1") {
+    alert("❌ Entidad de seguridad social no esta creada en contabilidad");
+  }
+
+})();
+
+
+
+
+  // ===== Confirmación al eliminar =====
+  document.addEventListener("DOMContentLoaded", function(){
+    const btn = document.getElementById("btnEliminar");
+    const form = document.getElementById("form-personal");
+    if(btn && form){
+      btn.addEventListener("click", function(e){
+        const cedula = (form.querySelector("input[name='cedula']")?.value || "").trim();
+        if(!cedula){
+          e.preventDefault();
+          alert("❌ Para eliminar, primero digita la cédula.");
+          return;
+        }
+        const ok = confirm("¿Seguro que deseas eliminar este empleado? (Cédula: " + cedula + ")");
+        if(!ok){
+          e.preventDefault();
+        }
+      });
+    }
+  });
+
+
+  
+  document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("form-personal");
+    const cedulaInput = form.querySelector("input[name='cedula']");
+
+    function setValue(name, value) {
+      const el = form.querySelector(`[name="${name}"]`);
+      if (!el) return;
+
+      // Para selects
+      if (el.tagName === "SELECT") {
+        el.value = value || "";
+        return;
+      }
+      // Inputs/textarea
+      el.value = value ?? "";
+    }
+
+    function fillRepeating(prefix, items, key, max) {
+      for (let i = 1; i <= max; i++) {
+        const v = items[i - 1]?.[key] ?? "";
+        setValue(`${prefix}_${i}`, v);
+      }
+    }
+
+    async function cargarEmpleadoPorCedula(cedula) {
+      const url = `{% url "empleado_por_cedula" %}?cedula=` + encodeURIComponent(cedula);
+      const res = await fetch(url, { method: "GET" });
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok || !data.ok) {
+        if (data.not_found) {
+          alert("ℹ️ No existe un empleado con esa cédula. Puedes crearlo y guardar.");
+          return;
+        }
+        alert("❌ Error consultando empleado.");
+        return;
+      }
+
+      const e = data.empleado;
+
+      // Campos simples (1 a 1)
+      Object.entries(e).forEach(([k, v]) => setValue(k, v));
+
+      // 🔥 llena selects (los names reales del HTML)
+      setValue("tipo_contrato", e.tipo_contrato_id);
+      setValue("tipo_nomina", e.tipo_nomina_id);
+      setValue("area", e.area_id);
+
+      // Educación (3)
+      for (let i = 1; i <= 3; i++) {
+        setValue(`acad_institucion_${i}`, data.educacion[i - 1]?.institucion ?? "");
+        setValue(`acad_titulo_${i}`, data.educacion[i - 1]?.titulo ?? "");
+      }
+
+      // Experiencia (4)
+      for (let i = 1; i <= 4; i++) {
+        setValue(`laboral_exp_${i}`, data.experiencia[i - 1]?.descripcion ?? "");
+      }
+
+      // Hijos (6)
+      for (let i = 1; i <= 6; i++) {
+        setValue(`hijo_${i}`, data.hijos[i - 1]?.nombre ?? "");
+      }
+
+      alert("✅ Empleado cargado.");
+    }
+
+    // Enter en cédula: buscar y llenar
+    cedulaInput.addEventListener("keydown", function (ev) {
+      if (ev.key === "Enter") {
+        ev.preventDefault(); // evita submit
+        const ced = (cedulaInput.value || "").trim();
+        if (!ced) {
+          alert("❌ Digita la cédula primero.");
+          return;
+        }
+        cargarEmpleadoPorCedula(ced);
+      }
+    });
+  });
+
+
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,49 @@
+
+
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Módulo de Configuración</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f7f8fb; }
+    h1 { margin-bottom: 16px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 14px;
+      margin-top: 10px;
+    }
+    .card {
+      background: white; padding: 18px; border-radius: 10px;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .card a {
+      display: block; text-decoration: none; color: #fff;
+      background: #007bff; padding: 12px 14px; border-radius: 8px;
+      text-align: center; font-weight: bold;
+    }
+    .card a:hover { background: #0056b3; }
+    .back { margin-top: 18px; display: inline-block; }
+  </style>
+</head>
+<body>
+  <h1>Configuración</h1>
+  <p>Selecciona una opción para administrar catálogos del sistema.</p>
+
+  <div class="grid">
+    <div class="card"><a href="{% url 'plan_cuentas' %}">Plan de cuentas</a></div>
+    <div class="card"><a href="{% url 'centros_costos' %}">Centros de costos</a></div>
+    <div class="card"><a href="{% url 'criterios' %}">Criterios</a></div>
+    <div class="card"><a href="{% url 'tablas_impuestos' %}">Tablas de impuestos</a></div>
+    <div class="card"><a href="{% url 'sucursales' %}">Sucursales</a></div>
+    <div class="card"><a href="{% url 'documentos_contables' %}">Documentos contables</a></div>
+    <div class="card"><a href="{% url 'usuarios_permisos' %}">Usuarios y permisos</a></div>
+  </div>
+
+  <a class="back" href="{% url 'contabilidad' %}">← Volver a Contabilidad</a>
+</body>
+</html>

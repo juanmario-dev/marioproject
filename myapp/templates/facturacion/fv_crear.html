@@ -1,0 +1,998 @@
+
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Factura de Venta</title>
+
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background:#f7f8fb; }
+    header { background:#021224; color:#fff; padding:18px 20px; font-size:20px; font-weight:bold; }
+    .wrap { padding: 20px; }
+
+    /* Botones base */
+    .actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+    .btn{
+      padding:10px 14px;
+      border:none;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:bold;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+    }
+    .btn-primary { background:#007bff; color:#fff; }
+    .btn-secondary { background:#6c757d; color:#fff; }
+    .btn-danger { background:#dc3545; color:#fff; }
+
+    /* Botón crear cliente (verde) */
+    .btn-success { background:#198754; color:#fff; }
+    .btn-success:hover { background:#157347; }
+
+    /* Botón agregar (amarillo) */
+    .btn-warning{
+      background:#ffc107;
+      color:#1f2937;
+      border:1px solid #eab308;
+    }
+    .btn-warning:hover{
+      background:#ffb300;
+    }
+
+    /* Tarjetas */
+    .card {
+      background:#fff;
+      border:1px solid #e5e7eb;
+      border-radius:12px;
+      padding:16px;
+      margin-bottom:14px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+
+    /* GRID 12 columnas */
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 18px;
+      align-items:end;
+    }
+    .col-2  { grid-column: span 2; }
+    .col-3  { grid-column: span 3; }
+    .col-4  { grid-column: span 4; }
+    .col-5  { grid-column: span 4; } /* si quieres más angosto pon span 3 */
+    .col-6  { grid-column: span 6; }
+    .col-7  { grid-column: span 7; }
+    .col-8  { grid-column: span 8; }
+    .col-9  { grid-column: span 9; }
+    .col-12 { grid-column: span 12; }
+
+    label { font-weight:bold; font-size:13px; margin-bottom:4px; display:block; }
+    input, select, textarea{
+      width:100%;
+      padding:8px;
+      border:1px solid #ccc;
+      border-radius:8px;
+      box-sizing:border-box;
+    }
+    small { color:#555; font-size:12px; }
+    .pill { display:inline-block; padding:3px 8px; border-radius:999px; background:#eef; margin-top:6px; }
+
+    /* Inputs más cortos */
+    .input-sm { max-width: 180px; }
+    .input-xs { max-width: 140px; }
+
+    /* Tabla */
+    table { width:100%; border-collapse:collapse; margin-top:12px; background:#fff; }
+    th, td { border:1px solid #ddd; padding:10px; }
+    th { background:#f2f2f2; }
+    .num { text-align:right; }
+
+    th.w-desc, td.w-desc { width:40%; }
+    th.w-cant, td.w-cant { width:8%; }
+    th.w-std,  td.w-std  { width:13%; }
+
+    /* NIT + botón debajo */
+    .nit-actions { display:flex; flex-direction:column; gap:10px; }
+
+    /* Totales (derecha, columna) */
+    .totales-wrap { display:flex; justify-content:flex-end; }
+    .totales{
+      width: 320px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+    .totales .row{
+      display:flex;
+      align-items:center;
+      gap:20px;
+    }
+    .totales .row label{
+      width: 120px;
+      margin: 0;
+      font-size:13px;
+    }
+    .totales .row input{
+      flex: 1;
+      text-align:right;
+    }
+
+    /* Abonos con lupa */
+    .abonos-box { display:flex; gap:8px; align-items:center; flex:1; }
+    .btn-icon{
+      width: 42px;
+      height: 40px;
+      border-radius:10px;
+      border:1px solid #cbd5e1;
+      background:#f1f5f9;
+      cursor:pointer;
+      font-size:18px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .btn-icon:hover { background:#e2e8f0; }
+
+    /* Pagos */
+    .pay-box{
+      border:2px dashed #94a3b8;
+      border-radius:12px;
+      padding:16px;
+      background:#f8fafc;
+      text-align:center;
+    }
+    .pay-grid{
+      display:flex;
+      justify-content:center;
+      gap:18px;
+      flex-wrap:wrap;
+      margin-top:12px;
+    }
+    .pay-btn{
+      width:180px;
+      height:90px;
+      border-radius:14px;
+      border:1px solid #cbd5e1;
+      background:#fff;
+      font-size:18px;
+      font-weight:bold;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+  </style>
+
+
+
+</head>
+
+<body>
+
+<header>FACTURA DE VENTA</header>
+
+<div class="wrap">
+
+  <!-- ✅ FECHAS EN UNA SOLA LÍNEA -->
+  <div class="card">
+    <div class="grid">
+      <div class="col-3">
+        <label>Fecha factura</label>
+        <input class="input-sm" type="date" id="fecha_factura" value="{{ hoy }}">
+        <small class="pill">Sugerencia: hoy</small>
+      </div>
+
+      <div class="col-2">
+        <label>Días de pago</label>
+        <input class="input-xs" type="number" id="dias_pago" value="0" min="0" step="1">
+      </div>
+
+      <div class="col-3">
+        <label>Fecha vencimiento</label>
+        <input class="input-sm" type="date" id="fecha_venc">
+        <small>Editable</small>
+      </div>
+
+      <div class="col-2">
+        <label>Consecutivo</label>
+        <input class="input-xs" type="text" id="consecutivo">
+        <small>⚡ Sugerido: <strong>{{ consecutivo_sugerido }}</strong></small>
+      </div>
+
+      <!-- espacio sobrante para que todo quede alineado bonito -->
+      <div class="col-2"></div>
+    </div>
+  </div>
+
+  <!-- ✅ CLIENTE ALINEADO EN UNA SOLA LÍNEA (NIT + RAZÓN + CORREO + DIRECCIÓN) -->
+  <div class="card">
+    <h3 style="margin-top:0">Datos del cliente</h3>
+
+    <div class="grid">
+      <div class="col-3 nit-actions">
+        <div>
+          <label>NIT (sin dígito)</label>
+          <input id="nit" type="text" placeholder="Escribe el NIT y presiona Enter">
+          <small>Debe existir en Terceros</small>
+        </div>
+
+        <button class="btn btn-success" type="button"
+          onclick="window.open('{% url 'registrar_tercero' %}','_blank')">
+          Crear cliente
+        </button>
+      </div>
+
+      <div class="col-4">
+        <label>Razón social</label>
+        <input id="nombre" type="text" readonly>
+      </div>
+
+      <div class="col-3">
+        <label>Correo</label>
+        <input id="correo" type="text" readonly>
+      </div>
+
+      <div class="col-2">
+        <label>Dirección</label>
+        <input id="direccion" type="text" readonly>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRODUCTO -->
+  <div class="grid">
+   <div class="col-5">
+    <label>Referencia</label>
+    <input id="ref_input" type="text" placeholder="Escribe mínimo 4 caracteres" list="refList" autocomplete="off">
+    <datalist id="refList"></datalist>
+    <small>Escribe 4+ caracteres y el sistema sugiere referencias existentes</small>
+   </div>
+
+  <div class="col-5">
+   <label>Producto</label>
+   <select id="producto_select">
+     <option value="">-- Seleccione --</option>
+   </select>
+    
+   <small>También puedes buscar por nombre desde aquí</small>
+  </div>
+
+  <button class="btn btn-warning" id="btnAgregarProducto" type="button">
+      ➕ Agregar
+  </button>
+
+  </div>
+
+
+  <p>
+    .
+  </p>
+  <p>
+    .
+  </p>
+
+ 
+
+    <table>
+      <thead>
+        <tr>
+          <th class="w-desc">Descripción</th>
+          <th class="num w-cant">Cantidad</th>
+          <th class="num w-std">Precio</th>
+          <th class="num w-std">Descuento</th>
+          <th class="num w-std">Impuestos</th>
+          <th class="num w-std">Total</th>
+        </tr>
+      </thead>
+      <tbody id="tabla"></tbody>
+      <tfoot>
+        <tr>
+          <td colspan="5" class="num"><strong>Subtotal</strong></td>
+          <td class="num"><strong id="subTotal">0</strong></td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <div class="actions">
+      <button class="btn btn-secondary" id="addRowBtn" type="button">Agregar línea</button>
+    </div>
+  </div>
+
+  <!-- ✅ TOTALES A LA DERECHA, EN COLUMNA -->
+  <div class="card">
+    <div class="totales-wrap">
+      <div class="totales">
+
+        <div class="row">
+          <label>Subtotal</label>
+          <input id="subtotal2" type="text" readonly value="0">
+        </div>
+
+        <div class="row">
+          <label>IVA</label>
+          <input id="iva" type="text" readonly value="0">
+        </div>
+
+        <div class="row">
+          <label>Retenciones</label>
+          <input id="retenciones" type="text" value="0">
+        </div>
+
+        <div class="row">
+          <label>Abonos</label>
+          <div class="abonos-box">
+            <input id="abonos" type="text" readonly value="0">
+            <button class="btn-icon" id="btnCartera" type="button" title="Ver estado de cartera (pendiente)">🔎</button>
+          </div>
+        </div>
+
+        <div class="row">
+          <label>Total a pagar</label>
+          <input id="total_pagar" type="text" readonly value="0">
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGOS -->
+  <div class="card pay-box">
+    <strong>Pague aquí</strong>
+    <div class="pay-grid">
+      <button class="pay-btn" type="button">PSE</button>
+      <button class="pay-btn" type="button">Nequi</button>
+      <button class="pay-btn" type="button">Daviplata</button>
+      <button class="pay-btn" type="button">Tarjeta</button>
+    </div>
+    <div style="margin-top:10px;">
+      <small>En PDF incluiremos código de barras con: NIT + NºFactura + Valor a pagar (fase siguiente).</small>
+    </div>
+  </div>
+
+  <!-- ACCIONES -->
+  <div class="actions">
+    <button class="btn btn-primary" id="btnGuardar" type="button">Guardar</button>
+    <button class="btn btn-secondary" id="btnLinkPago" type="button">Generar link de pago</button>
+    <a class="btn btn-secondary" id="btnPdf" href="#" target="_blank" data-url-template="{% url 'factura_pdf' 999999 %}"> Generar PDF </a>
+
+    <!-- <a class="btn btn-secondary" id="btnPdf" href="#" target="_blank">Generar PDF</a> -->
+    <a class="btn btn-secondary" href="{% url 'facturacioncxc' %}">← Volver</a>
+  </div>
+
+</div>
+
+
+
+
+{{ productos|json_script:"productos-data" }}
+
+
+
+<script>
+  const tbody = document.getElementById('tabla');
+
+  const fmtCOP = new Intl.NumberFormat('es-CO', { maximumFractionDigits: 0 });
+
+  // ✅ Variable global para recordar el ID de la última factura cargada/guardada
+
+  let LAST_FACTURA_ID = null;
+
+
+
+function parseMoneyInput(inp) {
+  // lee el número real desde data-raw
+  const raw = (inp?.dataset?.raw || "0").toString();
+  const n = Number(raw || 0);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function setMoneyInput(inp, value) {
+  const n = Number(value || 0);
+  const safe = Number.isFinite(n) ? Math.max(0, Math.round(n)) : 0;
+  inp.dataset.raw = String(safe);
+  inp.value = safe ? fmtCOP.format(safe) : "";
+}
+
+function initMoneyInput(inp) {
+  if (!inp) return;
+
+  // si viene con algo, conviértelo
+  const initialDigits = (inp.value || "").replace(/\D/g, "");
+  inp.dataset.raw = initialDigits || (inp.dataset.raw || "0");
+  inp.value = inp.dataset.raw && inp.dataset.raw !== "0" ? fmtCOP.format(Number(inp.dataset.raw)) : "";
+
+  inp.addEventListener("input", () => {
+    const digits = (inp.value || "").replace(/\D/g, "");
+    inp.dataset.raw = digits || "0";
+    inp.value = digits && digits !== "0" ? fmtCOP.format(Number(digits)) : "";
+  });
+
+  inp.addEventListener("focus", () => {
+    const v = inp.value;
+    setTimeout(() => inp.setSelectionRange(v.length, v.length), 0);
+  });
+}
+
+function formatMoneyText(value) {
+  const n = Number(value || 0);
+  const safe = Number.isFinite(n) ? Math.round(n) : 0;
+  return fmtCOP.format(safe);
+}
+
+
+
+
+  // ==============================
+  
+  // Productos desde Inventarios
+  
+  // ==============================
+  const PRODUCTOS = JSON.parse(document.getElementById("productos-data").textContent || "[]");
+
+  const refInput = document.getElementById("ref_input");
+  const refList = document.getElementById("refList");
+  const productoSelect = document.getElementById("producto_select");
+
+  // Mapas para "buscarx"
+  const byId = new Map();
+  const byRef = new Map(); // ref(normalizada) -> producto
+
+  function normRef(x) {
+    return (x || "").trim().toLowerCase();
+  }
+
+  // 1) Cargar SELECT de productos (dropdown)
+  function loadProductosSelect() {
+    // limpia (dejando la primera opción)
+    productoSelect.querySelectorAll("option:not(:first-child)").forEach(o => o.remove());
+
+    PRODUCTOS.forEach(p => {
+      const opt = document.createElement("option");
+      opt.value = String(p.id);
+      opt.textContent = p.nombre;
+      productoSelect.appendChild(opt);
+
+      byId.set(String(p.id), p);
+
+      const r = normRef(p.referencia);
+      if (r) byRef.set(r, p);
+    });
+  }
+
+  // 2) Cargar datalist de referencias
+  function loadReferenciasDatalist() {
+    refList.innerHTML = "";
+
+    // referencias únicas y no vacías
+    const refs = Array.from(new Set(
+      PRODUCTOS
+       .map(p => (p.referencia || "").trim())
+       .filter(r => r.length > 0)
+    ));
+
+  refs.forEach(r => {
+    const opt = document.createElement("option");
+    opt.value = r;
+    refList.appendChild(opt);
+   });
+  }
+
+   // 3) Cuando el usuario escribe referencia (mínimo 4 chars)
+    //    Si "elige" una referencia existente, setea el producto automáticamente
+  refInput.addEventListener("input", () => {
+    const v = (refInput.value || "").trim();
+    if (v.length < 4) return;
+
+    const p = byRef.get(normRef(v));
+    if (p) {
+     productoSelect.value = String(p.id);
+    }
+  });
+
+  // 4) Si el usuario cambia el producto por dropdown -> poner referencia automáticamente
+  productoSelect.addEventListener("change", () => {
+    const pid = productoSelect.value;
+    if (!pid) return;
+
+    const p = byId.get(String(pid));
+    if (!p) return;
+
+    refInput.value = (p.referencia || "");
+  });
+
+  // Init
+  loadProductosSelect();
+  loadReferenciasDatalist();
+
+
+  function addRow() {
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td class="w-desc"><input class="desc" type="text" placeholder="Descripción"></td>
+    <td class="w-cant"><input class="cant num" type="number" min="0" step="1" value="1"></td>
+
+    <!-- Precio con separadores -->
+    <td class="w-std"><input class="precio num money" type="text" inputmode="numeric" data-raw="0" value=""></td>
+
+    <!-- Descuento / Impuestos (por ahora como valor directo) -->
+    <td class="w-std"><input class="dto num" type="number" min="0" step="0.01" value="0"></td>
+    <td class="w-std"><input class="imp num" type="number" min="0" step="0.01" value="0"></td>
+
+    <td class="w-std num"><strong class="total_linea">0</strong></td>
+  `;
+  tbody.appendChild(tr);
+
+  // activar formatter al input money (precio)
+  initMoneyInput(tr.querySelector(".money"));
+
+  tr.querySelectorAll('input').forEach(inp => inp.addEventListener('input', recalc));
+  recalc();
+}
+
+
+  function recalc() {
+  let subtotal = 0;       // base después de descuento
+  let totalImpuestos = 0; // impuestos calculados
+
+  tbody.querySelectorAll('tr').forEach(tr => {
+    const cant = parseFloat(tr.querySelector('.cant').value || '0');
+    const precio = parseMoneyInput(tr.querySelector('.precio'));
+
+    const dtoPct = parseFloat(tr.querySelector('.dto').value || '0');
+    const impPct = parseFloat(tr.querySelector('.imp').value || '0');
+
+    const bruto = cant * precio;
+
+    const base = bruto - (bruto * dtoPct / 100);
+    const total = base * (1 + impPct / 100);
+    const impuestos = total - base;
+
+    tr.querySelector('.total_linea').textContent = formatMoneyText(total);
+
+    subtotal += base;
+    totalImpuestos += impuestos;
+  });
+
+  document.getElementById('subTotal').textContent = formatMoneyText(subtotal);
+  document.getElementById('subtotal2').value = formatMoneyText(subtotal);
+  document.getElementById('iva').value = formatMoneyText(totalImpuestos);
+
+  const ret = parseFloat(document.getElementById('retenciones').value || '0');
+  const ab = parseFloat(document.getElementById('abonos').value || '0');
+
+  const totalPagar = Math.max(0, (subtotal + totalImpuestos) - ret - ab);
+  document.getElementById('total_pagar').value = formatMoneyText(totalPagar);
+}
+
+   
+
+  
+
+
+  function calcVencimiento() {
+    const f = document.getElementById('fecha_factura').value;
+    const dias = parseInt(document.getElementById('dias_pago').value || '0', 10);
+    if (!f) return;
+    const dt = new Date(f + "T00:00:00");
+    dt.setDate(dt.getDate() + (isNaN(dias) ? 0 : dias));
+    const yyyy = dt.getFullYear();
+    const mm = String(dt.getMonth()+1).padStart(2,'0');
+    const dd = String(dt.getDate()).padStart(2,'0');
+    document.getElementById('fecha_venc').value = `${yyyy}-${mm}-${dd}`;
+  }
+
+  document.getElementById('fecha_factura').addEventListener('change', calcVencimiento);
+  document.getElementById('dias_pago').addEventListener('input', calcVencimiento);
+
+  document.getElementById('addRowBtn').addEventListener('click', addRow);
+
+  // Lupa cartera: pendiente
+  document.getElementById('btnCartera').addEventListener('click', () => {
+    alert("Estado de cartera: pendiente (lo implementamos cuando definamos cartera).");
+  });
+
+  // Init
+  addRow();
+  calcVencimiento();
+
+
+
+  function getProductoSeleccionado() {
+  // Prioridad 1: si hay un producto elegido en el dropdown
+  const pid = (productoSelect.value || "").trim();
+  if (pid) {
+    const p = byId.get(String(pid));
+    if (p) return p;
+  }
+
+  // Prioridad 2: si escribieron una referencia válida
+  const ref = (refInput.value || "").trim();
+  if (ref && ref.length >= 4) {
+    const p = byRef.get(normRef(ref));
+    if (p) return p;
+  }
+
+  return null;
+}
+
+// Usa la primera fila "vacía" para no llenar filas de más.
+// Si no hay fila vacía, crea una nueva con addRow().
+function getOrCreateLine() {
+  // Busca una fila donde la descripción esté vacía
+  const rows = Array.from(tbody.querySelectorAll("tr"));
+  for (const tr of rows) {
+    const desc = tr.querySelector(".desc");
+    if (desc && !desc.value.trim()) return tr;
+  }
+
+  // Si no hay, crea una nueva
+  addRow();
+  return tbody.lastElementChild;
+}
+
+
+
+  document.getElementById("btnAgregarProducto").addEventListener("click", () => {
+  const p = getProductoSeleccionado(); // tu función que encuentra el producto por ref o por nombre
+
+  if (!p) {
+    alert("Selecciona una referencia válida o un producto para agregar.");
+    return;
+  }
+
+  // ✅ 1) Usar primera fila vacía o crear una nueva
+  const tr = getOrCreateLine(); // tu función: usa fila vacía o llama addRow()
+
+  const ref = (p.referencia || "").trim();
+  const nom = (p.nombre || "").trim();
+
+  // ✅ 2) Descripción: "REF - NOMBRE" (si no hay ref, solo nombre)
+  const descText = ref ? `${ref} - ${nom}` : nom;
+  tr.querySelector(".desc").value = descText;
+
+  // ✅ 3) Traer precio/dto/imp desde inventarios
+  setMoneyInput(tr.querySelector(".precio"), Number(p.precio || 0));
+  tr.querySelector(".dto").value = Number(p.descuento_pct || 0);
+  tr.querySelector(".imp").value = Number(p.impuesto_pct || 0);
+
+  // ✅ Cantidad por defecto 1 (si quedó en 0)
+  const cantEl = tr.querySelector(".cant");
+  if (Number(cantEl.value || 0) <= 0) cantEl.value = 1;
+
+  // ✅ recalcular totales
+  recalc();
+
+  // ✅ 4) Limpiar los campos de arriba para seguir agregando
+  const refInput = document.getElementById("ref_input");
+  const prodSelect = document.getElementById("producto_select");
+
+  refInput.value = "";
+  prodSelect.value = "";
+
+  // ✅ opcional: borrar sugerencias y enfocar para escribir rápido
+  // (si usas datalist, esto ayuda a que no quede "pegada" una opción visual)
+  refInput.blur();
+  refInput.focus();
+});
+
+
+
+
+  // ... todo tu JS de productos y tabla ...
+
+  const nitInput = document.getElementById("nit");
+  const nombreInput = document.getElementById("nombre");
+  const correoInput = document.getElementById("correo");
+  const direccionInput = document.getElementById("direccion");
+
+  // Limpia los campos del cliente
+  function clearCliente() {
+    nombreInput.value = "";
+    correoInput.value = "";
+    direccionInput.value = "";
+  }
+
+  async function buscarClientePorNit(nit) {
+    const url = "{% url 'tercero_por_identificacion' %}" + "?nit=" + encodeURIComponent(nit);
+
+    try {
+      const resp = await fetch(url, {
+        method: "GET",
+        headers: { "Accept": "application/json" },
+      });
+
+      const data = await resp.json();
+
+      if (!resp.ok || !data.ok) {
+        clearCliente();
+        // opcional: mostrar mensaje si no existe
+        // alert(data.error || "No se encontró el tercero");
+        return;
+      }
+
+      // ✅ llenar campos
+      nombreInput.value = data.razon_social || "";
+      correoInput.value = data.correo || "";
+      direccionInput.value = data.direccion || "";
+    } catch (e) {
+      clearCliente();
+      alert("Error consultando el tercero. Revisa consola.");
+      console.error(e);
+    }
+  }
+
+  // ✅ TAB dispara blur, así que con blur ya cumples lo que quieres
+  nitInput.addEventListener("blur", () => {
+    const nit = (nitInput.value || "").trim();
+
+    // Si está vacío, limpiamos y no buscamos
+    if (!nit) {
+      clearCliente();
+      return;
+    }
+
+    buscarClientePorNit(nit);
+  });
+
+  // Extra recomendado: si presiona Enter también busca
+  nitInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      nitInput.blur(); // fuerza blur -> dispara la búsqueda
+    }
+  });
+
+
+  
+  // ✅ CSRF (Django)
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return '';
+  }
+
+  function collectLineasFactura() {
+    const lineas = [];
+
+    tbody.querySelectorAll("tr").forEach(tr => {
+      const desc = tr.querySelector(".desc")?.value?.trim() || "";
+      if (!desc) return; // no mandamos filas vacías
+
+      const cant = Number(tr.querySelector(".cant")?.value || 0);
+
+      // precio con data-raw (sin separadores)
+      const precioInp = tr.querySelector(".precio");
+      const precio = Number(precioInp?.dataset?.raw || 0);
+
+      const dto = Number(tr.querySelector(".dto")?.value || 0);
+      const imp = Number(tr.querySelector(".imp")?.value || 0);
+
+      lineas.push({
+        descripcion: desc,
+        cantidad: cant,
+        precio: precio,
+        descuento_pct: dto,
+        impuesto_pct: imp,
+      });
+    });
+
+    return lineas;
+  }
+
+  document.getElementById("btnGuardar").addEventListener("click", async () => {
+    const payload = {
+      // Cabecera
+      fecha_factura: document.getElementById("fecha_factura").value,
+      dias_pago: Number(document.getElementById("dias_pago").value || 0),
+      fecha_vencimiento: document.getElementById("fecha_venc").value,
+      consecutivo: document.getElementById("consecutivo").value, // si viene vacío, backend genera
+
+      // Cliente
+      nit: document.getElementById("nit").value,
+      razon_social: document.getElementById("nombre").value,
+      correo: document.getElementById("correo").value,
+      direccion: document.getElementById("direccion").value,
+
+      // Totales (estos inputs están formateados con separadores)
+      // Para enviarlos limpios, quitamos todo lo que no sea dígito o punto
+      subtotal: (document.getElementById("subtotal2").value || "0").replace(/[^\d.-]/g, ""),
+      iva: (document.getElementById("iva").value || "0").replace(/[^\d.-]/g, ""),
+      retenciones: (document.getElementById("retenciones").value || "0").replace(/[^\d.-]/g, ""),
+      abonos: (document.getElementById("abonos").value || "0").replace(/[^\d.-]/g, ""),
+      total_pagar: (document.getElementById("total_pagar").value || "0").replace(/[^\d.-]/g, ""),
+
+      // Líneas
+      lineas: collectLineasFactura(),
+    };
+
+    if (!payload.nit.trim()) {
+      alert("Debes ingresar el NIT del cliente.");
+      return;
+    }
+    if (!payload.lineas.length) {
+      alert("Debes agregar al menos un producto.");
+      return;
+    }
+    
+    const resp = await fetch("{% url 'fv_guardar' %}", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCookie("csrftoken"),
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await resp.json();
+    if (!resp.ok || !data.ok) {
+      alert("Error guardando: " + (data.error || "desconocido"));
+      return;
+    }
+
+    // ✅ te devuelve consecutivo real
+    alert("Factura guardada ✅ Consecutivo: " + data.consecutivo);
+
+    LAST_FACTURA_ID = data.id; // mario 29-01-26
+
+    // Opcional: actualizar el campo consecutivo en pantalla
+    document.getElementById("consecutivo").value = data.consecutivo;
+
+    // Opcional: recargar o redirigir
+    // window.location.reload();
+  });
+
+  const consecutivoInput = document.getElementById("consecutivo");
+
+function clearFacturaUI() {
+  // Cabecera
+  document.getElementById("fecha_factura").value = "";
+  document.getElementById("dias_pago").value = 0;
+  document.getElementById("fecha_venc").value = "";
+
+  // Cliente
+  document.getElementById("nit").value = "";
+  document.getElementById("nombre").value = "";
+  document.getElementById("correo").value = "";
+  document.getElementById("direccion").value = "";
+
+  // Tabla
+  tbody.innerHTML = "";
+
+  // Totales
+  document.getElementById("subTotal").textContent = "0";
+  document.getElementById("subtotal2").value = "0";
+  document.getElementById("iva").value = "0";
+  document.getElementById("retenciones").value = "0";
+  document.getElementById("abonos").value = "0";
+  document.getElementById("total_pagar").value = "0";
+}
+
+
+function fillFacturaUI(payload) {
+  const f = payload.factura;
+
+  // ✅ guardar el id para PDF
+  LAST_FACTURA_ID = f.id || null;
+
+  // Cabecera
+  document.getElementById("consecutivo").value = f.consecutivo || "";
+  document.getElementById("fecha_factura").value = f.fecha_factura || "";
+  document.getElementById("dias_pago").value = f.dias_pago ?? 0;
+  document.getElementById("fecha_venc").value = f.fecha_vencimiento || "";
+
+  // Cliente
+  document.getElementById("nit").value = f.nit || "";
+  document.getElementById("nombre").value = f.razon_social || "";
+  document.getElementById("correo").value = f.correo || "";
+  document.getElementById("direccion").value = f.direccion || "";
+
+  // Totales (formateados COP)
+  document.getElementById("subtotal2").value = formatMoneyText(f.subtotal);
+  document.getElementById("iva").value = formatMoneyText(f.iva);
+  document.getElementById("retenciones").value = formatMoneyText(f.retenciones);
+  document.getElementById("abonos").value = formatMoneyText(f.abonos);
+  document.getElementById("total_pagar").value = formatMoneyText(f.total_pagar);
+  document.getElementById("subTotal").textContent = formatMoneyText(f.subtotal);
+
+  // Tabla líneas
+  tbody.innerHTML = "";
+
+  (payload.lineas || []).forEach(linea => {
+    addRow();
+    const tr = tbody.lastElementChild;
+
+    tr.querySelector(".desc").value = linea.descripcion || "";
+    tr.querySelector(".cant").value = linea.cantidad || "1";
+
+    setMoneyInput(tr.querySelector(".precio"), Number(linea.precio || 0));
+
+    tr.querySelector(".dto").value = Number(linea.descuento_pct || 0);
+    tr.querySelector(".imp").value = Number(linea.impuesto_pct || 0);
+
+    tr.querySelector(".total_linea").textContent = formatMoneyText(linea.total || 0);
+  });
+
+  recalc();
+}
+
+
+
+
+
+
+
+
+async function buscarFacturaPorConsecutivo(cons) {
+  const url = "{% url 'fv_por_consecutivo' %}" + "?consecutivo=" + encodeURIComponent(cons);
+
+  const resp = await fetch(url, { headers: { "Accept": "application/json" } });
+  const data = await resp.json();
+
+  if (!resp.ok || !data.ok) {
+    clearFacturaUI();
+    alert(data.error || "No se encontró la factura.");
+    return;
+  }
+
+  fillFacturaUI(data);
+}
+
+// ✅ TAB dispara blur: aquí hacemos la consulta
+consecutivoInput.addEventListener("blur", () => {
+  const cons = (consecutivoInput.value || "").trim();
+  if (!cons) return; // si está vacío, no buscar
+  buscarFacturaPorConsecutivo(cons);
+});
+
+// ✅ Enter también busca
+consecutivoInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    consecutivoInput.blur();
+  }
+});
+
+
+// funcion para el pdf 
+
+// document.getElementById("btnPdf").addEventListener("click", function(e){
+//     e.preventDefault();  // evita que el # recargue la página
+
+//     if(!LAST_FACTURA_ID){
+//         alert("Primero guarda o consulta una factura.");
+//         return;
+//     }
+
+//     window.open(`/factura/pdf/${LAST_FACTURA_ID}/`, "_blank");
+// });
+
+document.getElementById("btnPdf").addEventListener("click", function(e){
+  e.preventDefault();
+
+  if(!LAST_FACTURA_ID){
+    alert("Primero guarda o consulta una factura.");
+    return;
+  }
+
+  const a = document.getElementById("btnPdf");
+  const template = a.dataset.urlTemplate;     // "/factura/pdf/999999/"
+  const url = template.replace("999999", String(LAST_FACTURA_ID));
+
+  window.open(url, "_blank");
+});
+
+
+
+
+
+</script>
+
+</body>
+</html>
+

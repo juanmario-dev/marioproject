@@ -1,0 +1,40 @@
+
+
+
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Detalle Notas Crédito</title>
+</head>
+<body>
+  <h2>Detalle NC - Factura {{ factura.consecutivo }}</h2>
+  <p><b>Cliente:</b> {{ factura.razon_social }} | <b>NIT:</b> {{ factura.nit }}</p>
+
+  <p><a href="{% url 'reporte_cartera' %}?view=tablas">← Volver al reporte</a></p>
+
+  <table border="1" cellpadding="6">
+    <thead>
+      <tr>
+        <th>Consecutivo</th>
+        <th>Fecha</th>
+        <th class="num">Total</th>
+        <th>Motivo</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for nc in ncs %}
+      <tr>
+        <td>{{ nc.consecutivo }}</td>
+        <td>{{ nc.fecha_nc }}</td>
+        <td class="num">{{ nc.total|intcomma }}</td>
+        <td>{{ nc.motivo }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="4">No hay notas crédito para esta factura.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
+</html>

@@ -1,0 +1,459 @@
+
+
+<!DOCTYPE html>
+<html lang="es">
+{% load humanize %}
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+  <style>
+    :root{
+      --bg:#f7f8fb;
+      --card:#ffffff;
+      --border:#d8dee9;
+      --text:#0f172a;
+      --muted:#64748b;
+      --shadow:0 10px 25px rgba(2,18,36,.10);
+      --zebra:#fafafa;
+      --blue:#0d6efd;
+      --blue-dark:#0b5ed7;
+    }
+
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      font-family:Arial, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      font-size:13px;
+    }
+
+    .wrap{
+      max-width:1900px;
+      margin:0 auto;
+      padding:10px 12px 14px;
+    }
+
+    .titulo{
+      background: linear-gradient(90deg, #109155, #34c782);
+      color:#fff;
+      font-size:14px;
+      font-weight:700;
+      padding:12px 16px;
+      border-radius:8px;
+      margin-bottom:12px;
+      box-shadow:0 4px 10px rgba(0,0,0,.08);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:8px;
+      padding:10px;
+      box-shadow:var(--shadow);
+      margin-bottom:10px;
+    }
+
+    .form-row{
+      display:flex;
+      gap:10px;
+      align-items:end;
+      flex-wrap:wrap;
+    }
+
+    .field label{
+      display:block;
+      font-size:11px;
+      font-weight:800;
+      color:#111;
+      margin:0 0 4px;
+    }
+
+    .field input{
+      width:180px;
+      height:30px;
+      padding:4px 8px;
+      border-radius:6px;
+      border:1px solid #cfd6e3;
+      font-size:12px;
+      background:#fff;
+      outline:none;
+    }
+
+    .btn{
+      border:0;
+      cursor:pointer;
+      border-radius:6px;
+      padding:8px 12px;
+      font-weight:900;
+      font-size:12px;
+      height:34px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      text-decoration:none;
+      white-space:nowrap;
+    }
+
+    .btn-primary{
+      color:#fff;
+      background: linear-gradient(120deg, var(--blue) 0%, var(--blue-dark) 100%);
+    }
+
+    .btn-dark{
+      background:#111;
+      color:#fff;
+    }
+
+    .muted{
+      color:var(--muted);
+      font-weight:700;
+    }
+
+    .table-wrap{
+      overflow:auto;
+      border:1px solid rgba(0,0,0,.08);
+      border-radius:6px;
+      background:#fff;
+    }
+
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      min-width:2200px;
+      background:#fff;
+      font-size:11.5px;
+    }
+
+    thead th{
+      position:sticky;
+      top:0;
+      z-index:2;
+      background:#fff;
+      color:#000;
+      font-weight:900;
+      font-size:11px;
+      padding:6px 6px;
+      text-align:left;
+      border:0;
+      white-space:nowrap;
+    }
+
+    tbody td{
+      padding:4px 6px;
+      border:0;
+      background:#fff;
+      white-space:nowrap;
+      vertical-align:middle;
+    }
+
+    tbody tr:nth-child(even) td{
+      background:var(--zebra);
+    }
+
+    tfoot td{
+      background:#f8fafc;
+      white-space:nowrap;
+      vertical-align:middle;
+      border-top:1px solid rgba(0,0,0,.12);
+      font-weight:900;
+      padding:8px 6px;
+    }
+
+    .num{
+      text-align:right;
+      font-variant-numeric:tabular-nums;
+    }
+
+    .msg{
+      margin-bottom:8px;
+    }
+
+    .msg .item{
+      padding:8px 10px;
+      border-radius:6px;
+      background:#fff3cd;
+      border:1px solid #ffe69c;
+      font-size:12px;
+      margin-bottom:6px;
+    }
+
+    .actions-row{
+      display:flex;
+      justify-content:flex-end;
+      align-items:center;
+      gap:10px;
+      margin-top:12px;
+      flex-wrap:wrap;
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="titulo">
+    <div>DataCounter : Archivo contable nómina</div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <a class="btn btn-dark" href="{% url 'nomina_subpanel' %}">Volver</a>
+    </div>
+  </div>
+
+  <div class="card">
+    {% if messages %}
+      <div class="msg">
+        {% for m in messages %}
+          <div class="item">{{ m }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <form method="GET">
+      <div class="form-row">
+        <div class="field">
+          <label>Número de nómina</label>
+          <input
+            type="text"
+            name="no_nomina"
+            value="{{ no_nomina|default_if_none:'' }}"
+            placeholder="Digite y presione Enter"
+            autofocus
+          >
+        </div>
+
+        <button class="btn btn-primary" type="submit">Consultar</button>
+      </div>
+    </form>
+  </div>
+
+  {% if nomina %}
+    <div class="card">
+      <div class="muted" style="margin-bottom:8px;">
+        Nómina {{ nomina.consecutivo }} | Período {{ nomina.fecha_ini|date:"Y-m-d" }} a {{ nomina.fecha_fin|date:"Y-m-d" }}
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Nómina</th>
+              <th>Fecha inicio</th>
+              <th>Fecha fin</th>
+              <th>Cédula</th>
+              <th>Concepto</th>
+              <th class="num">Valor</th>
+              <th>Tipo de concepto</th>
+              <th>Tipo de nómina</th>
+              <th>Cuenta contable</th>
+              <th>Naturaleza</th>
+              <th>Cuenta contable contrapartida</th>
+              <th>Naturaleza</th>
+              <th>Entidad salud</th>
+              <th>Entidad pensión</th>
+              <th>Entidad fondo cesantías</th>
+              <th>Cuenta general</th>
+              <th>Descripción</th>
+              <th class="num">Débito</th>
+              <th class="num">Crédito</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for row in filas %}
+              <tr>
+                <td>{{ row.nomina }}</td>
+                <td>{{ row.fecha_ini|date:"Y-m-d" }}</td>
+                <td>{{ row.fecha_fin|date:"Y-m-d" }}</td>
+                <td>{{ row.cedula }}</td>
+                <td>{{ row.concepto }}</td>
+                <td class="num">{{ row.valor|floatformat:2|intcomma }}</td>
+                <td>{{ row.tipo_concepto }}</td>
+                <td>{{ row.tipo_nomina }}</td>
+                <td>{{ row.cuenta_contable }}</td>
+                <td>{{ row.naturaleza_1 }}</td>
+                <td>{{ row.cuenta_contrapartida }}</td>
+                <td>{{ row.naturaleza_2 }}</td>
+                <td>{{ row.entidad_salud }}</td>
+                <td>{{ row.entidad_pension }}</td>
+                <td>{{ row.entidad_fondo_cesantias }}</td>
+                <td>{{ row.cuenta_general }}</td>
+                <td>{{ row.descripcion }}</td>
+                <td class="num">
+                  {% if row.debito != "" %}
+                    {{ row.debito|floatformat:2|intcomma }}
+                  {% endif %}
+                </td>
+                <td class="num">
+                  {% if row.credito != "" %}
+                    {{ row.credito|floatformat:2|intcomma }}
+                  {% endif %}
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="19" class="muted" style="text-align:center; padding:10px;">
+                  La nómina existe, pero no tiene movimientos con valor diferente de cero.
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+
+          <tfoot>
+            <tr>
+              <td colspan="17" style="text-align:right;">TOTALES</td>
+              <td class="num">{{ total_debito|floatformat:2|intcomma }}</td>
+              <td class="num">{{ total_credito|floatformat:2|intcomma }}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <div class="actions-row">
+        <button class="btn btn-primary" type="button" id="btnContabilizar">Contabilizar</button>
+      </div>
+    </div>
+  {% endif %}
+
+</div>
+
+
+<div id="modalFechaContab" style="
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.35);
+  z-index:3000;
+  align-items:center;
+  justify-content:center;
+">
+  <div style="
+    background:#fff;
+    width:320px;
+    max-width:92vw;
+    border-radius:10px;
+    padding:16px;
+    box-shadow:0 10px 30px rgba(0,0,0,.18);
+  ">
+    <div style="font-weight:900; margin-bottom:10px;">Fecha de contabilización</div>
+
+    <label style="display:block; font-size:12px; font-weight:700; margin-bottom:4px;">
+      Fecha
+    </label>
+    <input type="date" id="fechaContabilizacion" style="
+      width:100%;
+      height:34px;
+      padding:6px 8px;
+      border:1px solid #cfd6e3;
+      border-radius:6px;
+      margin-bottom:6px;
+    ">
+
+    <div style="font-size:11px; color:#64748b; margin-bottom:12px;">
+      Recomendación: fecha actual
+    </div>
+
+    <div style="display:flex; justify-content:flex-end; gap:8px;">
+      <button type="button" class="btn btn-dark" id="btnCancelarContab">Cancelar</button>
+      <button type="button" class="btn btn-primary" id="btnConfirmarContab">Confirmar</button>
+    </div>
+  </div>
+</div>
+<script>
+  function getCookie(name) {
+    const v = (`; ${document.cookie}`).split(`; ${name}=`);
+    if (v.length === 2) return v.pop().split(';').shift();
+  }
+
+  function parseTablaNominaParaContabilidad() {
+    const rows = [];
+    const trs = document.querySelectorAll("table tbody tr");
+
+    trs.forEach(tr => {
+      const tds = tr.querySelectorAll("td");
+      if (!tds || tds.length < 19) return;
+
+      const debitoTxt = (tds[17].innerText || "").trim().replace(/,/g, "");
+      const creditoTxt = (tds[18].innerText || "").trim().replace(/,/g, "");
+
+      rows.push({
+        nomina: (tds[0].innerText || "").trim(),
+        fecha_ini: (tds[1].innerText || "").trim(),
+        fecha_fin: (tds[2].innerText || "").trim(),
+        cedula: (tds[3].innerText || "").trim(),
+        concepto: (tds[4].innerText || "").trim(),
+        tipo_concepto: (tds[6].innerText || "").trim(),
+        tipo_nomina: (tds[7].innerText || "").trim(),
+        cuenta_general: (tds[15].innerText || "").trim(),
+        descripcion: (tds[16].innerText || "").trim(),
+        debito: debitoTxt || "",
+        credito: creditoTxt || ""
+      });
+    });
+
+    return rows;
+  }
+
+  const modal = document.getElementById("modalFechaContab");
+  const fechaInput = document.getElementById("fechaContabilizacion");
+
+  document.getElementById("btnContabilizar")?.addEventListener("click", () => {
+    const hoy = new Date().toISOString().split("T")[0];
+    fechaInput.value = hoy;
+    modal.style.display = "flex";
+  });
+
+  document.getElementById("btnCancelarContab")?.addEventListener("click", () => {
+    modal.style.display = "none";
+  });
+
+  document.getElementById("btnConfirmarContab")?.addEventListener("click", async () => {
+    const fecha = (fechaInput.value || "").trim();
+    if (!fecha) {
+      alert("Debes seleccionar la fecha de contabilización.");
+      return;
+    }
+
+    const filas = parseTablaNominaParaContabilidad();
+    if (!filas.length) {
+      alert("No hay filas para contabilizar.");
+      return;
+    }
+
+    const payload = {
+      fecha: fecha,
+      no_nomina: "{{ nomina.consecutivo|default:'' }}",
+      fecha_ini: "{{ nomina.fecha_ini|date:'Y-m-d'|default:'' }}",
+      fecha_fin: "{{ nomina.fecha_fin|date:'Y-m-d'|default:'' }}",
+      filas: filas
+    };
+
+    const resp = await fetch("{% url 'contabilizar_nomina' %}", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCookie("csrftoken") || "{{ csrf_token }}"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await resp.json();
+
+    if (!data.ok) {
+      alert(data.error || "No se pudo contabilizar la nómina.");
+      return;
+    }
+
+    alert("Nómina contabilizada correctamente. Documento número: " + data.numero);
+    window.location.href = "{% url 'asientos_listar' %}";
+  });
+</script>
+
+</body>
+</html>

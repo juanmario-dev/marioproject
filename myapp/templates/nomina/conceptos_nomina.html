@@ -1,0 +1,829 @@
+
+
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Conceptos de nómina</title>
+
+  <style>
+    :root{
+      --bg:#f7f8fb;
+      --nav:#021224;
+      --card:#fff;
+      --border:#e5e7eb;
+      --text:#0f172a;
+      --muted:#64748b;
+      --blue:#0d6efd;
+      --blue-dark:#0b5ed7;
+      --shadow: 0 10px 25px rgba(2,18,36,.10);
+      --shadow2: 0 12px 30px rgba(2,18,36,.16);
+      --ring: rgba(13,110,253,.18);
+      --danger:#dc3545;
+
+      --yellow:#ffc107;
+      --yellow-dark:#ffb300;
+      --yellow-text:#2b2100;
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    header{
+      background: var(--nav);
+      color:#fff;
+      padding:18px 20px;
+      text-align:center;
+      font-size:20px;
+      font-weight:bold;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 6px 18px rgba(2,18,36,.18);
+      letter-spacing:.3px;
+    }
+
+    .wrap{
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 18px 8px 40px;
+    }
+
+    .panel{
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+
+    .tabs-scroll{
+      overflow-x: auto;
+      padding-bottom: 6px;
+    }
+
+    .tabs{
+      display:grid;
+      grid-template-columns: repeat(4, minmax(320px, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+      width: 100%;
+      min-width: 1320px;
+    }
+
+    @media (max-width: 980px){
+      .tabs{
+        grid-template-columns: repeat(2, minmax(320px, 1fr));
+        min-width: 680px;
+      }
+    }
+    @media (max-width: 520px){
+      .tabs{
+        grid-template-columns: 1fr;
+        min-width: 360px;
+      }
+    }
+
+    .tab{
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      background: linear-gradient(180deg, #ffffff 0%, #f3f6fb 100%);
+      box-shadow: 0 6px 14px rgba(2,18,36,.06);
+    }
+
+    .tab h3{
+      margin:0 0 10px;
+      font-size: 14px;
+      font-weight: 800;
+      color:#021224;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      letter-spacing:.3px;
+    }
+
+    .pill{
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background:#eef2ff;
+      border: 1px solid #e0e7ff;
+      color:#1e3a8a;
+    }
+
+    .list{
+      border-top: 1px dashed #dbe2ea;
+      padding-top: 10px;
+      display:flex;
+      flex-direction:column;
+      gap: 8px;
+      min-height: 60px;
+    }
+
+    .row{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 10px;
+      padding: 10px 10px;
+      border: 1px solid #eef2f7;
+      border-radius: 12px;
+      background:#fff;
+    }
+
+    .row .left{
+      display:flex;
+      gap: 10px;
+      align-items:flex-start;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .code{
+      font-weight: 600;
+      font-size: 11.5px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background:#f1f5f9;
+      border: 1px solid #e2e8f0;
+      color:#0f172a;
+      flex: none;
+      margin-top: 1px;
+    }
+
+    .name{
+      font-weight: 400;
+      font-size: 12.5px;
+      line-height: 1.25;
+      white-space: normal;
+      overflow: visible;
+      text-overflow: clip;
+      word-break: break-word;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .type{
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 600;
+      flex: none;
+      white-space: nowrap;
+      margin-top: 1px;
+    }
+
+    .actions{
+      margin-top: 16px;
+      display:flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content:center;
+      padding-top: 14px;
+      border-top: 1px solid #eef2f7;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-weight: 900;
+      text-decoration:none;
+      cursor:pointer;
+      border: 1px solid var(--border);
+      background:#fff;
+      color: var(--text);
+      box-shadow: 0 6px 14px rgba(2,18,36,.08);
+      transition: all .15s ease;
+      user-select:none;
+    }
+    .btn:hover{ transform: translateY(-2px); box-shadow: var(--shadow2); }
+
+    .btn-primary{
+      border:none;
+      color:#fff;
+      background: linear-gradient(180deg, var(--blue) 0%, var(--blue-dark) 100%);
+      box-shadow: 0 10px 20px rgba(13,110,253,.26);
+    }
+
+    .btn-danger{
+      border: 1px solid rgba(220,53,69,.25);
+      color: var(--danger);
+      background:#fff;
+    }
+
+    .btn-yellow{
+      border: 1px solid rgba(255,193,7,.35);
+      background: linear-gradient(180deg, var(--yellow) 0%, var(--yellow-dark) 100%);
+      color: var(--yellow-text);
+      box-shadow: 0 10px 18px rgba(255,193,7,.24);
+    }
+
+
+     .btn-yellow-2{
+      border: 1px solid rgba(255,193,7,.35);
+      background: linear-gradient(100deg, var(--yellow) 0%, var(--yellow-dark) 70%);
+      color: var(--yellow-text);
+      box-shadow: 0 10px 18px rgba(255,193,7,.24);
+      font-size: 13px;
+    }
+
+
+
+    .btn-yellow:hover{ box-shadow: 0 14px 26px rgba(255,193,7,.32); }
+
+    .overlay{
+      position: fixed;
+      inset: 0;
+      background: rgba(2,18,36,.45);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding: 16px;
+      z-index: 50;
+    }
+    .overlay.show{ display:flex; }
+
+    .modal{
+      width: min(680px, 100%);
+      background: #fff;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      box-shadow: 0 18px 40px rgba(2,18,36,.22);
+      overflow:hidden;
+    }
+    .modal-header{
+      background: var(--nav);
+      color:#fff;
+      padding: 14px 16px;
+      font-weight: 900;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      letter-spacing:.3px;
+    }
+    .modal-body{ padding: 14px 16px 16px; }
+
+    .grid3{
+      display:grid;
+      grid-template-columns: 1fr 1fr 2fr;
+      gap: 10px;
+    }
+    @media (max-width: 620px){
+      .grid3{ grid-template-columns: 1fr; }
+      .span2{ grid-column: auto; }
+    }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap: 6px;
+    }
+    .field label{
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 900;
+    }
+    .field input, .field select{
+      width: 100%;
+      padding: 10px 10px;
+      border-radius: 12px;
+      border: 1px solid #dbe2ea;
+      outline: none;
+      font-size: 14px;
+    }
+    .field input:focus, .field select:focus{
+      border-color: rgba(13,110,253,.55);
+      box-shadow: 0 0 0 4px var(--ring);
+    }
+
+    .modal-actions{
+      display:flex;
+      gap: 10px;
+      justify-content:flex-end;
+      padding: 12px 16px 16px;
+      border-top: 1px solid #eef2f7;
+      background:#fbfdff;
+    }
+
+    .small-note{
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .err{
+      display:none;
+      margin-top:10px;
+      color:#b42318;
+      font-size: 12.5px;
+      font-weight: 700;
+    }
+
+    .tabs-scroll::-webkit-scrollbar{ height: 10px; }
+    .tabs-scroll::-webkit-scrollbar-thumb{ background: #cbd5e1; border-radius: 999px; }
+    .tabs-scroll::-webkit-scrollbar-track{ background: #eef2f7; border-radius: 999px; }
+
+    .row.selectable{ cursor: pointer; }
+    .row.selected{
+     border-color: rgba(13,110,253,.55);
+     box-shadow: 0 0 0 4px rgba(13,110,253,.12);
+     background: #f5f9ff;
+    }
+  </style>
+</head>
+
+<body>
+<header>CONCEPTOS DE NÓMINA</header>
+
+<div class="wrap">
+  <div class="panel">
+
+    <div class="tabs-scroll">
+      <div class="tabs">
+
+        <div class="tab">
+          <h3>Devengos <span class="pill" id="count_devengos">0</span></h3>
+          <div class="list" id="list_devengos">
+            {% for c in devengos %}
+              <div class="row" data-code="{{ c.codigo|escape }}">
+                <div class="left">
+                  <span class="code">{{ c.codigo }}</span>
+                  <span class="name">{{ c.nombre }}</span>
+                </div>
+                <div class="type">{{ c.get_tipo_display }}</div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="tab">
+          <h3>Deducciones <span class="pill" id="count_deducciones">0</span></h3>
+          <div class="list" id="list_deducciones">
+            {% for c in deducciones %}
+              <div class="row" data-code="{{ c.codigo|escape }}">
+                <div class="left">
+                  <span class="code">{{ c.codigo }}</span>
+                  <span class="name">{{ c.nombre }}</span>
+                </div>
+                <div class="type">{{ c.get_tipo_display }}</div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="tab">
+          <h3>Carga prestacional <span class="pill" id="count_carga">0</span></h3>
+          <div class="list" id="list_carga">
+            {% for c in carga %}
+              <div class="row" data-code="{{ c.codigo|escape }}">
+                <div class="left">
+                  <span class="code">{{ c.codigo }}</span>
+                  <span class="name">{{ c.nombre }}</span>
+                </div>
+                <div class="type">{{ c.get_tipo_display }}</div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="tab">
+          <h3>De pago <span class="pill" id="count_pago">0</span></h3>
+          <div class="list" id="list_pago">
+            {% for c in pago %}
+              <div class="row" data-code="{{ c.codigo|escape }}">
+                <div class="left">
+                  <span class="code">{{ c.codigo }}</span>
+                  <span class="name">{{ c.nombre }}</span>
+                </div>
+                <div class="type">{{ c.get_tipo_display }}</div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" id="btnCrear" type="button">Crear</button>
+      <button class="btn btn-danger" id="btnEliminar" type="button">Eliminar</button>
+      <button class="btn btn-yellow" id="btnModificar" type="button">Modificar</button>
+      <a class="btn btn-yellow-2" href="{% url 'nomina_parametrizar_asociar' %}">Parametrizar y asociar</a>
+      <a class="btn btn-yellow-2" href="{% url 'nomina_panel' %}">Regresar</a>
+    </div>
+
+    <div class="small-note">
+      Nota: 
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL CREAR -->
+<div class="overlay" id="overlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-label="Crear concepto">
+    <div class="modal-header">
+      <div>Crear concepto</div>
+      <button class="btn" type="button" id="btnX" style="padding:6px 12px; border-radius:12px; box-shadow:none;">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="grid3">
+        <div class="field">
+          <label>Código</label>
+          <input type="text" id="codigo" maxlength="30" placeholder="Ej: 001">
+        </div>
+
+        <div class="field">
+          <label>Tipo de concepto</label>
+          <select id="tipo">
+            <option value="">-- Selecciona --</option>
+            <option value="devengos">Devengos</option>
+            <option value="deducciones">Deducciones</option>
+            <option value="carga">Carga prestacional</option>
+            <option value="pago">De pago</option>
+          </select>
+        </div>
+
+        <div class="field span2">
+          <label>Nombre de concepto</label>
+          <input type="text" id="nombre" maxlength="160" placeholder="Ej: Auxilio de transporte">
+        </div>
+      </div>
+
+      <div class="err" id="msg"></div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-primary" type="button" id="btnGuardar">Guardar</button>
+      <button class="btn" type="button" id="btnSalir">Salir</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ========= ELEMENTOS =========
+  const overlay = document.getElementById("overlay");
+  const btnCrear = document.getElementById("btnCrear");
+  const btnSalir = document.getElementById("btnSalir");
+  const btnX = document.getElementById("btnX");
+  const btnGuardar = document.getElementById("btnGuardar"); // ✅ FALTABA EN TU TEMPLATE
+
+  const codigoEl = document.getElementById("codigo");
+  const tipoEl = document.getElementById("tipo");
+  const nombreEl = document.getElementById("nombre");
+  const msgEl = document.getElementById("msg");
+
+  // ========= MENSAJES =========
+  function showMsg(text){
+    msgEl.style.display = "block";
+    msgEl.textContent = text;
+  }
+  function hideMsg(){           // ✅ FALTABA EN TU TEMPLATE
+    msgEl.style.display = "none";
+    msgEl.textContent = "";
+  }
+
+  // ========= MODAL =========
+  function openModal(){
+    overlay.classList.add("show");
+    hideMsg();
+    codigoEl.value = "";
+    tipoEl.value = "";
+    nombreEl.value = "";
+    setTimeout(() => codigoEl.focus(), 50);
+  }
+  function closeModal(){ overlay.classList.remove("show"); }
+
+  btnCrear.addEventListener("click", openModal);
+  btnSalir.addEventListener("click", closeModal);
+  btnX.addEventListener("click", closeModal);
+  overlay.addEventListener("click", (e) => { if(e.target === overlay) closeModal(); });
+  document.addEventListener("keydown", (e) => { if(e.key === "Escape") closeModal(); });
+
+  // ========= MAPEO LISTAS/CONTADORES =========
+  function getListId(tipo){
+    if(tipo === "devengos") return "list_devengos";
+    if(tipo === "deducciones") return "list_deducciones";
+    if(tipo === "carga") return "list_carga";
+    if(tipo === "pago") return "list_pago";
+    return null;
+  }
+  function getCountId(tipo){
+    if(tipo === "devengos") return "count_devengos";
+    if(tipo === "deducciones") return "count_deducciones";
+    if(tipo === "carga") return "count_carga";
+    if(tipo === "pago") return "count_pago";
+    return null;
+  }
+
+  function updateCount(tipo){
+    const listId = getListId(tipo);
+    const countId = getCountId(tipo);
+    if(!listId || !countId) return;
+
+    const list = document.getElementById(listId);
+    document.getElementById(countId).textContent = list.querySelectorAll(".row").length;
+  }
+
+  function updateAllCounts(){
+    ["devengos","deducciones","carga","pago"].forEach(updateCount);
+  }
+  updateAllCounts(); // ✅ cuenta lo que viene de BD
+
+  // ========= APPEND ROW (UI) =========
+  function appendRow(concepto){  // ✅ FALTABA EN TU TEMPLATE
+    const listId = getListId(concepto.tipo);
+    if(!listId) return;
+
+    const row = document.createElement("div");
+    row.className = "row";
+    row.setAttribute("data-code", concepto.codigo);
+
+    row.innerHTML = `
+      <div class="left">
+        <span class="code"></span>
+        <span class="name"></span>
+      </div>
+      <div class="type"></div>
+    `;
+
+    row.querySelector(".code").textContent = concepto.codigo;
+    row.querySelector(".name").textContent = concepto.nombre;
+    row.querySelector(".type").textContent = concepto.tipo_label;
+
+    document.getElementById(listId).appendChild(row);
+    updateCount(concepto.tipo);
+  }
+
+  function codeExistsInUI(codigo){
+    const codes = Array.from(document.querySelectorAll("[data-code]")).map(el => el.getAttribute("data-code"));
+    return codes.includes(codigo);
+  }
+
+  // ========= CSRF =========
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+  const csrftoken = getCookie('csrftoken');
+
+  // ========= GUARDAR (POST BACKEND) =========
+  
+
+
+  
+  // ====== Selección de filas ======
+  let selectedRow = null;
+
+  function clearSelection(){
+    if(selectedRow){
+      selectedRow.classList.remove("selected");
+      selectedRow = null;
+    }
+  }
+
+  function selectRow(row){
+    clearSelection();
+    selectedRow = row;
+    row.classList.add("selected");
+  }
+
+  // Marcar filas como clickeables (las que vienen de BD y las nuevas)
+  function bindRowSelection(container){
+    const rows = container.querySelectorAll(".row");
+    rows.forEach(r => {
+      r.classList.add("selectable");
+      r.addEventListener("click", (e) => {
+        e.stopPropagation();
+        selectRow(r);
+      });
+    });
+  }
+
+  // Vincula selección a las listas existentes
+  ["list_devengos","list_deducciones","list_carga","list_pago"].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) bindRowSelection(el);
+  });
+
+  // Modifica appendRow para que la fila nueva también sea seleccionable:
+  const _appendRowOriginal = appendRow;
+  appendRow = function(concepto){
+    _appendRowOriginal(concepto);
+    // buscar la fila recién agregada por data-code
+    const row = document.querySelector(`.row[data-code="${CSS.escape(concepto.codigo)}"]`);
+    if(row){
+      row.classList.add("selectable");
+      row.addEventListener("click", (e) => {
+        e.stopPropagation();
+        selectRow(row);
+      });
+    }
+  };
+
+  // ====== Eliminar ======
+  const btnEliminar = document.getElementById("btnEliminar");
+  btnEliminar.addEventListener("click", async () => {
+    if(!selectedRow){
+      return alert("Selecciona un concepto primero.");
+    }
+
+    const codigo = selectedRow.getAttribute("data-code");
+    const nombre = selectedRow.querySelector(".name")?.textContent || "";
+
+    if(!confirm(`¿Eliminar el concepto ${codigo} - ${nombre}?`)){
+      return;
+    }
+
+    try{
+      const formData = new FormData();
+      formData.append("codigo", codigo);
+
+      const res = await fetch("{% url 'nomina_concepto_eliminar' %}", {
+        method: "POST",
+        headers: { "X-CSRFToken": csrftoken },
+        body: formData
+      });
+
+      const data = await res.json().catch(()=>({}));
+
+      if(!res.ok || !data.ok){
+        return alert("❌ " + (data.error || "No se pudo eliminar."));
+      }
+
+      // Quitar del UI
+      const parentList = selectedRow.parentElement;
+      const tipoListId = parentList?.id;
+
+      selectedRow.remove();
+      selectedRow = null;
+
+      // actualizar contador según la lista
+      if(tipoListId === "list_devengos") updateCount("devengos");
+      if(tipoListId === "list_deducciones") updateCount("deducciones");
+      if(tipoListId === "list_carga") updateCount("carga");
+      if(tipoListId === "list_pago") updateCount("pago");
+
+    }catch(e){
+      console.error(e);
+      alert("❌ Error de red/servidor al eliminar.");
+    }
+  });
+
+  // ====== Modificar ======
+  const btnModificar = document.getElementById("btnModificar");
+
+  let modoEdicion = false;
+  let codigoOriginal = null;
+
+  btnModificar.addEventListener("click", () => {
+    if(!selectedRow){
+      return alert("Selecciona un concepto primero.");
+    }
+
+    // cargar valores seleccionados al modal
+    const codigo = selectedRow.getAttribute("data-code");
+    const nombre = selectedRow.querySelector(".name")?.textContent || "";
+    const tipoTxt = selectedRow.querySelector(".type")?.textContent || "";
+
+    // mapear texto visible a value del select
+    const map = {
+      "Devengos": "devengos",
+      "Deducciones": "deducciones",
+      "Carga prestacional": "carga",
+      "De pago": "pago",
+    };
+
+    codigoEl.value = codigo;
+    nombreEl.value = nombre;
+    tipoEl.value = map[tipoTxt] || "";
+
+    modoEdicion = true;
+    codigoOriginal = codigo;
+
+    overlay.classList.add("show");
+    hideMsg();
+  });
+
+  // Ajustar el botón Guardar para que si está en modo edición, haga UPDATE
+  const _guardarHandler = btnGuardar.onclick; // no siempre existe
+  
+
+  btnGuardar.addEventListener("click", async () => {
+  hideMsg();
+
+  const codigo = (codigoEl.value || "").trim();
+  const tipo = (tipoEl.value || "").trim();
+  const nombre = (nombreEl.value || "").trim();
+
+  if(!codigo) return showMsg("❌ El código es obligatorio.");
+  if(!tipo) return showMsg("❌ Debes seleccionar el tipo de concepto.");
+  if(!nombre) return showMsg("❌ El nombre del concepto es obligatorio.");
+
+  btnGuardar.disabled = true;
+  btnGuardar.textContent = "Guardando...";
+
+  try{
+    const formData = new FormData();
+
+    // ===== MODO EDICIÓN =====
+    if(modoEdicion){
+      formData.append("codigo_original", codigoOriginal);
+      formData.append("codigo", codigo);
+      formData.append("tipo", tipo);
+      formData.append("nombre", nombre);
+
+      const res = await fetch("{% url 'nomina_concepto_modificar' %}", {
+        method: "POST",
+        headers: { "X-CSRFToken": csrftoken },
+        body: formData
+      });
+
+      const data = await res.json().catch(()=>({}));
+
+      if(!res.ok || !data.ok){
+        return showMsg("❌ " + (data.error || "No se pudo modificar."));
+      }
+
+      const c = data.concepto;
+
+      // quitar fila seleccionada y volver a insertarla actualizada
+      if(selectedRow) selectedRow.remove();
+      selectedRow = null;
+
+      appendRow({
+        codigo: c.codigo,
+        nombre: c.nombre,
+        tipo: c.tipo,
+        tipo_label: c.tipo_label
+      });
+
+      modoEdicion = false;
+      codigoOriginal = null;
+      closeModal();
+      updateAllCounts();
+      return;
+    }
+
+    // ===== MODO CREAR =====
+    if(codeExistsInUI(codigo)){
+      return showMsg("❌ Ya existe un concepto con ese código.");
+    }
+
+    formData.append("codigo", codigo);
+    formData.append("tipo", tipo);
+    formData.append("nombre", nombre);
+
+    const res = await fetch("{% url 'nomina_concepto_crear' %}", {
+      method: "POST",
+      headers: { "X-CSRFToken": csrftoken },
+      body: formData
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if(!res.ok || !data.ok){
+      return showMsg("❌ " + (data.error || "No se pudo guardar. Revisa consola/servidor."));
+    }
+
+    appendRow(data.concepto);
+    closeModal();
+
+  } catch (e){
+    console.error(e);
+    showMsg("❌ Error de red/servidor. Revisa consola y consola del servidor.");
+  } finally {
+    btnGuardar.disabled = false;
+    btnGuardar.textContent = "Guardar";
+  }
+});
+
+
+</script>
+
+</body>
+</html>

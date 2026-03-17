@@ -1,0 +1,1361 @@
+
+
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Parametrización y asociación de conceptos</title>
+
+  <style>
+    :root{
+      --bg:#f6f7fb;
+      --nav:#021224;
+      --card:#fff;
+      --border:#e5e7eb;
+      --text:#0f172a;
+      --muted:#64748b;
+
+      /* Nuevo look tabs (otro color) */
+      --tab:#0ea5e9;          /* sky */
+      --tab-dark:#0284c7;
+      --tab-soft:#e0f2fe;
+
+      /* Excel-ish */
+      --grid:#e5e7eb;
+      --grid2:#eef2f7;
+      --head:#f3f4f6;
+      --zebra:#fbfbfd;
+      --hover:#f6faff;
+
+      --shadow: 0 8px 18px rgba(2,18,36,.08);
+      --ring: rgba(14,165,233,.18);
+    }
+
+    *{ box-sizing:border-box; }
+
+    /* ====== INTERFAZ MÁS PEQUEÑA (compact) ====== */
+    body{
+      margin:0;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    header{
+      background: var(--nav);
+      color:#fff;
+      padding: 12px 14px;
+      text-align:center;
+      font-size: 16px;
+      font-weight: 900;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 6px 14px rgba(2,18,36,.16);
+      letter-spacing:.2px;
+    }
+
+    .wrap{
+      max-width: 1700px;
+      margin: 0 auto;
+      padding: 12px 10px 26px;
+    }
+
+    .panel{
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      padding: 12px;
+    }
+
+    .title{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+    .title h1{
+      margin:0;
+      font-size: 15px;
+      font-weight: 900;
+      letter-spacing:.2px;
+      color:#021224;
+    }
+    .subtitle{
+      margin-top:4px;
+      font-size: 11.5px;
+      color: var(--muted);
+      font-weight: 600;
+      line-height: 1.25;
+    }
+
+    .topbar{
+      display:grid;
+      grid-template-columns: 280px 1fr;
+      gap: 10px;
+      align-items:end;
+      margin: 10px 0 10px;
+    }
+    @media (max-width: 900px){
+      .topbar{ grid-template-columns: 1fr; }
+    }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap: 5px;
+    }
+    .field label{
+      font-size: 11.5px;
+      color: var(--muted);
+      font-weight: 900;
+    }
+    .field select, .field input{
+      width: 100%;
+      padding: 8px 9px;
+      border-radius: 10px;
+      border: 1px solid #dbe2ea;
+      outline: none;
+      font-size: 13px;
+      background:#fff;
+    }
+    .field select:focus, .field input:focus{
+      border-color: rgba(14,165,233,.6);
+      box-shadow: 0 0 0 3px var(--ring);
+    }
+
+    /* ====== Tabs nuevos ====== */
+    .tabbar-wrap{
+      border-top: 1px solid #eef2f7;
+      padding-top: 10px;
+      margin-top: 4px;
+    }
+    .tabbar{
+      display:flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items:center;
+    }
+    .tabbtn{
+      border: 1px solid rgba(2,132,199,.22);
+      background: linear-gradient(180deg, #ffffff 0%, var(--tab-soft) 100%);
+      color:#0b2b3a;
+      padding: 8px 12px;
+      border-radius: 12px;
+      font-weight: 900;
+      cursor:pointer;
+      transition: all .12s ease;
+      user-select:none;
+      display:inline-flex;
+      gap: 8px;
+      align-items:center;
+      box-shadow: none;
+    }
+    .tabbtn:hover{
+      transform: translateY(-1px);
+      border-color: rgba(2,132,199,.35);
+    }
+    .tabbtn.active{
+      background: linear-gradient(180deg, var(--tab) 0%, var(--tab-dark) 100%);
+      border-color: rgba(2,132,199,.55);
+      color:#fff;
+      box-shadow: 0 8px 16px rgba(14,165,233,.18);
+    }
+
+    .pill{
+      font-size: 10.5px;
+      font-weight: 900;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.75);
+      border: 1px solid rgba(255,255,255,.55);
+      color:#0b2b3a;
+    }
+    .tabbtn.active .pill{
+      background: rgba(255,255,255,.18);
+      border-color: rgba(255,255,255,.25);
+      color:#fff;
+    }
+
+    /* ====== panes ====== */
+    .pane{ display:none; margin-top: 10px; }
+    .pane.active{ display:block; }
+
+    /* ====== look Excel ====== */
+    .table-card{
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      overflow:hidden;
+      background:#f8fafc;
+      box-shadow: none;
+    }
+
+    .table-head{
+      padding: 10px 12px;
+      background: #f1f5f9;
+      border-bottom: 1px solid #d1d5db;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .table-head .h{
+      font-weight: 900;
+      color:#021224;
+      letter-spacing:.2px;
+      font-size: 13px;
+    }
+    .table-head .note{
+      font-size: 11.5px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .table-scroll{
+      overflow:auto;
+      width: 100%;
+      background:#fff;
+    }
+
+    table{
+      border-collapse: collapse;
+      width: 100%;
+      min-width: 1400px;
+      font-size: 12px;
+    }
+
+
+
+
+    /* Ancho de columnas en tablas de parametrización */
+  .table-scroll table th:nth-child(1),
+  .table-scroll table td:nth-child(1){
+    width: 90px;   /* Consecutivo */
+    min-width: 90px;
+  }
+
+  .table-scroll table th:nth-child(2),
+  .table-scroll table td:nth-child(2){
+    width: 240px;   /* Concepto */
+    min-width: 240px;
+  }
+
+  .table-scroll table th:nth-child(3),
+  .table-scroll table td:nth-child(3){
+    width: 270px;   /* Cuenta contable */
+    min-width: 270px;
+  }
+
+
+
+    thead th{
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: var(--head);
+      border-bottom: 1px solid #cbd5e1;
+      border-right: 1px solid var(--grid);
+      color: #111827;
+      font-size: 11px;
+      letter-spacing: .2px;
+      text-align:left;
+      padding: 8px 8px;
+      white-space: nowrap;
+      font-weight: 900;
+    }
+    thead th:last-child{ border-right: none; }
+
+    tbody td{
+      border-top: 1px solid var(--grid);
+      border-right: 1px solid var(--grid2);
+      padding: 7px 8px;
+      vertical-align: top;
+      background:#fff;
+    }
+    tbody td:last-child{ border-right: none; }
+
+    tbody tr:nth-child(even) td{ background: var(--zebra); }
+    tbody tr:hover td{ background: var(--hover); }
+
+    .code{
+      display:inline-block;
+      font-weight: 900;
+      font-size: 11px;
+      padding: 3px 7px;
+      border-radius: 8px;
+      background:#eef2f7;
+      border: 1px solid #d1d5db;
+      color:#0f172a;
+    }
+    .concept{
+      font-weight: 600;
+      color:#0f172a;
+      word-break: break-word;
+      font-size: 12px;
+    }
+
+    .inp, .sel{
+      width: 100%;
+      min-width: 120px;
+      padding: 6px 7px;
+      border-radius: 6px;
+      border: 1px solid #d1d5db;
+      outline: none;
+      font-size: 12px;
+      background:#fff;
+      box-shadow: none;
+    }
+    .mini{ min-width: 105px; }
+    .inp:focus, .sel:focus{
+      border-color: rgba(14,165,233,.7);
+      box-shadow: 0 0 0 2px var(--ring);
+    }
+
+    .empty{
+      padding: 14px 12px;
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 12px;
+      background:#fff;
+    }
+
+    .actions{
+      margin-top: 12px;
+      display:flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content:flex-end;
+      padding-top: 12px;
+      border-top: 1px solid #eef2f7;
+    }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      border-radius: 12px;
+      padding: 8px 12px;
+      font-weight: 900;
+      text-decoration:none;
+      cursor:pointer;
+      border: 1px solid var(--border);
+      background:#fff;
+      color: var(--text);
+      box-shadow: none;
+      transition: all .12s ease;
+      user-select:none;
+      font-size: 12.5px;
+    }
+    .btn:hover{ transform: translateY(-1px); }
+    .btn-primary{
+      border:none;
+      color:#fff;
+      background: linear-gradient(180deg, var(--tab) 0%, var(--tab-dark) 100%);
+      box-shadow: 0 10px 16px rgba(14,165,233,.18);
+    }
+    .btn-danger{
+      border: 1px solid rgba(220,53,69,.25);
+      color:#b42318;
+      background:#fff;
+    }
+    .btn-soft{
+      border: 1px solid rgba(2,132,199,.22);
+      background: #f0f9ff;
+      color:#0b2b3a;
+    }
+
+    /* ====== Iconos ====== */
+    .iconbtn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      padding:6px 10px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background:#fff;
+      cursor:pointer;
+      font-weight: 900;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+    .iconbtn:hover{ transform: translateY(-1px); }
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width: 24px;
+      height: 20px;
+      padding: 0 8px;
+      border-radius: 999px;
+      background:#f1f5f9;
+      border: 1px solid #d1d5db;
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    /* ====== MODALS ====== */
+    .overlay{
+      position: fixed;
+      inset: 0;
+      background: rgba(2,18,36,.45);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding: 16px;
+      z-index: 999;
+    }
+    .overlay.show{ display:flex; }
+
+    .modal{
+      width: min(820px, 96vw);
+      background:#fff;
+      border-radius: 14px;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 18px 40px rgba(2,18,36,.22);
+      overflow:hidden;
+    }
+    /* Modal TARIFA más ancho */
+    .modal-wide{
+      width: min(980px, 96vw);
+    }
+
+    .modal-header{
+      background: #021224;
+      color:#fff;
+      padding: 12px 14px;
+      font-weight: 900;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+    }
+    .modal-body{ padding: 12px 14px; background:#fff; }
+    .modal-actions{
+      display:flex;
+      gap: 8px;
+      justify-content:flex-end;
+      padding: 10px 14px 14px;
+      border-top: 1px solid #eef2f7;
+      background:#fbfdff;
+    }
+    .xbtn{
+      border:none;
+      background: rgba(255,255,255,.15);
+      color:#fff;
+      font-weight: 900;
+      border-radius: 10px;
+      padding: 6px 10px;
+      cursor:pointer;
+    }
+    .xbtn:hover{ background: rgba(255,255,255,.25); }
+
+    /* Modal Base */
+    .base-grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    @media (max-width: 720px){
+      .base-grid{ grid-template-columns: 1fr; }
+    }
+    .base-item{
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 10px 10px;
+      display:flex;
+      gap: 10px;
+      align-items:flex-start;
+      background:#fff;
+    }
+    .base-item .code{
+      flex:none;
+      margin-top: 1px;
+    }
+    .base-item .name{
+      font-size: 12px;
+      font-weight: 700;
+      color:#0f172a;
+      line-height: 1.25;
+    }
+
+    /* Modal Rangos */
+    .rangos-actions{
+      display:flex;
+      gap: 8px;
+      justify-content:space-between;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .rangos-wrap{
+      width: 100%;
+      overflow-x: auto;
+      margin-top: 10px;
+    }
+
+    .rangos-table{
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 12px;
+      min-width: 520px;
+    }
+
+    /* IMPORTANTE: anulamos sticky heredado */
+    .rangos-table thead th{
+      position: static !important;
+      top: auto !important;
+      z-index: auto !important;
+
+      background:#f3f4f6;
+      border: 1px solid #e5e7eb;
+      padding: 6px 8px;
+      font-size: 11px;
+      font-weight: 900;
+      white-space: nowrap;
+      text-align: left;
+    }
+
+    .rangos-table tbody td{
+      border: 1px solid #e5e7eb;
+      padding: 6px 8px;
+      background:#fff;
+      vertical-align: middle;
+    }
+
+    /* Columnas proporcionadas */
+    .rangos-table th:nth-child(1),
+    .rangos-table td:nth-child(1){ width: 42%; }
+
+    .rangos-table th:nth-child(2),
+    .rangos-table td:nth-child(2){ width: 42%; }
+
+    .rangos-table th:nth-child(3),
+    .rangos-table td:nth-child(3){ width: 8%; text-align:center; }
+
+    .rangos-table th:nth-child(4),
+    .rangos-table td:nth-child(4){ width: 8%; text-align:center; }
+
+    .inp-money{ width: 100%; }
+    .inp-pct{
+      width: 100%;
+      text-align:center;
+    }
+    .btn-x{
+      padding: 4px 8px;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+
+<body>
+<header>PARAMETRIZACIÓN Y ASOCIACIÓN DE CONCEPTOS</header>
+
+<div class="wrap">
+  <div class="panel">
+
+    <!-- ✅ IMPORTANTE: action al mismo endpoint + permite recargar con GET -->
+    <form method="post"
+          id="frmParam"
+          action="{% url 'nomina_parametrizar_asociar' %}">
+      {% csrf_token %}
+
+      <!-- ✅ Precarga que manda la vista (GET) -->
+      <script type="application/json" id="paramData">
+        {{ param_data|safe }}
+      </script>
+
+      <!-- Hidden para mandar bases y tarifas (JSON) -->
+      <input type="hidden" name="base_json" id="base_json" value="{}">
+      <input type="hidden" name="tarifa_json" id="tarifa_json" value="{}">
+
+      <div class="title">
+        <div>
+          <div class="subtitle">
+            <b></b>.
+          </div>
+        </div>
+      </div>
+
+      <div class="topbar">
+        <div class="field">
+          <label>Tipos de nómina</label>
+
+          <!-- ✅ Al cambiar, recarga por GET para traer precarga del backend -->
+          <select name="tipo_nomina"
+                  id="tipo_nomina"
+                  onchange="location.href='?tipo_nomina=' + encodeURIComponent(this.value)">
+            <option value="">-- Selecciona --</option>
+            {% for tn in tipos_nomina %}
+              <option value="{{ tn.consecutivo }}"
+                {% if tipo_nomina_sel == tn.consecutivo %}selected{% endif %}>
+                {{ tn.consecutivo }} - {{ tn.descripcion }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="tabbar-wrap">
+          <div class="tabbar" role="tablist" aria-label="Menú de parametrización">
+            <button class="tabbtn active" type="button" data-tab="devengos" role="tab" aria-selected="true">
+              Devengos <span class="pill">{{ devengos|length }}</span>
+            </button>
+            <button class="tabbtn" type="button" data-tab="deducciones" role="tab" aria-selected="false">
+              Deducciones <span class="pill">{{ deducciones|length }}</span>
+            </button>
+            <button class="tabbtn" type="button" data-tab="carga" role="tab" aria-selected="false">
+              Carga prestacional <span class="pill">{{ carga|length }}</span>
+            </button>
+            <button class="tabbtn" type="button" data-tab="pago" role="tab" aria-selected="false">
+              De pago <span class="pill">{{ pago|length }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================== DEVENGOS ===================== -->
+      <section class="pane active" id="pane-devengos" role="tabpanel">
+        <div class="table-card">
+          <div class="table-head">
+            <div class="h">Devengos</div>
+            <div class="note">Se cargan automáticamente los conceptos tipo <b>Devengos</b> (código y nombre).</div>
+          </div>
+
+          {% if devengos %}
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Consecutivo</th>
+                  <th>Concepto</th>
+                  <th>Cuenta contable</th>
+                  <th>Débito/Crédito</th>
+                  <th>Salarial (sí/no)</th>
+                  <th>Contrato 1</th>
+                  <th>Contrato 2</th><th>Contrato 3</th><th>Contrato 4</th><th>Contrato 5</th>
+                  <th>Contrato 6</th><th>Contrato 7</th><th>Contrato 8</th><th>Contrato 9</th><th>Contrato 10</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for c in devengos %}
+                <tr>
+                  <td><span class="code">{{ c.codigo }}</span></td>
+                  <td><span class="concept">{{ c.nombre }}</span></td>
+
+                  <td>
+                    <select class="sel" name="dev_{{ c.codigo }}_cuenta" id="dev_{{ c.codigo }}_cuenta">
+                      <option value="">-- Selecciona cuenta --</option>
+                      {% for ct in cuentas_mov %}
+                        <option value="{{ ct.codigo }}">{{ ct.codigo }} - {{ ct.nombre }}</option>
+                      {% endfor %}
+                    </select>
+                  </td>
+
+                  <td>
+                    <select class="sel mini" name="dev_{{ c.codigo }}_dc" id="dev_{{ c.codigo }}_dc">
+                      <option value="">--</option>
+                      <option value="D">Débito</option>
+                      <option value="C">Crédito</option>
+                    </select>
+                  </td>
+
+                  <td>
+                    <select class="sel mini" name="dev_{{ c.codigo }}_salarial" id="dev_{{ c.codigo }}_salarial">
+                      <option value="">--</option>
+                      <option value="SI">Sí</option>
+                      <option value="NO">No</option>
+                    </select>
+                  </td>
+
+                  {% for i in contratos_cols %}
+                    <td>
+                      <select class="sel mini"
+                              name="dev_{{ c.codigo }}_contrato{{ i }}"
+                              id="dev_{{ c.codigo }}_contrato{{ i }}">
+                        <option value="">-- Selecciona contrato --</option>
+                        {% for ctto in contratos %}
+                          <option value="{{ ctto.consecutivo }}">
+                            {{ ctto.consecutivo }} - {{ ctto.descripcion }}
+                          </option>
+                        {% endfor %}
+                      </select>
+                    </td>
+                  {% endfor %}
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+            <div class="empty">No hay conceptos tipo <b>Devengos</b> creados todavía.</div>
+          {% endif %}
+        </div>
+      </section>
+
+      <!-- ===================== DEDUCCIONES ===================== -->
+      <section class="pane" id="pane-deducciones" role="tabpanel">
+        <div class="table-card">
+          <div class="table-head">
+            <div class="h">Deducciones</div>
+            <div class="note">Se cargan automáticamente los conceptos tipo <b>Deducciones</b>.</div>
+          </div>
+
+          {% if deducciones %}
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Consecutivo</th>
+                  <th>Concepto</th>
+                  <th>Cuenta contable</th>
+                  <th>Débito/Crédito</th>
+                  <th>Base conceptos salariales</th>
+                  <th>Tarifa (%)</th>
+                  <th>Contrato 1</th>
+                  <th>Contrato 2</th><th>Contrato 3</th><th>Contrato 4</th><th>Contrato 5</th>
+                  <th>Contrato 6</th><th>Contrato 7</th><th>Contrato 8</th><th>Contrato 9</th><th>Contrato 10</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for c in deducciones %}
+                <tr>
+                  <td><span class="code">{{ c.codigo }}</span></td>
+                  <td><span class="concept">{{ c.nombre }}</span></td>
+
+                  <td>
+                    <select class="sel" name="ded_{{ c.codigo }}_cuenta" id="ded_{{ c.codigo }}_cuenta">
+                      <option value="">-- Selecciona cuenta --</option>
+                      {% for ct in cuentas_mov %}
+                        <option value="{{ ct.codigo }}">{{ ct.codigo }} - {{ ct.nombre }}</option>
+                      {% endfor %}
+                    </select>
+                  </td>
+
+                  <td>
+                    <select class="sel mini" name="ded_{{ c.codigo }}_dc" id="ded_{{ c.codigo }}_dc">
+                      <option value="">--</option>
+                      <option value="D">Débito</option>
+                      <option value="C">Crédito</option>
+                    </select>
+                  </td>
+
+                  <td>
+                    <button type="button"
+                            class="iconbtn js-base-open"
+                            data-scope="ded"
+                            data-code="{{ c.codigo }}"
+                            title="Seleccionar base de conceptos (devengos)">
+                      🔍 <span class="chip js-base-count" data-scope="ded" data-code="{{ c.codigo }}">0</span>
+                    </button>
+                  </td>
+
+                  <td>
+                    <button type="button"
+                            class="iconbtn js-tarifa-open"
+                            data-scope="ded"
+                            data-code="{{ c.codigo }}"
+                            title="Configurar rangos de tarifa (%)">
+                      % <span class="chip js-tarifa-count" data-scope="ded" data-code="{{ c.codigo }}">0</span>
+                    </button>
+                  </td>
+
+                  {% for i in contratos_cols %}
+                    <td>
+                      <select class="sel mini"
+                              name="ded_{{ c.codigo }}_contrato{{ i }}"
+                              id="ded_{{ c.codigo }}_contrato{{ i }}">
+                        <option value="">-- Selecciona contrato --</option>
+                        {% for ctto in contratos %}
+                          <option value="{{ ctto.consecutivo }}">
+                            {{ ctto.consecutivo }} - {{ ctto.descripcion }}
+                          </option>
+                        {% endfor %}
+                      </select>
+                    </td>
+                  {% endfor %}
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+            <div class="empty">No hay conceptos tipo <b>Deducciones</b> creados todavía.</div>
+          {% endif %}
+        </div>
+      </section>
+
+      <!-- ===================== CARGA PRESTACIONAL ===================== -->
+      <section class="pane" id="pane-carga" role="tabpanel">
+        <div class="table-card">
+          <div class="table-head">
+            <div class="h">Carga prestacional</div>
+            <div class="note">Se cargan automáticamente los conceptos tipo <b>Carga prestacional</b>.</div>
+          </div>
+
+          {% if carga %}
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Consecutivo</th>
+                  <th>Concepto</th>
+                  <th>Cuenta contable</th>
+                  <th>Débito/Crédito</th>
+                  <th>Cuenta contrapartida</th>
+                  <th>Débito/Crédito</th>
+                  <th>Base conceptos salariales</th>
+                  <th>Tarifa (%)</th>
+                  <th>Contrato 1</th>
+                  <th>Contrato 2</th><th>Contrato 3</th><th>Contrato 4</th><th>Contrato 5</th>
+                  <th>Contrato 6</th><th>Contrato 7</th><th>Contrato 8</th><th>Contrato 9</th><th>Contrato 10</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for c in carga %}
+                <tr>
+                  <td><span class="code">{{ c.codigo }}</span></td>
+                  <td><span class="concept">{{ c.nombre }}</span></td>
+
+                  <td>
+                    <select class="sel" name="car_{{ c.codigo }}_cuenta" id="car_{{ c.codigo }}_cuenta">
+                      <option value="">-- Selecciona cuenta --</option>
+                      {% for ct in cuentas_mov %}
+                        <option value="{{ ct.codigo }}">{{ ct.codigo }} - {{ ct.nombre }}</option>
+                      {% endfor %}
+                    </select>
+                  </td>
+
+                  <td>
+                    <select class="sel mini" name="car_{{ c.codigo }}_dc1" id="car_{{ c.codigo }}_dc1">
+                      <option value="">--</option>
+                      <option value="D">Débito</option>
+                      <option value="C">Crédito</option>
+                    </select>
+                  </td>
+
+                  <td>
+                    <select class="sel" name="car_{{ c.codigo }}_contracuenta" id="car_{{ c.codigo }}_contracuenta">
+                      <option value="">-- Selecciona cuenta --</option>
+                      {% for ct in cuentas_mov %}
+                        <option value="{{ ct.codigo }}">{{ ct.codigo }} - {{ ct.nombre }}</option>
+                      {% endfor %}
+                    </select>
+                  </td>
+
+                  <td>
+                    <select class="sel mini" name="car_{{ c.codigo }}_dc2" id="car_{{ c.codigo }}_dc2">
+                      <option value="">--</option>
+                      <option value="D">Débito</option>
+                      <option value="C">Crédito</option>
+                    </select>
+                  </td>
+
+                  <td>
+                    <button type="button"
+                            class="iconbtn js-base-open"
+                            data-scope="car"
+                            data-code="{{ c.codigo }}"
+                            title="Seleccionar base de conceptos (devengos)">
+                      🔍 <span class="chip js-base-count" data-scope="car" data-code="{{ c.codigo }}">0</span>
+                    </button>
+                  </td>
+
+                  <td>
+                    <button type="button"
+                            class="iconbtn js-tarifa-open"
+                            data-scope="car"
+                            data-code="{{ c.codigo }}"
+                            title="Configurar rangos de tarifa (%)">
+                      % <span class="chip js-tarifa-count" data-scope="car" data-code="{{ c.codigo }}">0</span>
+                    </button>
+                  </td>
+
+                  {% for i in contratos_cols %}
+                    <td>
+                      <select class="sel mini"
+                              name="car_{{ c.codigo }}_contrato{{ i }}"
+                              id="car_{{ c.codigo }}_contrato{{ i }}">
+                        <option value="">-- Selecciona contrato --</option>
+                        {% for ctto in contratos %}
+                          <option value="{{ ctto.consecutivo }}">
+                            {{ ctto.consecutivo }} - {{ ctto.descripcion }}
+                          </option>
+                        {% endfor %}
+                      </select>
+                    </td>
+                  {% endfor %}
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+            <div class="empty">No hay conceptos tipo <b>Carga prestacional</b> creados todavía.</div>
+          {% endif %}
+        </div>
+      </section>
+
+      <!-- ===================== DE PAGO ===================== -->
+      <section class="pane" id="pane-pago" role="tabpanel">
+        <div class="table-card">
+          <div class="table-head">
+            <div class="h">De pago</div>
+            <div class="note">Se cargan automáticamente los conceptos tipo <b>De pago</b>.</div>
+          </div>
+
+          {% if pago %}
+          <div class="table-scroll">
+            <table style="min-width: 900px;">
+              <thead>
+                <tr>
+                  <th>Consecutivo</th>
+                  <th>Concepto</th>
+                  <th>Cuenta contable</th>
+                  <th>Débito/Crédito</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for c in pago %}
+                <tr>
+                  <td><span class="code">{{ c.codigo }}</span></td>
+                  <td><span class="concept">{{ c.nombre }}</span></td>
+
+                  <td>
+                    <select class="sel" name="pag_{{ c.codigo }}_cuenta" id="pag_{{ c.codigo }}_cuenta">
+                      <option value="">-- Selecciona cuenta --</option>
+                      {% for ct in cuentas_mov %}
+                        <option value="{{ ct.codigo }}">{{ ct.codigo }} - {{ ct.nombre }}</option>
+                      {% endfor %}
+                    </select>
+                  </td>
+
+                  <td>
+                    <select class="sel mini" name="pag_{{ c.codigo }}_dc" id="pag_{{ c.codigo }}_dc">
+                      <option value="">--</option>
+                      <option value="D">Débito</option>
+                      <option value="C">Crédito</option>
+                    </select>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+            <div class="empty">No hay conceptos tipo <b>De pago</b> creados todavía.</div>
+          {% endif %}
+        </div>
+      </section>
+
+      <div class="actions">
+        <button class="btn btn-primary" type="submit" id="btnGuardar">Guardar</button>
+        <a class="btn" href="{% url 'nomina_conceptos' %}" title="Conceptos">Regresar</a>
+      </div>
+
+    </form>
+
+  </div>
+</div>
+
+<!-- ========== MODAL BASE (Seleccionar Devengos) ========== -->
+<div class="overlay" id="overlayBase">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-header">
+      <div id="baseTitle">Base conceptos salariales</div>
+      <button class="xbtn" type="button" id="baseClose">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="subtitle" style="margin:0 0 6px;">
+        Selecciona los <b>devengos</b> que harán parte de la base de cálculo.
+      </div>
+
+      <input class="inp" id="baseSearch" placeholder="Buscar devengo por código o nombre..." />
+
+      <div class="base-grid" id="baseList">
+        {% for d in devengos %}
+        <label class="base-item">
+          <input type="checkbox" class="baseChk" value="{{ d.codigo }}">
+          <div>
+            <span class="code">{{ d.codigo }}</span>
+            <div class="name">{{ d.nombre }}</div>
+          </div>
+        </label>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn" type="button" id="baseCancel">Cancelar</button>
+      <button class="btn btn-primary" type="button" id="baseSave">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MODAL TARIFA (Rangos) ========== -->
+<div class="overlay" id="overlayTarifa">
+  <div class="modal modal-wide" role="dialog" aria-modal="true">
+    <div class="modal-header">
+      <div id="tarifaTitle">Tarifa (%) por rangos</div>
+      <button class="xbtn" type="button" id="tarifaClose">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="subtitle" style="margin:0 0 6px;">
+        Agrega rangos: <b>mínimo</b>, <b>máximo</b> y <b>%</b>. Puedes crear tantas filas como necesites.
+      </div>
+
+      <div class="rangos-actions">
+        <button class="btn btn-soft" type="button" id="tarifaAdd">+ Agregar fila</button>
+        <button class="btn btn-danger" type="button" id="tarifaClear">Borrar todo</button>
+      </div>
+
+      <div class="rangos-wrap">
+        <table class="rangos-table">
+          <thead>
+            <tr>
+              <th>Mínimo</th>
+              <th>Máximo</th>
+              <th>%</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="tarifaBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn" type="button" id="tarifaCancel">Cancelar</button>
+      <button class="btn btn-primary" type="button" id="tarifaSave">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ===== Tabs =====
+  const tabButtons = Array.from(document.querySelectorAll(".tabbtn"));
+  const panes = {
+    devengos: document.getElementById("pane-devengos"),
+    deducciones: document.getElementById("pane-deducciones"),
+    carga: document.getElementById("pane-carga"),
+    pago: document.getElementById("pane-pago"),
+  };
+
+  function setActive(tab){
+    tabButtons.forEach(b => {
+      const isActive = b.dataset.tab === tab;
+      b.classList.toggle("active", isActive);
+      b.setAttribute("aria-selected", isActive ? "true" : "false");
+    });
+    Object.keys(panes).forEach(k => panes[k].classList.toggle("active", k === tab));
+  }
+
+  tabButtons.forEach(btn => btn.addEventListener("click", () => setActive(btn.dataset.tab)));
+
+  // ========= Estado en memoria =========
+  // key = `${scope}:${code}` donde scope = ded | car
+  const baseSeleccion = {};
+  const tarifaRangos = {};
+
+  // ========= Precarga desde backend =========
+  function safeParseJsonFromScript(id){
+    const el = document.getElementById(id);
+    if(!el) return null;
+    try { return JSON.parse(el.textContent || "{}"); }
+    catch(e){ return null; }
+  }
+
+  const preload = safeParseJsonFromScript("paramData") || {};
+  const preloadConceptos = preload.conceptos || {};
+  const preloadBases = preload.bases || {};
+  const preloadTarifas = preload.tarifas || {};
+
+  // Copiamos bases/tarifas al estado en memoria para que chips + modales funcionen
+  Object.keys(preloadBases).forEach(k => { baseSeleccion[k] = (preloadBases[k] || []).slice(); });
+  Object.keys(preloadTarifas).forEach(k => { tarifaRangos[k] = JSON.parse(JSON.stringify(preloadTarifas[k] || [])); });
+
+  // Rellena selects (cuentas/dc/salarial/contracuenta/dc2/contratos)
+  function setSelectValue(id, value){
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.value = value || "";
+  }
+
+  function applyPreloadToForm(){
+    Object.keys(preloadConceptos).forEach(key => {
+      const info = preloadConceptos[key] || {};
+      const parts = key.split(":");
+      if(parts.length !== 2) return;
+      const scope = parts[0]; // dev|ded|car|pag
+      const code = parts[1];
+
+      // Cuenta principal
+      setSelectValue(`${scope}_${code}_cuenta`, info.cuenta);
+
+      // dc
+      if(scope === "car"){
+        setSelectValue(`car_${code}_dc1`, info.dc);
+        setSelectValue(`car_${code}_contracuenta`, info.contracuenta);
+        setSelectValue(`car_${code}_dc2`, info.dc2);
+      } else {
+        setSelectValue(`${scope}_${code}_dc`, info.dc);
+      }
+
+      // salarial (solo dev)
+      if(scope === "dev"){
+        setSelectValue(`dev_${code}_salarial`, info.salarial);
+      }
+
+      // contratos 1..10
+      const contratos = info.contratos || [];
+      for(let i=1;i<=10;i++){
+        setSelectValue(`${scope}_${code}_contrato${i}`, contratos[i-1] || "");
+      }
+    });
+
+    // Actualiza chips de bases/tarifas según precarga
+    document.querySelectorAll(".js-base-count").forEach(chip=>{
+      const scope = chip.dataset.scope;
+      const code = chip.dataset.code;
+      const k = `${scope}:${code}`;
+      chip.textContent = String((baseSeleccion[k] || []).length);
+    });
+
+    document.querySelectorAll(".js-tarifa-count").forEach(chip=>{
+      const scope = chip.dataset.scope;
+      const code = chip.dataset.code;
+      const k = `${scope}:${code}`;
+      chip.textContent = String((tarifaRangos[k] || []).length);
+    });
+  }
+
+  // Al cargar, aplicar precarga
+  applyPreloadToForm();
+
+  // ========= MODAL BASE =========
+  const overlayBase = document.getElementById("overlayBase");
+  const baseClose = document.getElementById("baseClose");
+  const baseCancel = document.getElementById("baseCancel");
+  const baseSave = document.getElementById("baseSave");
+  const baseSearch = document.getElementById("baseSearch");
+  const baseList = document.getElementById("baseList");
+
+  let currentScope = null;
+  let currentCode = null;
+  let snapshotBase = null;
+
+  function openBaseModal(scope, code){
+    currentScope = scope;
+    currentCode = code;
+
+    document.getElementById("baseTitle").textContent =
+      `Base conceptos salariales (${scope.toUpperCase()} - ${code})`;
+
+    const k = `${scope}:${code}`;
+    snapshotBase = (baseSeleccion[k] || []).slice();
+
+    const selectedSet = new Set(snapshotBase.map(String));
+    baseList.querySelectorAll(".baseChk").forEach(chk=>{
+      chk.checked = selectedSet.has(String(chk.value));
+    });
+
+    baseSearch.value = "";
+    filterBase("");
+
+    overlayBase.classList.add("show");
+    setTimeout(()=> baseSearch.focus(), 50);
+  }
+
+  function closeBaseModal(){
+    overlayBase.classList.remove("show");
+    currentScope = null;
+    currentCode = null;
+    snapshotBase = null;
+  }
+
+  function filterBase(q){
+    q = (q || "").toLowerCase();
+    baseList.querySelectorAll(".base-item").forEach(item=>{
+      item.style.display = item.textContent.toLowerCase().includes(q) ? "" : "none";
+    });
+  }
+
+  baseSearch.addEventListener("input", e=> filterBase(e.target.value));
+  baseClose.addEventListener("click", closeBaseModal);
+
+  baseCancel.addEventListener("click", () => {
+    const k = `${currentScope}:${currentCode}`;
+    baseSeleccion[k] = snapshotBase ? snapshotBase.slice() : [];
+    updateBaseChip(currentScope, currentCode);
+    closeBaseModal();
+  });
+
+  baseSave.addEventListener("click", () => {
+    const k = `${currentScope}:${currentCode}`;
+    const sel = Array.from(baseList.querySelectorAll(".baseChk"))
+      .filter(chk => chk.checked)
+      .map(chk => String(chk.value));
+
+    baseSeleccion[k] = sel;
+    updateBaseChip(currentScope, currentCode);
+    closeBaseModal();
+  });
+
+  overlayBase.addEventListener("click", (e)=> { if(e.target === overlayBase) closeBaseModal(); });
+
+  function updateBaseChip(scope, code){
+    const k = `${scope}:${code}`;
+    const chip = document.querySelector(`.js-base-count[data-scope="${scope}"][data-code="${code}"]`);
+    if(chip) chip.textContent = String((baseSeleccion[k] || []).length);
+  }
+
+  // ========= MODAL TARIFA =========
+  const overlayTarifa = document.getElementById("overlayTarifa");
+  const tarifaClose = document.getElementById("tarifaClose");
+  const tarifaCancel = document.getElementById("tarifaCancel");
+  const tarifaSave = document.getElementById("tarifaSave");
+  const tarifaAdd = document.getElementById("tarifaAdd");
+  const tarifaClear = document.getElementById("tarifaClear");
+  const tarifaBody = document.getElementById("tarifaBody");
+
+  let snapshotTarifa = null;
+
+  function openTarifaModal(scope, code){
+    currentScope = scope;
+    currentCode = code;
+
+    document.getElementById("tarifaTitle").textContent =
+      `Tarifa (%) por rangos (${scope.toUpperCase()} - ${code})`;
+
+    const k = `${scope}:${code}`;
+    snapshotTarifa = JSON.parse(JSON.stringify(tarifaRangos[k] || []));
+
+    renderTarifaRows(snapshotTarifa);
+    overlayTarifa.classList.add("show");
+  }
+
+  function closeTarifaModal(){
+    overlayTarifa.classList.remove("show");
+    currentScope = null;
+    currentCode = null;
+    snapshotTarifa = null;
+    tarifaBody.innerHTML = "";
+  }
+
+  function renderTarifaRows(rows){
+    tarifaBody.innerHTML = "";
+    if(!rows || rows.length === 0){
+      addTarifaRow("", "", "");
+      return;
+    }
+    rows.forEach(r => addTarifaRow(r.min, r.max, r.pct));
+  }
+
+  function addTarifaRow(min, max, pct){
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><input class="inp inp-money" placeholder="1000000" value="${min ?? ""}"></td>
+      <td><input class="inp inp-money" placeholder="2000000" value="${max ?? ""}"></td>
+      <td><input class="inp inp-pct" placeholder="4" value="${pct ?? ""}"></td>
+      <td><button class="btn btn-danger btn-x" type="button">X</button></td>
+    `;
+    tr.querySelector("button").addEventListener("click", ()=> tr.remove());
+    tarifaBody.appendChild(tr);
+  }
+
+  function readTarifaRows(){
+    return Array.from(tarifaBody.querySelectorAll("tr"))
+      .map(tr=>{
+        const inputs = tr.querySelectorAll("input");
+        return {
+          min: (inputs[0].value || "").trim(),
+          max: (inputs[1].value || "").trim(),
+          pct: (inputs[2].value || "").trim(),
+        };
+      })
+      .filter(r => r.min || r.max || r.pct);
+  }
+
+  tarifaAdd.addEventListener("click", ()=> addTarifaRow("", "", ""));
+  tarifaClear.addEventListener("click", ()=>{
+    if(confirm("¿Borrar todos los rangos?")){
+      tarifaBody.innerHTML = "";
+      addTarifaRow("", "", "");
+    }
+  });
+
+  tarifaClose.addEventListener("click", closeTarifaModal);
+
+  tarifaCancel.addEventListener("click", () => {
+    const k = `${currentScope}:${currentCode}`;
+    tarifaRangos[k] = snapshotTarifa ? JSON.parse(JSON.stringify(snapshotTarifa)) : [];
+    updateTarifaChip(currentScope, currentCode);
+    closeTarifaModal();
+  });
+
+  tarifaSave.addEventListener("click", () => {
+    const k = `${currentScope}:${currentCode}`;
+    const rows = readTarifaRows();
+
+    for(const r of rows){
+      if(r.pct && (!r.min || !r.max)){
+        return alert("Si diligencias %, también debes diligenciar mínimo y máximo.");
+      }
+    }
+
+    tarifaRangos[k] = rows;
+    updateTarifaChip(currentScope, currentCode);
+    closeTarifaModal();
+  });
+
+  overlayTarifa.addEventListener("click", (e)=> { if(e.target === overlayTarifa) closeTarifaModal(); });
+
+  function updateTarifaChip(scope, code){
+    const k = `${scope}:${code}`;
+    const chip = document.querySelector(`.js-tarifa-count[data-scope="${scope}"][data-code="${code}"]`);
+    if(chip) chip.textContent = String((tarifaRangos[k] || []).length);
+  }
+
+  // ========= Bind iconos =========
+  document.querySelectorAll(".js-base-open").forEach(btn=>{
+    btn.addEventListener("click", (e)=>{
+      e.stopPropagation();
+      openBaseModal(btn.dataset.scope, btn.dataset.code);
+    });
+  });
+
+  document.querySelectorAll(".js-tarifa-open").forEach(btn=>{
+    btn.addEventListener("click", (e)=>{
+      e.stopPropagation();
+      openTarifaModal(btn.dataset.scope, btn.dataset.code);
+    });
+  });
+
+  // ========= Submit =========
+  const frm = document.getElementById("frmParam");
+  frm.addEventListener("submit", (e) => {
+    const tipoNomina = document.getElementById("tipo_nomina").value;
+    if (!tipoNomina) {
+      e.preventDefault();
+      alert("Debes seleccionar un tipo de nómina antes de guardar.");
+      return;
+    }
+
+    document.getElementById("base_json").value = JSON.stringify(baseSeleccion || {});
+    document.getElementById("tarifa_json").value = JSON.stringify(tarifaRangos || {});
+  });
+</script>
+
+</body>
+</html>

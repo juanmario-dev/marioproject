@@ -1,0 +1,154 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Plan de Cuentas</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background:#f7f7f7; }
+    h1 { margin-bottom: 12px; }
+    form.search { margin: 10px 0 16px; }
+    input[type="text"] { padding: 8px; width: 280px; }
+    button, .btn {
+      padding: 8px 12px; border: none; border-radius: 6px;
+      cursor: pointer; text-decoration: none;
+    }
+    .btn { background:#007bff; color:#fff; }
+    .btn:hover { background:#0056b3; }
+    .btn-danger { background:#dc3545; color:#fff; }
+    .btn-danger:hover { background:#a71d2a; }
+
+    table { border-collapse: collapse; width: 100%; background:#fff; }
+    th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+    th { background:#f2f2f2; }
+    tr:nth-child(even) { background:#fafafa; }
+    tr:hover { background:#f1f1f1; }
+
+    /* Menú contextual (click derecho) */
+    .ctx-menu {
+      position: absolute; background: #fff; border: 1px solid #ddd;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      border-radius: 6px; display: none; z-index: 1000; min-width: 160px;
+    }
+    .ctx-menu a { display:block; padding:10px 12px; text-decoration:none; color:#333; }
+    .ctx-menu a:hover { background:#f0f0f0; }
+  </style>
+</head>
+<body>
+  <h1>Plan de Cuentas</h1>
+
+  <form class="search" method="get">
+    <input type="text" name="q" value="{{ q }}" placeholder="Buscar por código o nombre">
+    <button type="submit">Buscar</button>
+    <a class="btn" href="{% url 'cuenta_crear' %}">Crear cuenta</a>
+    <a class="btn" href="{% url 'configuracion' %}">← Volver a Configuración</a>
+  </form>
+
+  <table id="tabla-cuentas">
+    <tr>
+      <th>Código contable</th>
+      <th>Cuenta contable</th>
+      <th>Movimiento</th>
+      <th>Centro de costo</th>
+      <th>Criterio 1</th>
+      <th>Criterio 2</th>
+      <th>Criterio 3</th>
+      <th>Acciones</th>
+    </tr>
+
+    {% for c in cuentas %}
+    <tr data-id="{{ c.id }}" data-codigo="{{ c.codigo }}">
+      <!-- Sangría por nivel usando padding-left (1em por cada nivel - 1) -->
+      <td style="font-family: monospace; padding-left: {{ c.nivel|add:'-1' }}em;">
+        {{ c.codigo }}
+      </td>
+      <td>{{ c.nombre }}</td>
+      <td>{{ c.movimiento|yesno:"Sí,No" }}</td>
+      <td>{{ c.centro_costo|yesno:"Sí,No" }}</td>
+      <td>{{ c.criterio1|default:"-" }}</td>
+      <td>{{ c.criterio2|default:"-" }}</td>
+      <td>{{ c.criterio3|default:"-" }}</td>
+      <td class="actions">
+        <a class="btn" href="{% url 'cuenta_editar' c.id %}">Modificar</a>
+        <a class="btn btn-danger" href="{% url 'cuenta_eliminar' c.id %}"
+           onclick="return confirm('¿Eliminar la cuenta {{ c.codigo }}?')">Eliminar</a>
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="8">No hay cuentas registradas.</td></tr>
+    {% endfor %}
+  </table>
+
+  <!-- Menú contextual -->
+  <div id="ctx" class="ctx-menu">
+    <a id="ctx-crear" href="#">Crear (hija)</a>
+    <a id="ctx-editar" href="#">Modificar</a>
+    <a id="ctx-eliminar" href="#">Eliminar</a>
+  </div>
+
+  <script>
+    (function() {
+      const tabla = document.getElementById('tabla-cuentas');
+      const menu = document.getElementById('ctx');
+
+      // Ocultar menú
+      function hideMenu() { menu.style.display = 'none'; }
+
+      // Mostrar menú contextual con enlaces correctos
+      tabla.addEventListener('contextmenu', function(e) {
+        const row = e.target.closest('tr[data-id]');
+        if (!row) return;
+
+        e.preventDefault();  // evita el menú del navegador
+
+        const id = row.getAttribute('data-id');
+        const codigo = row.getAttribute('data-codigo');
+
+        // Posicionar el menú
+        menu.style.display = 'block';
+        menu.style.left = e.pageX + 'px';
+        menu.style.top = e.pageY + 'px';
+
+        // Armar hrefs
+        document.getElementById('ctx-crear')
+          .setAttribute('href', `{% url 'cuenta_crear' %}?parent=${codigo}`);
+
+        // Reemplazar el "0" de la URL base por el id real
+        document.getElementById('ctx-editar')
+          .setAttribute('href', `{% url 'cuenta_editar' 0 %}`.replace('/0/', '/' + id + '/'));
+
+        const hrefDel = `{% url 'cuenta_eliminar' 0 %}`.replace('/0/', '/' + id + '/');
+        const delLink = document.getElementById('ctx-eliminar');
+        delLink.setAttribute('href', hrefDel);
+        delLink.onclick = function() {
+          return confirm('¿Eliminar la cuenta ' + codigo + '?');
+        };
+      });
+
+      // Cerrar el menú si clic en cualquier otra parte
+      document.addEventListener('click', hideMenu);
+      // Evitar que se cierre si clic dentro del menú
+      menu.addEventListener('click', function(e){ e.stopPropagation(); });
+    })();
+  </script>
+
+<!-- # botones para cargar csv -->
+ <div>
+  .
+
+ </div>
+ <div>
+  .
+ </div>
+ <div>
+  .
+ </div>
+ 
+<a class="btn" href="{% url 'cuentas_export_csv' %}">Exportar CSV</a>
+<a class="btn" href="{% url 'cuentas_plantilla_csv' %}">Descargar plantilla</a>
+<a class="btn" href="{% url 'cuentas_import_csv' %}">Importar CSV</a>
+
+
+
+</body>
+</html>

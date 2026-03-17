@@ -1,0 +1,664 @@
+
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Recibo de Caja</title>
+
+  <style>
+    body { font-family: Arial, sans-serif; margin:0; background:#f7f8fb; }
+    header { background:#021224; color:#fff; padding:18px 20px; font-size:20px; font-weight:bold; text-align:center; }
+    .wrap { padding: 20px; }
+
+    .card {
+      background:#fff; border:1px solid #e5e7eb; border-radius:12px;
+      padding:16px; margin-bottom:14px; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+
+    .grid-top {
+      display:grid;
+      grid-template-columns: 220px 220px 1fr;
+      gap: 12px;
+      align-items:end;
+    }
+
+    label { font-weight:bold; font-size: 13px; display:block; margin-bottom: 4px; }
+    input, select, textarea {
+      width:100%;
+      padding:8px;
+      border:1px solid #ccc;
+      border-radius:8px;
+      box-sizing:border-box;
+      font-size: 12px;
+    }
+    small { color:#555; }
+
+    .btn {
+      padding:10px 14px; border:none; border-radius:10px; cursor:pointer;
+      font-weight:bold; text-decoration:none; display:inline-flex; align-items:center; gap:8px;
+    }
+    .btn-primary { background:#007bff; color:#fff; }
+    .btn-secondary { background:#6c757d; color:#fff; }
+    .btn-success { background:#28a745; color:#fff; }
+    .btn-danger { background:#dc3545; color:#fff; }
+
+    .table-wrap{
+      border:1px solid #e5e7eb;
+      border-radius:12px;
+      overflow:auto;
+      background:#fff;
+      max-height: 60vh;
+    }
+
+    table { border-collapse:collapse; width: 1370px; }
+    th, td { border:1px solid #ddd; padding:10px; vertical-align:middle; }
+    th {
+      position: sticky; top:0;
+      background:#f2f2f2; z-index: 10;
+      font-size:12px; text-align:left;
+      white-space: normal;
+      line-height: 1.2;
+      height: 60px;
+      vertical-align: middle;
+    }
+
+    .w-date{ width:20px; }
+    .w-nit{ width:140px; }
+    .w-search{ width:20px; text-align:center; }
+    .w-fact{ width:100px; }
+    .w-valor{ width:140px; }
+    .w-pago{ width:140px; }
+    .w-medio{ width:190px; }
+    .w-cta{ width:190px; }
+
+    .icon-btn{
+      width: 38px;
+      height: 38px;
+      border-radius:10px;
+      border:1px solid #cbd5e1;
+      background:#fff;
+      cursor:pointer;
+      font-weight:bold;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      user-select:none;
+    }
+    .icon-btn:hover{ background:#f1f5f9; }
+
+    .actions-top{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:12px;
+      justify-content:flex-end;
+    }
+
+    .desc-row{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      margin-top: 14px;
+    }
+    .desc-row textarea{ min-height: 70px; resize: vertical; }
+
+    .actions-bottom{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:center;
+      margin-top:16px;
+    }
+
+    .money-input{
+      text-align:right;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    .pill { display:inline-block; padding:3px 8px; border-radius:999px; background:#eef; font-size:12px; margin-left:8px; }
+  </style>
+</head>
+
+<body>
+
+<header>RECIBO DE CAJA</header>
+
+<div class="wrap">
+
+  <!-- Encabezado: fecha elaboración + consecutivo -->
+  <div class="card">
+    <div class="grid-top">
+      <div>
+        <label>Fecha de elaboración</label>
+        <input id="fecha_elab" type="date" value="{{ hoy }}">
+        <small class="pill">Sugerencia: hoy</small>
+      </div>
+
+      <div>
+        <label>Consecutivo</label>
+        <input id="consecutivo" type="text" value="{{ consecutivo_sugerido }}">
+        <small>Escribe el consecutivo y presiona Enter para cargar</small>
+        <small>Consecutivo sugerido (editable luego si quieres)</small>
+      </div>
+
+      <div class="actions-top">
+        <button class="btn btn-secondary" id="btnAddRow" type="button">➕ Agregar fila</button>
+        <a class="btn btn-secondary" href="{% url 'tesoreria' %}">← Volver</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabla principal -->
+  <div class="card">
+    <div class="table-wrap">
+      <table id="tablaRC">
+        <thead>
+          <tr>
+            <th class="w-date">Fecha de pago</th>
+            <th class="w-nit">Cliente / tercero (NIT)</th>
+            <th class="w-search">Buscar factura</th>
+            <th class="w-fact">Factura No</th>
+            <th class="w-valor">Valor factura</th>
+            <th class="w-pago">$ pago</th>
+            <th class="w-medio">Medio de pago</th>
+            <th class="w-cta">Medio de pago - cuenta contable</th>
+          </tr>
+        </thead>
+        <tbody id="rcBody"></tbody>
+      </table>
+    </div>
+
+    <small style="display:block; margin-top:10px;">
+      Nota: podrás agregar tantas filas como necesites para cargar varias facturas.
+    </small>
+
+    <!-- Descripción -->
+    <div class="desc-row">
+      <div style="flex:0 0 110px;">
+        <label>Descripción</label>
+      </div>
+      <div style="flex:1;">
+        <textarea id="descripcion" placeholder="Aquí el usuario colocará el texto que considere..."></textarea>
+      </div>
+    </div>
+
+    <!-- Botones finales -->
+    <div class="actions-bottom">
+      <button class="btn btn-success" id="btnContabilizar" type="button">Contabilizar</button>
+      <button class="btn btn-secondary" id="btnPDF" type="button">PDF</button>
+
+      <button class="btn btn-secondary" id="btnCsvGen" type="button">Generar archivo CSV</button>
+      <button class="btn btn-secondary" id="btnCsvPlantilla" type="button">Generar Plantilla CSV</button>
+
+      <button class="btn btn-secondary" id="btnCsvCargar" type="button">Cargar archivo CSV</button>
+      <input id="fileCsv" type="file" accept=".csv" style="display:none;">
+
+      <button class="btn btn-primary" id="btnEnviarCliente" type="button">Enviar al cliente</button>
+    </div>
+  </div>
+
+</div>
+
+<form id="csrfForm">{% csrf_token %}</form>
+
+<!-- ✅ MODAL (debe estar ANTES del script para que el JS encuentre los IDs) -->
+<div id="pickerModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:9999;">
+  <div style="position:absolute; inset:4%; background:#fff; border-radius:14px; overflow:hidden;">
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:#021224; color:#fff;">
+      <b>Seleccionar factura (Cartera)</b>
+      <button id="btnClosePicker" type="button" style="background:#fff; border:none; border-radius:10px; padding:6px 10px; cursor:pointer;">Cerrar</button>
+    </div>
+    <iframe id="pickerFrame" style="width:100%; height:calc(100% - 46px); border:none;"></iframe>
+  </div>
+</div>
+
+{{ medios_pago|json_script:"mp-data" }}
+
+<script>
+  const MP_DATA = JSON.parse(document.getElementById("mp-data").textContent);
+
+  // Mapa tipo: { "12": "111005", "13": "110505", ... }
+  const MP_MAP = {};
+  MP_DATA.forEach(mp => {
+    MP_MAP[String(mp.id)] = mp.cuenta_contable || "";
+  });
+
+  function makeMedioPagoSelect(){
+    const sel = document.createElement('select');
+
+    const opt0 = document.createElement('option');
+    opt0.value = "";
+    opt0.textContent = "-- Seleccione --";
+    sel.appendChild(opt0);
+
+    MP_DATA.forEach(mp => {
+      const opt = document.createElement('option');
+      opt.value = mp.id;
+      opt.textContent = mp.descripcion;
+      sel.appendChild(opt);
+    });
+
+    return sel;
+  }
+
+  function makeReadonlyText(placeholder=''){
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.placeholder = placeholder;
+    inp.readOnly = true;
+    inp.style.background = "#f8fafc";
+    return inp;
+  }
+
+  const rcBody = document.getElementById('rcBody');
+
+  function td(el){
+    const d = document.createElement('td');
+    d.appendChild(el);
+    return d;
+  }
+
+  function makeDate(value=''){
+    const inp = document.createElement('input');
+    inp.type = 'date';
+    if (value) inp.value = value;
+    return inp;
+  }
+
+  function makeText(placeholder=''){
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.placeholder = placeholder;
+    return inp;
+  }
+
+  // ✅ $ pago con separadores de miles (es-CO), entero
+  function makeMoney(){
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.className = 'money-input';
+    inp.placeholder = '0';
+    inp.inputMode = 'numeric';
+    inp.dataset.raw = '';
+
+    const formatter = new Intl.NumberFormat('es-CO', { maximumFractionDigits: 0 });
+
+    function formatValue(rawDigits) {
+      if (!rawDigits) return '';
+      const n = Number(rawDigits);
+      if (Number.isNaN(n)) return '';
+      return formatter.format(n);
+    }
+
+    inp.addEventListener('input', () => {
+      const raw = inp.value.replace(/\D/g, '');
+      inp.dataset.raw = raw;
+      inp.value = formatValue(raw);
+    });
+
+    inp.addEventListener('focus', () => {
+      const v = inp.value;
+      setTimeout(() => inp.setSelectionRange(v.length, v.length), 0);
+    });
+
+    return inp;
+  }
+
+
+
+
+  function parseMoneyToRaw(v){
+    if (!v) return "";
+    let s = String(v).trim();
+    if (s.includes(".")) s = s.split(".")[0]; // ✅ quita decimales
+    if (s.includes(",")) s = s.replace(/,/g, "");
+    return s.replace(/\D/g, "");
+  }
+
+  function setReadonlyMoney(inp, rawDigits){
+    // inp es readonly text, así que solo seteamos .value formateado
+    const formatter = new Intl.NumberFormat('es-CO', { maximumFractionDigits: 0 });
+    inp.value = rawDigits ? formatter.format(Number(rawDigits)) : "";
+  }
+
+  // ----------------- MODAL + PICKER -----------------
+  let CURRENT_PICK_ROW = null;
+
+  function openPickerForRow(tr){
+    const nit = (tr._refs.inpNit.value || "").trim();
+
+    if (!nit){
+      alert("Primero digita el NIT del cliente.");
+      return;
+    }
+
+    // Abrimos cartera filtrada por nit, en modo selector
+    const url = "{% url 'reporte_cartera' %}" + "?view=tablas&picker=1&nit=" + encodeURIComponent(nit);
+
+    CURRENT_PICK_ROW = tr;
+
+    document.getElementById("pickerFrame").src = url;
+    document.getElementById("pickerModal").style.display = "block";
+  }
+
+  document.getElementById("btnClosePicker").addEventListener("click", () => {
+    document.getElementById("pickerModal").style.display = "none";
+    document.getElementById("pickerFrame").src = "";
+    CURRENT_PICK_ROW = null;
+  });
+
+  function makeSearchBtn(tr){
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'icon-btn';
+    b.title = 'Buscar factura (cartera)';
+    b.textContent = '🔎';
+    b.addEventListener('click', () => openPickerForRow(tr));
+    return b;
+  }
+
+  // Recibir selección desde reporte_cartera (iframe)
+  window.addEventListener("message", (event) => {
+    const data = event.data || {};
+    if (data.type !== "PICK_FACTURA") return;
+
+    if (!CURRENT_PICK_ROW){
+      alert("No hay fila seleccionada para cargar la factura.");
+      return;
+    }
+
+    // Llenamos campos bloqueados
+    CURRENT_PICK_ROW._refs.inpFacturaNo.value = data.factura || "";
+
+    // Valor factura = Total factura (total_pagar)
+    //const total = data.total_factura || "";
+
+    const total = data.total_factura ?? "";
+
+    // ✅ Tomar solo la parte entera si viene con decimales tipo "190400.00"
+    let enteroStr = String(total).trim();
+    if (enteroStr.includes(".")) enteroStr = enteroStr.split(".")[0];
+    if (enteroStr.includes(",")) enteroStr = enteroStr.replace(/,/g, ""); // por si acaso
+
+    const rawFactura = enteroStr.replace(/\D/g, "");
+    setReadonlyMoney(CURRENT_PICK_ROW._refs.inpValorFactura, rawFactura);
+
+
+
+
+
+
+
+   
+
+    // Cerramos modal
+    document.getElementById("pickerModal").style.display = "none";
+    document.getElementById("pickerFrame").src = "";
+    CURRENT_PICK_ROW = null;
+  });
+
+  // ---------------- VALIDAR NIT CONTRA TERCERO ----------------
+  async function validarNitEnBD(nit){
+    const url = "{% url 'validar_nit' %}" + "?nit=" + encodeURIComponent(nit);
+    const resp = await fetch(url);
+    return await resp.json();
+  }
+
+  function addRow(data=null){
+    const tr = document.createElement('tr');
+
+    const inpFechaPago = makeDate();
+    tr.appendChild(td(inpFechaPago));
+
+    const inpNit = makeText('NIT');
+    tr.appendChild(td(inpNit));
+
+    const tdSearch = document.createElement('td');
+    tdSearch.style.textAlign = 'center';
+    tdSearch.appendChild(makeSearchBtn(tr));
+    tr.appendChild(tdSearch);
+
+    const inpFacturaNo = makeReadonlyText('Factura No (selecciona con lupa)');
+    tr.appendChild(td(inpFacturaNo));
+
+    const inpValorFactura = makeReadonlyText('Valor factura (auto)');
+    tr.appendChild(td(inpValorFactura));
+
+    const inpPago = makeMoney();
+    tr.appendChild(td(inpPago));
+
+    const selMP = makeMedioPagoSelect();
+    tr.appendChild(td(selMP));
+
+    const inpCta = makeReadonlyText('Cuenta contable (auto)');
+    tr.appendChild(td(inpCta));
+
+    selMP.addEventListener('change', () => {
+      const id = selMP.value;
+      inpCta.value = MP_MAP[String(id)] || "";
+    });
+
+    // refs para guardar (esto lo necesita collectPayload)
+    tr._refs = { inpFechaPago, inpNit, inpFacturaNo, inpValorFactura, inpPago, selMP, inpCta };
+
+    // Validación NIT (después de tener _refs para poder limpiar)
+    function limpiarSeleccionFactura(){
+      tr._refs.inpFacturaNo.value = "";
+      tr._refs.inpValorFactura.value = "";
+    }
+
+    inpNit.addEventListener("blur", async () => {
+      const nit = (inpNit.value || "").trim();
+      if (!nit) return;
+
+      // Solo números
+      if (!/^\d+$/.test(nit)){
+        alert("El NIT debe contener solo números.");
+        inpNit.value = "";
+        limpiarSeleccionFactura();
+        return;
+      }
+
+      try{
+        const r = await validarNitEnBD(nit);
+        if (!r.ok){
+          alert("❌ Ese NIT no existe en Terceros. Debes crearlo primero.");
+          inpNit.value = "";
+          limpiarSeleccionFactura();
+        } else {
+          // si cambia el nit, obligamos a volver a escoger factura
+          // (por si el usuario reemplaza el nit manualmente)
+          limpiarSeleccionFactura();
+        }
+      }catch(e){
+        alert("❌ Error validando NIT: " + e);
+      }
+    });
+
+    // Si viene data (al cargar), llenamos
+    if (data){
+      inpFechaPago.value = data.fecha_pago || "";
+      inpNit.value = data.nit || "";
+      inpFacturaNo.value = data.factura_no || "";
+
+      // valor_factura puede venir con decimales -> formateamos
+      const rawVF = parseMoneyToRaw(data.valor_factura);
+      setReadonlyMoney(inpValorFactura, rawVF);
+
+      // pago
+      const rawPago = parseMoneyToRaw(data.pago);
+      inpPago.dataset.raw = rawPago || "";
+      // reusar formato de money
+      if (rawPago){
+        const formatter = new Intl.NumberFormat('es-CO', { maximumFractionDigits: 0 });
+        inpPago.value = formatter.format(Number(rawPago));
+      } else {
+        inpPago.value = "";
+      }
+
+      selMP.value = data.medio_pago_id ? String(data.medio_pago_id) : "";
+      inpCta.value = data.cuenta_contable || (MP_MAP[String(selMP.value)] || "");
+    }
+
+    rcBody.appendChild(tr);
+  }
+
+  // Botón agregar fila
+  document.getElementById('btnAddRow').addEventListener('click', () => addRow());
+
+  function collectPayload(){
+    const fecha_elab = document.getElementById("fecha_elab").value;
+    const consecutivo = document.getElementById("consecutivo").value;
+    const descripcion = document.getElementById("descripcion").value;
+
+    const lineas = Array.from(rcBody.querySelectorAll("tr")).map(tr => {
+      const r = tr._refs;
+
+      return {
+        fecha_pago: r.inpFechaPago.value || null,
+        nit: r.inpNit.value || "",
+        factura_no: r.inpFacturaNo.value || "",
+
+        // readonly text -> mandamos dígitos (aunque el backend lo recalcula)
+        valor_factura: (r.inpValorFactura.value || "").replace(/\D/g, "") || "0",
+
+        pago: r.inpPago.dataset.raw || "0",
+        medio_pago_id: r.selMP.value ? parseInt(r.selMP.value) : null,
+        cuenta_contable: r.inpCta.value || "",
+      };
+    });
+
+    return { fecha_elab, consecutivo, descripcion, lineas };
+  }
+
+
+  //__________________________________--
+
+  document.getElementById('btnContabilizar').addEventListener('click', async () => {
+  const payload = collectPayload();
+
+  try{
+    const resp = await fetch("{% url 'rc_contabilizar' %}", {   // ✅ CAMBIO AQUÍ
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCSRFToken(),
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await resp.json();
+
+    if (!data.ok){
+      alert("❌ Error: " + (data.error || "desconocido"));
+      return;
+    }
+
+    // ✅ ESTE ES EL MENSAJE QUE NO ENTENDISTE (solo muestra info)
+    alert(`✅ RC guardado y contabilizado: ${data.consecutivo}\nAsiento: ${data.asiento_numero}`);
+
+  }catch(err){
+    alert("❌ Error de red: " + err);
+  }
+});
+
+
+//____________________________________
+
+
+
+
+  document.getElementById('btnPDF').addEventListener('click', () => {
+    alert('PDF: pendiente (fase siguiente: generar PDF del recibo).');
+  });
+
+  document.getElementById('btnCsvGen').addEventListener('click', () => {
+    alert('Generar archivo CSV: pendiente (fase siguiente: exportar filas a CSV).');
+  });
+
+  document.getElementById('btnCsvPlantilla').addEventListener('click', () => {
+    const csv = [
+      'fecha_pago,nit,buscar_factura,factura_no,valor_factura,pago,medio_pago,cuenta_contable',
+      '2026-01-19,900123456,,FV-0001,1500000,1500000,PSE,111005'
+    ].join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'plantilla_recibo_caja.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  const fileCsv = document.getElementById('fileCsv');
+  document.getElementById('btnCsvCargar').addEventListener('click', () => fileCsv.click());
+
+  fileCsv.addEventListener('change', async () => {
+    const file = fileCsv.files[0];
+    if (!file) return;
+    await file.text();
+    alert('CSV cargado (lectura OK). En la siguiente fase parseamos y llenamos filas automáticamente.');
+    fileCsv.value = '';
+  });
+
+  document.getElementById('btnEnviarCliente').addEventListener('click', () => {
+    alert('Enviar al cliente: pendiente (fase siguiente: correo + PDF adjunto).');
+  });
+
+  // CSRF helper
+  function getCSRFToken(){
+    return document.querySelector('#csrfForm input[name="csrfmiddlewaretoken"]').value;
+  }
+
+  // Cargar recibo por consecutivo
+  async function cargarRecibo(consecutivo){
+    const url = "{% url 'rc_buscar' %}" + "?consecutivo=" + encodeURIComponent(consecutivo);
+
+    const resp = await fetch(url, { method: "GET" });
+    const data = await resp.json();
+
+    if (!data.ok){
+      alert("❌ " + (data.error || "No se pudo cargar"));
+      return;
+    }
+
+    const rc = data.recibo;
+
+    // Encabezado
+    document.getElementById("fecha_elab").value = rc.fecha_elab || "";
+    document.getElementById("consecutivo").value = rc.consecutivo || "";
+    document.getElementById("descripcion").value = rc.descripcion || "";
+
+    // Líneas
+    rcBody.innerHTML = "";
+    if (rc.lineas && rc.lineas.length){
+      rc.lineas.forEach(ln => addRow(ln));
+    } else {
+      addRow();
+    }
+
+    alert("✅ Recibo cargado: " + rc.consecutivo);
+  }
+
+  document.getElementById("consecutivo").addEventListener("keydown", async (e) => {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+
+    const consecutivo = (e.target.value || "").trim();
+    if (!consecutivo) return;
+
+    await cargarRecibo(consecutivo);
+  });
+
+  // Init
+  addRow();
+</script>
+
+</body>
+</html>
+
+
+

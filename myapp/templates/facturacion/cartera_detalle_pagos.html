@@ -1,0 +1,45 @@
+
+
+
+
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Detalle Pagos</title>
+</head>
+<body>
+  <h2>Detalle Pagos - Factura {{ factura.consecutivo }}</h2>
+  <p><b>Cliente:</b> {{ factura.razon_social }} | <b>NIT:</b> {{ factura.nit }}</p>
+
+  <p><a href="{% url 'reporte_cartera' %}?view=tablas">← Volver al reporte</a></p>
+
+  <table border="1" cellpadding="6">
+    <thead>
+      <tr>
+        <th>Recibo</th>
+        <th>Fecha recibo</th>
+        <th>Fecha pago</th>
+        <th>Descripción</th>
+        <th class="num">Valor</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in pagos %}
+      <tr>
+        <td>{{ p.recibo__consecutivo }}</td>
+        <td>{{ p.recibo__fecha_elab }}</td>
+        <td>{{ p.fecha_pago|default:"" }}</td>
+        <td>{{ p.recibo__descripcion|default:"" }}</td>
+        <td class="num">{{ p.total_pago|intcomma }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5">No hay pagos registrados para esta factura.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
+</html>
+
+

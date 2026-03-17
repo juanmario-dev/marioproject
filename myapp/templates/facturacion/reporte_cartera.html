@@ -1,0 +1,381 @@
+
+
+
+
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reporte de Cartera</title>
+
+  <style>
+    body{
+      font-family: Arial, sans-serif;
+      margin:0;
+      background:#f7f8fb;
+      color:#111827;
+    }
+    header{
+      background:#021224;
+      color:#fff;
+      padding:18px 20px;
+      font-size:20px;
+      font-weight:700;
+    }
+    .wrap{ padding:20px; }
+    .card{
+      background:#fff;
+      border:1px solid #e5e7eb;
+      border-radius:12px;
+      padding:16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      margin-bottom:14px;
+    }
+    .row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+    }
+    .tabs a{
+      display:inline-block;
+      padding:10px 14px;
+      border:1px solid #d1d5db;
+      border-radius:10px;
+      text-decoration:none;
+      color:#111827;
+      background:#fff;
+      font-weight:600;
+    }
+    .tabs a.active{
+      background:#021224;
+      color:#fff;
+      border-color:#021224;
+    }
+    .filters input{
+      padding:10px 12px;
+      border:1px solid #d1d5db;
+      border-radius:10px;
+      outline:none;
+      min-width: 220px;
+    }
+    .filters input[type="date"]{ min-width:160px; }
+
+    .btn{
+      padding:10px 14px;
+      border-radius:10px;
+      border:1px solid #199c2f;
+      background:#0ea522;
+      color:#fff;
+      cursor:pointer;
+      font-weight:700;
+      text-decoration:none;
+      display:inline-block;
+    }
+    .btn.secondary{
+      background:#fff;
+      color:#111827;
+      border-color:#d1d5db;
+      font-weight:600;
+    }
+
+    /* Tabla con scroll interno */
+    .table-shell{
+      border:1px solid #e5e7eb;
+      border-radius:12px;
+      overflow:hidden;
+      background:#fff;
+    }
+    .table-scroll{
+      overflow:auto;
+      max-height: 62vh;
+    }
+    table{
+      width:max-content;
+      min-width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+    }
+    thead th{
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background:#f3f4f6;
+      text-align:left;
+      padding:6px 10px;
+      font-size:12.5px;
+      border-bottom:1px solid #e5e7eb;
+      white-space:nowrap;
+    }
+    tbody td{
+      padding:5px 10px;
+      border-bottom:1px solid #f1f5f9;
+      font-size:13px;
+      vertical-align:middle;
+      white-space:nowrap;
+    }
+    tbody tr:hover{ background:#fafafa; }
+
+    .num{
+      text-align:right;
+      font-variant-numeric: tabular-nums;
+      white-space:nowrap;
+    }
+    .saldo-pos{ color:#1f2937; font-weight:800; }
+    .saldo-zero{ color:#065f46; font-weight:800; }
+    .muted{ color:#6b7280; }
+
+    .note{
+      padding:14px;
+      border:1px dashed #9ca3af;
+      border-radius:12px;
+      background:#fcfcfd;
+    }
+
+    @media (max-width: 900px){
+      .filters input{ min-width: 100%; }
+      .filters input[type="date"]{ min-width: 100%; }
+      .row{ align-items:stretch; }
+      .tabs{ width:100%; }
+      .table-scroll{ max-height: 70vh; }
+    }
+  </style>
+</head>
+
+<body>
+<header>Reporte de Cartera</header>
+
+<div class="wrap">
+
+  <!-- Tabs -->
+  <div class="card">
+    <div class="row tabs">
+      <a class="{% if view_mode == 'tablas' %}active{% endif %}"
+         href="?view=tablas&nit={{ f_nit }}&cliente={{ f_cliente }}&desde={{ f_desde }}&hasta={{ f_hasta }}">
+        Tablas
+      </a>
+
+      <a class="{% if view_mode == 'graficas' %}active{% endif %}"
+         href="?view=graficas&nit={{ f_nit }}&cliente={{ f_cliente }}&desde={{ f_desde }}&hasta={{ f_hasta }}">
+        Gráficas
+      </a>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="card">
+    <form method="get" class="row filters">
+      <input type="hidden" name="view" value="{{ view_mode }}">
+      <input type="text" name="cliente" placeholder="Cliente (Razón social)" value="{{ f_cliente }}">
+      <input type="text" name="nit" placeholder="NIT" value="{{ f_nit }}">
+      <input type="date" name="desde" value="{{ f_desde }}">
+      <input type="date" name="hasta" value="{{ f_hasta }}">
+      <button class="btn" type="submit">Filtrar</button>
+      <a class="btn secondary" href="?view={{ view_mode }}">Limpiar</a>
+    </form>
+
+    <div class="muted" style="margin-top:10px; font-size:13px;">
+      Tip: puedes filtrar por una parte del NIT o del nombre del cliente.
+    </div>
+  </div>
+
+  {% if view_mode == "graficas" %}
+
+    <!-- Totales -->
+    <div class="card">
+      <div class="row" style="justify-content:space-between; gap:12px;">
+        <div><b>Total Factura:</b> {{ total_factura|intcomma }}</div>
+        <div><b>Total NC:</b> {{ total_nc_sum|intcomma }}</div>
+        <div><b>Total Pagos:</b> {{ total_pagos_sum|intcomma }}</div>
+        <div><b>Total Saldo:</b> {{ total_saldo_sum|intcomma }}</div>
+      </div>
+    </div>
+
+    <!-- Datos seguros para JS -->
+    {{ pie_labels|json_script:"pie-labels" }}
+    {{ pie_values|json_script:"pie-values" }}
+    {{ bar_labels|json_script:"bar-labels" }}
+    {{ bar_values|json_script:"bar-values" }}
+
+    <div class="row" style="gap:14px; align-items:stretch;">
+      <div class="card" style="flex:2; min-width:320px;">
+        <b>Barras: Top 10 clientes con mayor saldo</b>
+        <div class="muted" style="margin-top:6px; font-size:13px;">
+          Muestra las facturas con saldo pendiente más alto (según filtros).
+        </div>
+        <div style="margin-top:12px;">
+          <canvas id="barChart" height="120"></canvas>
+        </div>
+      </div>
+
+      <div class="card" style="flex:1; min-width:280px;">
+        <b>Torta: Pagos vs Saldo</b>
+        <div class="muted" style="margin-top:6px; font-size:13px;">
+          Distribución total según filtros.
+        </div>
+        <div style="margin-top:12px;">
+          <canvas id="pieChart" height="220"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+      const pieLabels = JSON.parse(document.getElementById("pie-labels").textContent);
+      const pieValues = JSON.parse(document.getElementById("pie-values").textContent);
+
+      const barLabels = JSON.parse(document.getElementById("bar-labels").textContent);
+      const barValues = JSON.parse(document.getElementById("bar-values").textContent);
+
+      new Chart(document.getElementById("barChart"), {
+        type: "bar",
+        data: {
+          labels: barLabels,
+          datasets: [{ label: "Saldo", data: barValues }]
+        },
+        options: {
+          responsive: true,
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+
+      new Chart(document.getElementById("pieChart"), {
+        type: "pie",
+        data: {
+          labels: pieLabels,
+          datasets: [{ data: pieValues }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { position: "bottom" } }
+        }
+      });
+    </script>
+
+  {% else %}
+
+    <!-- TABLA -->
+    <div class="card">
+      <div class="table-shell">
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Factura</th>
+                <th>Fecha</th>
+                <th>Vencimiento</th>
+                <th>NIT</th>
+                <th>Cliente</th>
+                <th class="num">Subtotal</th>
+                <th class="num">IVA</th>
+                <th class="num">Retenciones</th>
+                <th class="num">Total Factura</th>
+                <th class="num">Total NC</th>
+                <th>Detalle NC</th>
+                <th class="num">Total Pagos</th>
+                <th>Detalle Pagos</th>
+                <th class="num">Total Factura - NC</th>
+                <th class="num">Saldo</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {% for f in facturas %}
+                <tr>
+                  <td>
+                     {% if picker_mode %}
+                       <a href="#"
+                         class="pick-factura"
+                         data-factura="{{ f.consecutivo }}"
+                         data-total="{{ f.total_pagar }}">
+                        <b>{{ f.consecutivo }}</b>
+                       </a>
+                     {% else %}
+                      <b>{{ f.consecutivo }}</b>
+                     {% endif %}
+                  </td>
+
+                  <td>{{ f.fecha_factura }}</td>
+                  <td>{{ f.fecha_vencimiento|default:"" }}</td>
+                  <td>{{ f.nit }}</td>
+                  <td>{{ f.razon_social }}</td>
+
+                  <td class="num">{{ f.subtotal|intcomma }}</td>
+                  <td class="num">{{ f.iva|intcomma }}</td>
+                  <td class="num">{{ f.retenciones|intcomma }}</td>
+
+                  <td class="num">{{ f.total_pagar|intcomma }}</td>
+                  <td class="num">{{ f.total_nc|intcomma }}</td>
+
+                  <td>
+                    <a class="btn secondary" style="padding:5px 10px;"
+                       href="{% url 'cartera_detalle_nc' f.id %}">
+                      Ver NC
+                    </a>
+                  </td>
+
+                  <td class="num">{{ f.total_pagos|intcomma }}</td>
+                  <td>
+                    <a class="btn secondary" style="padding:5px 10px;"
+                       href="{% url 'cartera_detalle_pagos' f.consecutivo %}">
+                      Ver pagos
+                    </a>
+                  </td>
+
+                  <td class="num">{{ f.total_factura_menos_nc|intcomma }}</td>
+
+                  <td class="num">
+                    {% if f.saldo > 0 %}
+                      <span class="saldo-pos">{{ f.saldo|intcomma }}</span>
+                    {% else %}
+                      <span class="saldo-zero">{{ f.saldo|intcomma }}</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="15" class="muted">No hay resultados con los filtros actuales.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  {% endif %}
+
+</div>
+</body>
+
+{% if picker_mode %}
+<script>
+  document.querySelectorAll(".pick-factura").forEach(a => {
+    a.addEventListener("click", (e) => {
+      e.preventDefault();
+
+      const factura = a.dataset.factura;
+      const total = a.dataset.total; // viene como número/decimal según backend
+
+      // Si el reporte está dentro de iframe: parent
+      // Si está en popup: opener
+      const target = window.parent !== window ? window.parent : window.opener;
+
+      if (!target) {
+        alert("No se pudo enviar la selección (no hay ventana receptora).");
+        return;
+      }
+
+      target.postMessage({
+        type: "PICK_FACTURA",
+        factura: factura,
+        total_factura: total
+      }, "*");
+    });
+  });
+</script>
+{% endif %}
+
+</html>

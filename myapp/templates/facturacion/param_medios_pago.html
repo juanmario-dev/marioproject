@@ -1,0 +1,339 @@
+
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Parámetros - Medios de pago</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin:0; background:#f7f8fb; }
+    header { background:#021224; color:#fff; padding:18px 20px; font-size:20px; font-weight:bold; text-align:center; }
+    .wrap { padding: 20px; }
+
+    .card{
+      background:#fff; border:1px solid #e5e7eb; border-radius:12px;
+      padding:16px; box-shadow:0 1px 3px rgba(0,0,0,0.06);
+    }
+
+    .actions-top{
+      display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; margin-bottom:12px;
+    }
+
+    .btn{
+      padding:10px 14px; border:none; border-radius:10px; cursor:pointer;
+      font-weight:bold; text-decoration:none; display:inline-flex; align-items:center; gap:8px;
+    }
+    .btn-primary{ background:#007bff; color:#fff; }
+    .btn-secondary{ background:#6c757d; color:#fff; }
+    .btn-danger{ background:#dc3545; color:#fff; }
+    .btn-warning{ background:#ffc107; color:#000; }
+
+    .table-wrap{
+      border:1px solid #e5e7eb;
+      border-radius:12px;
+      overflow:auto;
+      background:#fff;
+      max-height: 65vh;
+    }
+
+    table{ border-collapse:collapse; width: 1100px; table-layout: fixed; }
+    th, td{ border:1px solid #ddd; padding:10px; vertical-align:middle; }
+    th{
+      background:#f2f2f2;
+      font-size:12px; text-align:left;
+      position: sticky; top:0; z-index:10;
+      white-space: normal; line-height:1.2;
+      height: 56px;
+    }
+
+    input{
+      width:100%;
+      padding:8px;
+      border:1px solid #ccc;
+      border-radius:8px;
+      box-sizing:border-box;
+      font-size:12px;
+    }
+
+    .w-id{ width:20px; }
+    .w-desc{ width:290px; }
+    .w-ent{ width:220px; }
+    .w-cuenta{ width:220px; }
+    .w-cta{ width:180px; }
+    .w-act{ width:180px; }
+
+    .act-box{ display:flex; gap:8px; justify-content:center; }
+  </style>
+</head>
+<body>
+
+<header>PARÁMETROS - MEDIOS DE PAGO</header>
+
+<div class="wrap">
+  <div class="card">
+
+    <div class="actions-top">
+      <button class="btn btn-secondary" id="btnAddRow" type="button">➕ Agregar fila</button>
+    </div>
+
+    <div class="table-wrap">
+      <table id="mpTable">
+        <thead>
+          <tr>
+            <th class="w-id">Id</th>
+            <th class="w-desc">Descripción del medio de pago</th>
+            <th class="w-ent">Entidad bancaria</th>
+            <th class="w-cuenta">No de cuenta</th>
+            <th class="w-cta">Cuenta contable</th>
+            <th class="w-act">Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="mpBody"></tbody>
+      </table>
+    </div>
+
+    <div class="actions-top" style="margin-top:14px; justify-content:flex-end;">
+      <button class="btn btn-primary" id="btnGuardar" type="button">Guardar</button>
+      <a class="btn btn-secondary" href="{% url 'fact_parametros' %}">← Regresar</a>
+    </div>
+
+    <form id="csrfForm">{% csrf_token %}</form>
+  </div>
+</div>
+
+{{ cuentas_mov|json_script:"cuentas-mov-data" }}
+{{ medios_pago|json_script:"mp-data" }}
+
+<script>
+  const body = document.getElementById('mpBody');
+
+  const CUENTAS_MOV = JSON.parse(document.getElementById("cuentas-mov-data").textContent);
+  const MP_DATA = JSON.parse(document.getElementById("mp-data").textContent);
+
+  function getCSRFToken(){
+    return document.querySelector('#csrfForm input[name="csrfmiddlewaretoken"]').value;
+  }
+
+  function makeCuentaSelect(){
+    const sel = document.createElement("select");
+    sel.style.width = "100%";
+    sel.style.padding = "8px";
+    sel.style.border = "1px solid #ccc";
+    sel.style.borderRadius = "8px";
+    sel.style.boxSizing = "border-box";
+    sel.style.fontSize = "12px";
+
+    const opt0 = document.createElement("option");
+    opt0.value = "";
+    opt0.textContent = "— Seleccione cuenta —";
+    sel.appendChild(opt0);
+
+    CUENTAS_MOV.forEach(c => {
+      const opt = document.createElement("option");
+      opt.value = c.codigo;
+      opt.textContent = `${c.codigo} - ${c.nombre}`;
+      sel.appendChild(opt);
+    });
+
+    return sel;
+  }
+
+  function makeInput(placeholder=''){
+    const i = document.createElement('input');
+    i.type = 'text';
+    i.placeholder = placeholder;
+    return i;
+  }
+
+  function renumber(){
+    Array.from(body.querySelectorAll('tr')).forEach((tr, idx) => {
+      const idCell = tr.querySelector('td');
+      if (idCell) idCell.textContent = idx + 1; // id visual
+    });
+  }
+
+  function collectRow(tr){
+    const tds = tr.querySelectorAll('td');
+
+    const descripcion = tds[1]?.querySelector('input')?.value || "";
+    const entidad_bancaria = tds[2]?.querySelector('input')?.value || "";
+    const numero_cuenta = tds[3]?.querySelector('input')?.value || "";
+    const cuenta_contable = tds[4]?.querySelector('select')?.value || "";
+
+    const id_real = tr.dataset.dbid ? parseInt(tr.dataset.dbid) : null;
+
+    return { id: id_real, descripcion, entidad_bancaria, numero_cuenta, cuenta_contable };
+  }
+
+  function collectAllRows(){
+    return Array.from(body.querySelectorAll('tr')).map(tr => collectRow(tr));
+  }
+
+  async function saveFilas(filas){
+    try{
+      const resp = await fetch("{% url 'mp_guardar' %}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCSRFToken()
+        },
+        body: JSON.stringify({ filas })
+      });
+
+      const data = await resp.json();
+      if (!data.ok){
+        alert("❌ Error guardando: " + (data.error || "desconocido"));
+        return false;
+      }
+      return true;
+    }catch(err){
+      alert("❌ Error de red: " + err);
+      return false;
+    }
+  }
+
+  async function eliminarEnBD(id){
+    const resp = await fetch("{% url 'mp_eliminar' %}", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCSRFToken()
+      },
+      body: JSON.stringify({ id })
+    });
+
+    const data = await resp.json();
+    if (!data.ok){
+      throw new Error(data.error || "desconocido");
+    }
+    return true;
+  }
+
+  function buildRow({ dbid=null, descripcion="", entidad_bancaria="", numero_cuenta="", cuenta_contable="" }){
+    const tr = document.createElement('tr');
+    if (dbid) tr.dataset.dbid = dbid;
+
+    // Id visual
+    const tdId = document.createElement('td');
+    tdId.textContent = body.children.length + 1;
+    tr.appendChild(tdId);
+
+    // Descripción
+    let td = document.createElement('td');
+    const iDesc = makeInput('Ej: PSE, Nequi, Daviplata...');
+    iDesc.value = descripcion;
+    td.appendChild(iDesc);
+    tr.appendChild(td);
+
+    // Entidad bancaria
+    td = document.createElement('td');
+    const iEnt = makeInput('Ej: Bancolombia, Davivienda...');
+    iEnt.value = entidad_bancaria;
+    td.appendChild(iEnt);
+    tr.appendChild(td);
+
+    // No de cuenta
+    td = document.createElement('td');
+    const iNum = makeInput('Ej: 0123456789');
+    iNum.value = numero_cuenta;
+    td.appendChild(iNum);
+    tr.appendChild(td);
+
+    // Cuenta contable select
+    td = document.createElement('td');
+    const sel = makeCuentaSelect();
+    sel.value = cuenta_contable;
+    td.appendChild(sel);
+    tr.appendChild(td);
+
+    // Acciones
+    const tdAct = document.createElement('td');
+    const box = document.createElement('div');
+    box.className = 'act-box';
+
+    // Modificar = guardar SOLO esta fila
+    const btnEdit = document.createElement('button');
+    btnEdit.type = 'button';
+    btnEdit.className = 'btn btn-warning';
+    btnEdit.textContent = 'Modificar';
+    btnEdit.addEventListener('click', async () => {
+      const fila = collectRow(tr);
+      const ok = await saveFilas([fila]);
+      if (ok){
+        alert("✅ Modificado OK");
+        // para filas nuevas, lo mejor es recargar para que asignen dbid real
+        location.reload();
+      }
+    });
+
+    // Eliminar
+    const btnDel = document.createElement('button');
+    btnDel.type = 'button';
+    btnDel.className = 'btn btn-danger';
+    btnDel.textContent = 'Eliminar';
+    btnDel.addEventListener('click', async () => {
+      const ok = confirm('¿Deseas eliminar esta línea?');
+      if (!ok) return;
+
+      const dbid = tr.dataset.dbid ? parseInt(tr.dataset.dbid) : null;
+
+      try{
+        // si ya existe en BD, eliminar lógico
+        if (dbid){
+          await eliminarEnBD(dbid);
+        }
+        // siempre quitar de la UI
+        tr.remove();
+        renumber();
+      }catch(err){
+        alert("❌ Error eliminando: " + err.message);
+      }
+    });
+
+    box.appendChild(btnEdit);
+    box.appendChild(btnDel);
+    tdAct.appendChild(box);
+    tr.appendChild(tdAct);
+
+    return tr;
+  }
+
+  function addRow(){
+    const tr = buildRow({});
+    body.appendChild(tr);
+  }
+
+  // Eventos principales
+  document.getElementById('btnAddRow').addEventListener('click', addRow);
+
+  document.getElementById('btnGuardar').addEventListener('click', async () => {
+    const filas = collectAllRows();
+    const ok = await saveFilas(filas);
+    if (ok){
+      alert("✅ Guardado OK");
+      location.reload(); // recarga y muestra lo guardado
+    }
+  });
+
+  // Inicial: cargar lo guardado o una fila en blanco
+  body.innerHTML = "";
+  if (MP_DATA && MP_DATA.length){
+    MP_DATA.forEach(row => {
+      body.appendChild(buildRow({
+        dbid: row.id,
+        descripcion: row.descripcion || "",
+        entidad_bancaria: row.entidad_bancaria || "",
+        numero_cuenta: row.numero_cuenta || "",
+        cuenta_contable: row.cuenta_contable || ""
+      }));
+    });
+    renumber();
+  } else {
+    addRow();
+  }
+</script>
+
+</body>
+</html>
+

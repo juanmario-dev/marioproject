@@ -1,0 +1,90 @@
+
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Subpanel Nómina</title>
+
+    <style>
+        body{
+            margin:0;
+            font-family: Arial, sans-serif;
+            background:#f4f6f9;
+        }
+
+        header{
+            background:#021224;
+            color:white;
+            padding:18px;
+            text-align:center;
+            font-size:20px;
+            font-weight:bold;
+        }
+
+        .contenedor{
+            padding:40px;
+            text-align:center;
+        }
+
+        .boton{
+            display:block;
+            width:280px;
+            margin:15px auto;
+            padding:14px;
+            background:#0d6efd;
+            color:white;
+            text-decoration:none;
+            border-radius:8px;
+            font-size:16px;
+            font-weight:bold;
+            transition:0.3s;
+        }
+
+        .boton:hover{
+            background:#0b5ed7;
+        }
+
+        .retroceder{
+            margin-top:30px;
+            display:inline-block;
+            padding:10px 20px;
+            background:#6c757d;
+            color:white;
+            text-decoration:none;
+            border-radius:6px;
+            font-size:14px;
+        }
+
+        .retroceder:hover{
+            background:#5c636a;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    Módulo de Nómina
+</header>
+
+<div class="contenedor">
+
+    <a href="{% url 'nomina_cargue' %}" class="boton">Cargue de Nómina</a>
+
+    <a href="{% url 'historial_nominas' %}" class="boton">Historial de Nóminas</a>
+
+    <a href="{% url 'nomina_cargue_contable' %}" class="boton">Nomina cargue contable</a>
+
+    <a href="{% url 'reportes_acumulados' %}" class="boton">Informe de Acumulados</a>
+
+    <br>
+
+    <a class="retroceder" href="{% url 'nomina_panel' %}">
+        Regresar
+    </a>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,96 @@
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ titulo }}</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background:#f7f7f7; }
+    h1 { margin-bottom: 12px; }
+    .actions { margin: 10px 0 16px; }
+    .btn { display:inline-block; padding:8px 12px; background:#007bff; color:#fff; text-decoration:none; border-radius:6px; }
+    .btn:hover { background:#0056b3; }
+    .btn-secondary { background:#6c757d; }
+    .btn-secondary:hover { background:#5a6268; }
+    form { background:#fff; padding:16px; border-radius:8px; }
+    table { width:100%; border-collapse: collapse; background:#fff; }
+    th, td { border:1px solid #ddd; padding:10px; text-align:left; }
+    th { background:#f2f2f2; }
+    input[type="text"] { width:100%; padding:6px; }
+    .mg-top { margin-top: 12px; }
+    .msg { margin: 10px 0; color: #333; }
+    .error { color:#c00; font-size:12px; margin-top:4px; }
+  </style>
+</head>
+<body>
+  <h1>{{ titulo }}</h1>
+
+  {% if messages %}
+    <div class="msg">
+      {% for m in messages %}
+        <div>{{ m }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <div class="actions">
+    <a class="btn btn-secondary" href="{% url 'configuracion' %}">← Volver a Configuración</a>
+    <a class="btn" href="?extra={{ extra|add:5 }}">Añadir 5 filas vacías</a>
+    <a class="btn" href="?extra={{ extra|add:10 }}">Añadir 10 filas vacías</a>
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+    {{ formset.management_form }}
+
+    <table>
+      <tr>
+        <th>Código del documento</th>
+        <th>Nombre del documento</th>
+        <th>Eliminar</th>
+      </tr>
+
+      {% for form in formset %}
+        <tr>
+          <td>
+            <!-- MUY IMPORTANTE: incluir el PK oculto -->
+            {{ form.id }}
+            {{ form.codigo }}
+            {% for err in form.codigo.errors %}
+              <div class="error">{{ err }}</div>
+            {% endfor %}
+          </td>
+          <td>
+            {{ form.nombre }}
+            {% for err in form.nombre.errors %}
+              <div class="error">{{ err }}</div>
+            {% endfor %}
+          </td>
+          <td style="text-align:center;">
+            {% if form.instance.pk %}
+              {{ form.DELETE }}
+            {% endif %}
+          </td>
+        </tr>
+
+        {% if form.non_field_errors %}
+          <tr><td colspan="3" class="error">
+            {% for err in form.non_field_errors %}{{ err }}<br>{% endfor %}
+          </td></tr>
+        {% endif %}
+      {% endfor %}
+    </table>
+
+    {% if formset.non_form_errors %}
+      <div class="error mg-top">
+        {% for err in formset.non_form_errors %}{{ err }}<br>{% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="mg-top">
+      <button type="submit" class="btn">Guardar</button>
+    </div>
+  </form>
+</body>
+</html>

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Módulo de Facturación</title>
+
+<style>
+
+body{
+    font-family: Arial, Helvetica, sans-serif;
+    margin:0;
+    padding:0;
+    background:linear-gradient(180deg,#eef4fb 0%,#f7f9fc 100%);
+    text-align:center;
+}
+
+/* HEADER */
+
+header{
+    background:#021224;
+    color:white;
+    padding:16px 0;
+    font-size:22px;
+    font-weight:bold;
+    box-shadow:0 5px 15px rgba(0,0,0,0.2);
+}
+
+/* CONTENEDOR */
+
+.container{
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    min-height:82vh;
+}
+
+/* MENU */
+
+.menu{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:24px;
+    max-width:900px;
+}
+
+/* BOTONES CIRCULARES */
+
+.menu a{
+    width:150px;
+    height:150px;
+
+    border-radius:50%;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    text-align:center;
+
+    background:#2563eb;
+
+    color:white;
+
+    font-size:15px;
+    font-weight:bold;
+
+    text-decoration:none;
+
+    padding:14px;
+
+    transition:all .25s ease;
+
+    box-shadow:0 10px 20px rgba(37,99,235,0.35);
+}
+
+.menu a:hover{
+    transform:scale(1.07);
+    background:#1d4ed8;
+}
+
+/* TEXTO */
+
+.menu a span{
+    max-width:90%;
+}
+
+/* BOTÓN VOLVER */
+
+.back{
+    margin-top:28px;
+}
+
+.back a{
+    text-decoration:none;
+    font-weight:bold;
+    color:#2563eb;
+    font-size:13px;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+Módulo de Facturación
+</header>
+
+<div class="container">
+
+<div class="menu">
+
+<a href="{% url 'fv_crear' %}">
+<span>Facturar</span>
+</a>
+
+<a href="{% url 'nc_crear' %}">
+<span>Nota Crédito</span>
+</a>
+
+<a href="{% url 'inventarios' %}">
+<span>Inventarios</span>
+</a>
+
+<a href="{% url 'reporte_cartera' %}">
+<span>Reportes</span>
+</a>
+
+<a href="{% url 'tesoreria' %}">
+<span>Tesorería</span>
+</a>
+
+<a href="{% url 'fact_parametros' %}">
+<span>Parámetros</span>
+</a>
+
+</div>
+
+<div class="back">
+<a href="{% url 'home' %}">← Volver al inicio</a>
+</div>
+
+</div>
+
+</body>
+</html>
+
+

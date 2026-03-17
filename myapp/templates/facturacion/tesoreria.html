@@ -1,0 +1,178 @@
+
+
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Tesorería</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f7f8fb;
+        }
+
+        header {
+            background: #021224;
+            color: #fff;
+            padding: 18px 20px;
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .wrap {
+            padding: 20px;
+        }
+
+        .card {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 14px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+        }
+
+        .circle-container {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+            margin-bottom: 30px;
+        }
+
+        .circle-btn {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: none;
+            background: #007bff;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .circle-btn:hover {
+            background: #0056b3;
+        }
+
+        .info-text {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #333;
+            margin-top: 20px;
+        }
+
+        .center-btn {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .btn-principal {
+            padding: 14px 22px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            background: #28a745;
+            color: white;
+            cursor: pointer;
+        }
+
+        .btn-principal:hover {
+            background: #1e7e34;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<header>
+    MÓDULO DE TESORERÍA
+</header>
+
+<div class="wrap">
+
+    <div class="card">
+
+        <div class="circle-container">
+            <button class="circle-btn">Pagos por PSE</button>
+            <button class="circle-btn">Pagos por ventanilla bancaria</button>
+            <button class="circle-btn">Pagos recibidos por datáfono</button>
+            <button class="circle-btn">Pagos en Cash</button>
+        </div>
+
+        <div class="info-text">
+            <p>
+                <strong>Nota:</strong> la empresa puede tener diferentes convenios de recaudo con las diferentes entidades recaudadoras, tales por ejemplo: Bancolombia, Davivienda, Efecty, Pagatodo etc.
+            </p>
+
+        
+
+            <p>
+                Cada entidad recaudadora es responsable de enviar sus reportes de recaudo.  
+                El tesorero o la persona encargada de la tesorería deberá consolidar estos reportes.
+            </p>
+
+            <p>
+                A través del código de referencia, cada reporte deberá contener el Nit del cliente, el valor pagado, y el número de factura.  
+                En el caso de los pagos por medio de PSE, ACH COLOMBIA es la responsable de generar estos reportes.
+            </p>
+
+            <p>
+                Una vez el tesorero de la empresa haya consolidado los reportes especificando el nit del cliente, el valor pagado y el número de factura, podrá realizar el cargue de pagos en el módulo de tesorería tanto de forma manual o masiva.
+            </p>
+
+            <p>
+                
+            </p>
+       
+            </div>
+            <p>
+
+
+             <li>
+
+             </li>
+             <li>
+
+             </li>
+
+            </p>
+
+            <a href="{% url 'recibo_caja' %}" class="btn-principal" style="text-decoration:none;">
+            Realizar recibo de caja
+            </a>    
+            
+            <a href="{% url 'facturacioncxc' %}" class="btn-principal" style="text-decoration:none;">
+            Regresar
+            </a> 
+
+            </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>
+
+
+
+
+
+
+

@@ -1,0 +1,129 @@
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Reportes contables</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background:#f7f7f7; }
+    h1 { margin-bottom: 12px; }
+    .filters { background:#fff; padding:14px; border-radius:8px; margin-bottom:16px; display:grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap:10px; }
+    label { font-weight:bold; display:block; margin-bottom:4px; }
+    input, select { width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; }
+    .actions { display:flex; gap:10px; flex-wrap:wrap; margin-top: 6px; }
+    .btn { padding:8px 12px; background:#007bff; color:#fff; text-decoration:none; border-radius:6px; display:inline-block; }
+    .btn:hover { background:#0056b3; }
+    table { width:100%; border-collapse: collapse; background:#fff; }
+    th, td { border:1px solid #ddd; padding:8px; text-align:left; }
+    th { background:#f2f2f2; }
+    tfoot td { font-weight:bold; background:#fafafa; }
+    .note { color:#666; font-size:12px; }
+  </style>
+</head>
+<body>
+  <h1>Reportes contables</h1>
+
+  <form method="get" class="filters">
+    <div>
+      <label>Fecha desde</label>
+      <input type="date" name="fecha_desde" value="{{ filtros.fecha_desde }}">
+    </div>
+    <div>
+      <label>Fecha hasta</label>
+      <input type="date" name="fecha_hasta" value="{{ filtros.fecha_hasta }}">
+    </div>
+    <div>
+      <label>Tipo de documento</label>
+      <select name="doc_id">
+        <option value="">-- Todos --</option>
+        {% for d in documentos %}
+          <option value="{{ d.id }}" {% if filtros.doc_id == d.id|stringformat:"s" %}selected{% endif %}>{{ d.codigo }} — {{ d.nombre }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>Cuenta (prefijo)</label>
+      <input type="text" name="cuenta" value="{{ filtros.cuenta }}" placeholder="Ej: 11 o 1101 o 110101">
+    </div>
+    <div>
+      <label>Tercero (identificación)</label>
+      <input type="text" name="tercero" value="{{ filtros.tercero }}">
+    </div>
+    <div style="grid-column:1/-1;">
+      <label>Texto en descripción (asiento o línea)</label>
+      <input type="text" name="q" value="{{ filtros.q }}" placeholder="Ej: arriendo, factura, etc.">
+    </div>
+
+    <div class="actions" style="grid-column:1/-1;">
+      <button class="btn" type="submit">Aplicar filtros</button>
+      <a class="btn" href="{% url 'reportes_export_csv' %}?fecha_desde={{ filtros.fecha_desde }}&fecha_hasta={{ filtros.fecha_hasta }}&doc_id={{ filtros.doc_id }}&cuenta={{ filtros.cuenta }}&tercero={{ filtros.tercero }}&q={{ filtros.q|urlencode }}">Exportar CSV</a>
+      <a class="btn" href="{% url 'contabilidad' %}">← Volver</a>
+      <span class="note">Se muestran hasta 1000 filas en pantalla. El CSV exporta todo el rango filtrado.</span>
+    </div>
+  </form>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Fecha</th>
+        <th>Doc</th>
+        <th>Número</th>
+        <th>Cuenta</th>
+        <th>Nombre cuenta</th>
+        <th>Tercero</th>
+        <th>Nombre tercero</th>
+        <th>Descripción línea</th>
+        <th>Descripción asiento</th>
+        <th>Débito</th>
+        <th>Crédito</th>
+        <th>CC</th>
+        <th>C1</th>
+        <th>C2</th>
+        <th>C3</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for m in rows %}
+        <tr>
+          <td>{{ m.asiento.fecha }}</td>
+          <td>{{ m.asiento.documento.codigo }}</td>
+          <td>{{ m.asiento.numero }}</td>
+          <td>{{ m.cuenta.codigo }}</td>
+          <td>{{ m.cuenta.nombre }}</td>
+          <td>{{ m.tercero.numero_identificacion|default:"" }}</td>
+          <td>
+            {% if m.tercero %}
+              {% if m.tercero.razon_social %}
+                {{ m.tercero.razon_social }}
+              {% else %}
+                {{ m.tercero.primer_nombre }} {{ m.tercero.segundo_nombre }} {{ m.tercero.primer_apellido }} {{ m.tercero.segundo_apellido }}
+              {% endif %}
+            {% endif %}
+          </td>
+          <td>{{ m.descripcion }}</td>
+          <td>{{ m.asiento.descripcion }}</td>
+          <td style="text-align:right">{{ m.debito }}</td>
+          <td style="text-align:right">{{ m.credito }}</td>
+          <td style="text-align:center">{{ m.centro_costo|yesno:"1,0" }}</td>
+          <td>{{ m.criterio1|default:"" }}</td>
+          <td>{{ m.criterio2|default:"" }}</td>
+          <td>{{ m.criterio3|default:"" }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="15">No hay resultados con los filtros aplicados.</td></tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="9" style="text-align:right">Totales:</td>
+        <td style="text-align:right">{{ totales.total_debito|default:"0.00" }}</td>
+        <td style="text-align:right">{{ totales.total_credito|default:"0.00" }}</td>
+        <td colspan="4"></td>
+      </tr>
+    </tfoot>
+  </table>
+</body>
+</html>
+
+

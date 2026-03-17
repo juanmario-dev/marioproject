@@ -1,0 +1,371 @@
+
+
+
+
+<!DOCTYPE html>
+<html lang="es">
+{% load humanize %}
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+  <style>
+    :root{
+      --bg:#f7f8fb;
+      --card:#ffffff;
+      --border:#d8dee9;
+      --text:#0f172a;
+      --muted:#64748b;
+      --shadow:0 10px 25px rgba(2,18,36,.10);
+      --zebra:#fafafa;
+      --blue:#0d6efd;
+      --blue-dark:#0b5ed7;
+      --green:#16a34a;
+      --green-dark:#15803d;
+    }
+
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      font-family:Arial, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      font-size:13px;
+    }
+
+    .wrap{
+      max-width:1900px;
+      margin:0 auto;
+      padding:10px 12px 14px;
+    }
+
+    .titulo{
+      background: linear-gradient(90deg, #109155, #34c782);
+      color:#fff;
+      font-size:14px;
+      font-weight:700;
+      padding:12px 16px;
+      border-radius:8px;
+      margin-bottom:12px;
+      box-shadow:0 4px 10px rgba(0,0,0,.08);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:8px;
+      padding:10px;
+      box-shadow:var(--shadow);
+      margin-bottom:10px;
+    }
+
+    .form-row{
+      display:flex;
+      gap:10px;
+      align-items:end;
+      flex-wrap:wrap;
+    }
+
+    .field label{
+      display:block;
+      font-size:11px;
+      font-weight:800;
+      color:#111;
+      margin:0 0 4px;
+    }
+
+    .field input{
+      width:180px;
+      height:30px;
+      padding:4px 8px;
+      border-radius:6px;
+      border:1px solid #cfd6e3;
+      font-size:12px;
+      background:#fff;
+      outline:none;
+    }
+
+    .btn{
+      border:0;
+      cursor:pointer;
+      border-radius:6px;
+      padding:8px 12px;
+      font-weight:900;
+      font-size:12px;
+      height:34px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      text-decoration:none;
+      white-space:nowrap;
+    }
+
+    .btn-primary{
+      color:#fff;
+      background: linear-gradient(120deg, var(--blue) 0%, var(--blue-dark) 100%);
+    }
+
+    .btn-dark{
+      background:#111;
+      color:#fff;
+    }
+
+    .muted{
+      color:var(--muted);
+      font-weight:700;
+    }
+
+    .table-wrap{
+      overflow:auto;
+      border:1px solid rgba(0,0,0,.08);
+      border-radius:6px;
+      background:#fff;
+    }
+
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      min-width:1850px;
+      background:#fff;
+      font-size:11.5px;
+    }
+
+    thead th{
+      position:sticky;
+      top:0;
+      z-index:2;
+      background:#fff;
+      color:#000;
+      font-weight:900;
+      font-size:11px;
+      padding:6px 6px;
+      text-align:left;
+      border:0;
+      white-space:nowrap;
+    }
+
+    tbody td{
+      padding:1px 4px;
+      border:0;
+      background:#fff;
+      white-space:nowrap;
+      vertical-align:middle;
+    }
+
+    tbody tr:nth-child(even) td{
+      background:var(--zebra);
+    }
+
+    .num{
+      text-align:right;
+      font-variant-numeric:tabular-nums;
+    }
+
+    .msg{
+      margin-bottom:8px;
+    }
+
+    .msg .item{
+      padding:8px 10px;
+      border-radius:6px;
+      background:#fff3cd;
+      border:1px solid #ffe69c;
+      font-size:12px;
+      margin-bottom:6px;
+    }
+
+    .icon-link{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:5px;
+      padding:4px 8px;
+      border-radius:6px;
+      font-size:11px;
+      font-weight:800;
+      text-decoration:none;
+      border:1px solid #dbe3ef;
+      background:#fff;
+      color:#111827;
+    }
+
+    .icon-link:hover{
+      background:#f3f4f6;
+    }
+
+    .col-acciones{
+      text-align:center;
+    }
+
+
+
+    .scroll-top{
+      overflow-x:auto;
+      overflow-y:hidden;
+      height:14px;
+    }
+
+    .scroll-top div{
+      height:1px;
+    }
+
+    .table-wrap{
+      overflow:auto;
+      border:1px solid rgba(0,0,0,.08);
+      border-radius:6px;
+      background:#fff;
+    }
+
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="titulo">
+    <div>DataCounter : Desprendibles de nómina</div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <a class="btn btn-dark" href="{% url 'certificados_subpanel' %}">Volver</a>
+    </div>
+  </div>
+
+  <div class="card">
+    {% if messages %}
+      <div class="msg">
+        {% for m in messages %}
+          <div class="item">{{ m }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <form method="GET">
+      <div class="form-row">
+        <div class="field">
+          <label>Número de nómina</label>
+          <input
+            type="text"
+            name="no_nomina"
+            value="{{ no_nomina|default_if_none:'' }}"
+            placeholder="Digite y presione Enter"
+            autofocus
+          >
+        </div>
+
+        <button class="btn btn-primary" type="submit">Consultar</button>
+      </div>
+    </form>
+  </div>
+
+  {% if nomina %}
+    <div class="card">
+      <div class="muted" style="margin-bottom:8px;">
+        Nómina {{ nomina.consecutivo }} | Período {{ nomina.fecha_ini|date:"Y-m-d" }} a {{ nomina.fecha_fin|date:"Y-m-d" }}
+      </div>
+
+      <div class="scroll-top">
+        <div></div>
+      </div>
+      <div class="table-wrap" id="tablaScroll"></div>
+        <table id="tablaNomina">
+          <thead>
+            <tr>
+              <th>Nómina</th>
+              <th>Fecha inicio</th>
+              <th>Fecha fin</th>
+              <th>Cédula</th>
+              <th>Concepto</th>
+              <th class="num">Valor</th>
+              <th>Tipo de concepto</th>
+              <th>Tipo de nómina</th>
+              <th>Nombre empleado</th>
+              <th>Contrato</th>
+              <th>Tipo de contrato</th>
+              <th>Área</th>
+              <th>Correo electrónico</th>
+              <th class="col-acciones">Desprendibles</th>
+              <th class="col-acciones">Acciones</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for row in filas %}
+              <tr>
+                <td>{{ row.nomina }}</td>
+                <td>{{ row.fecha_ini|date:"Y-m-d" }}</td>
+                <td>{{ row.fecha_fin|date:"Y-m-d" }}</td>
+                <td>{{ row.cedula }}</td>
+                <td>{{ row.concepto }}</td>
+                <td class="num">{{ row.valor|floatformat:2|intcomma }}</td>
+                <td>{{ row.tipo_concepto }}</td>
+                <td>{{ row.tipo_nomina }}</td>
+                <td>{{ row.nombre_empleado }}</td>
+                <td>{{ row.contrato }}</td>
+                <td>{{ row.tipo_contrato }}</td>
+                <td>{{ row.area }}</td>
+                <td>{{ row.correo_electronico }}</td>
+                
+                <td class="col-acciones">
+                 <a
+                   href="{% url 'ver_desprendible_pdf' row.nomina row.cedula %}"
+                   class="icon-link"
+                   title="Ver desprendible"
+                   target="_blank"
+                 >👁 Ver</a>
+                </td>
+                
+                <td class="col-acciones">
+                  <a
+                    href="{% url 'enviar_desprendible_email' row.nomina row.cedula %}"
+                    class="icon-link"
+                    title="Enviar desprendible"
+                    onclick="return confirm('¿Deseas enviar este desprendible al correo del empleado?');"
+                  >✉ Enviar</a>
+                </td>
+
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="15" class="muted" style="text-align:center; padding:10px;">
+                  La nómina existe, pero no tiene movimientos con valor diferente de cero.
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% endif %}
+
+</div>
+
+<script>
+
+const scrollTop = document.querySelector(".scroll-top");
+const scrollBottom = document.querySelector(".table-wrap");
+const table = document.getElementById("tablaNomina");
+
+function syncScroll(){
+  const width = table.scrollWidth;
+  scrollTop.firstElementChild.style.width = width + "px";
+}
+
+scrollTop.addEventListener("scroll", () => {
+  scrollBottom.scrollLeft = scrollTop.scrollLeft;
+});
+
+scrollBottom.addEventListener("scroll", () => {
+  scrollTop.scrollLeft = scrollBottom.scrollLeft;
+});
+
+window.addEventListener("load", syncScroll);
+window.addEventListener("resize", syncScroll);
+
+</script>
+</body>
+</html>

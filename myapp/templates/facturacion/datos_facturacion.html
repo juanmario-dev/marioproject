@@ -1,0 +1,214 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Datos de facturación</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #f5f5f5;
+        }
+
+        .contenedor-form {
+            max-width: 700px;
+            margin: 30px auto;
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .col {
+            flex: 1;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 6px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #021224;
+            color: white;
+            padding: 5px 8px;
+            border-radius: 4px;
+            margin: 4px;
+            font-size: 13px;
+        }
+
+        .badge span {
+            cursor: pointer;
+            margin-left: 6px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="contenedor-form">
+    <h2>Datos de facturación</h2>
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label>Nombre de la empresa</label>
+            <input type="text" name="nombre_empresa"
+                   value="{{ datos.nombre_empresa|default_if_none:'' }}">
+        </div>
+
+        <div class="form-group">
+            <label>Logo</label>
+            <input type="file" name="logo">
+
+            {% if datos.logo %}
+                <div style="margin-top: 8px;">
+                    <small>Logo actual:</small><br>
+                    <img src="{{ datos.logo.url }}" style="max-height: 80px;">
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <label>NIT</label>
+                <input type="text" name="nit"
+                       value="{{ datos.nit|default_if_none:'' }}">
+            </div>
+            <div class="col">
+                <label>Teléfono</label>
+                <input type="text" name="telefono"
+                       value="{{ datos.telefono|default_if_none:'' }}">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Dirección</label>
+            <input type="text" name="direccion"
+                   value="{{ datos.direccion|default_if_none:'' }}">
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <label>Sucursal</label>
+                <input type="text" name="sucursal"
+                       value="{{ datos.sucursal|default_if_none:'' }}">
+            </div>
+            <div class="col">
+                <label>Correo electrónico</label>
+                <input type="email" name="correo"
+                       value="{{ datos.correo|default_if_none:'' }}">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Resolución de facturación DIAN</label>
+            <input type="text" name="resolucion_dian"
+                   value="{{ datos.resolucion_dian|default_if_none:'' }}">
+        </div>
+
+        <div class="form-group">
+            <label>Resolución Autoretenedor DIAN</label>
+            <input type="text" name="resolucion_autoretenedor_dian"
+                   value="{{ datos.resolucion_autoretenedor_dian|default_if_none:'' }}">
+        </div>
+
+        <div class="form-group">
+            <label>Resolución Autoretenedor ICA</label>
+            <input type="text" name="resolucion_autoretenedor_ica"
+                   value="{{ datos.resolucion_autoretenedor_ica|default_if_none:'' }}">
+        </div>
+
+        <!-- ENTIDADES DE PAGO -->
+        <div class="form-group">
+            <label>Entidades de pago</label>
+            <div class="row">
+                <div class="col">
+                    <select id="entidad_select">
+                        <option value="">— Seleccione —</option>
+                        <option value="Bancolombia">Bancolombia</option>
+                        <option value="Davivienda">Davivienda</option>
+                        <option value="Banco de Bogotá">Banco de Bogotá</option>
+                        <option value="Efecty">Efecty</option>
+                        <option value="PagaTodo">PagaTodo</option>
+                    </select>
+                </div>
+                <div class="col">
+                    <button type="button" onclick="agregarEntidad()">Agregar</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="lista_entidades"></div>
+
+        <input type="hidden" name="entidades_pago"
+               id="entidades_pago"
+               value="{{ datos.entidades_pago }}">
+
+        <br>
+
+        <button type="submit">Guardar</button>
+        <a href="{% url 'fact_parametros' %}">← Regresar</a>
+    </form>
+</div>
+
+<script>
+    let entidades = "{{ datos.entidades_pago|default:'' }}"
+        .split(",")
+        .filter(e => e);
+
+    function agregarEntidad() {
+        const select = document.getElementById("entidad_select");
+        const valor = select.value;
+
+        if (!valor || entidades.includes(valor)) return;
+
+        entidades.push(valor);
+        actualizarVista();
+    }
+
+    function eliminarEntidad(entidad) {
+        entidades = entidades.filter(e => e !== entidad);
+        actualizarVista();
+    }
+
+    function actualizarVista() {
+        const cont = document.getElementById("lista_entidades");
+        const hidden = document.getElementById("entidades_pago");
+
+        cont.innerHTML = "";
+        entidades.forEach(e => {
+            cont.innerHTML += `
+                <span class="badge">
+                    ${e} <span onclick="eliminarEntidad('${e}')">✖</span>
+                </span>
+            `;
+        });
+
+        hidden.value = entidades.join(",");
+    }
+
+    actualizarVista();
+</script>
+
+</body>
+</html>

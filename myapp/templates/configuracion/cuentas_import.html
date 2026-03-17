@@ -1,0 +1,45 @@
+
+
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Importar Plan de Cuentas (CSV)</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background:#f7f7f7; }
+    h1 { margin-bottom: 12px; }
+    form { background:#fff; padding:20px; border-radius:8px; max-width:600px; }
+    label { font-weight:bold; }
+    input, select { width:100%; padding:8px; margin:6px 0 12px; border:1px solid #ccc; border-radius:4px; }
+    button { background:#007bff; color:white; padding:10px 16px; border:none; border-radius:6px; cursor:pointer; }
+    button:hover { background:#0056b3; }
+    a.btn { display:inline-block; margin-top:12px; background:#6c757d; color:#fff; padding:8px 12px; text-decoration:none; border-radius:6px; }
+    a.btn:hover { background:#5a6268; }
+    .help { color:#555; font-size:14px; margin-top:8px; }
+  </style>
+</head>
+<body>
+  <h1>Importar Plan de Cuentas (CSV)</h1>
+
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <label for="id_archivo">Archivo CSV</label>
+    {{ form.archivo }}
+
+    <label for="id_modo">Modo de importación</label>
+    {{ form.modo }}
+
+    <button type="submit">Importar</button>
+  </form>
+
+  <p class="help">
+    El CSV debe tener estos encabezados: <code>codigo,nombre,movimiento,centro_costo,criterio1,criterio2,criterio3</code><br>
+    Para <strong>movimiento</strong> y <strong>centro_costo</strong> usa: 1/0, true/false o sí/no.
+  </p>
+
+  <a class="btn" href="{% url 'cuentas_plantilla_csv' %}">Descargar plantilla</a>
+  <a class="btn" href="{% url 'plan_cuentas' %}">← Volver al Plan de Cuentas</a>
+</body>
+</html>

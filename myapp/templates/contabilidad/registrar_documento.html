@@ -1,0 +1,588 @@
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>{{ titulo|default:"Registrar documento contable" }}</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 20px; background:#f7f7f7; }
+  h1 { margin-bottom: 12px; }
+  .row { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; margin-bottom: 12px; }
+  label { font-weight: bold; }
+  input, select, textarea { width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; }
+  table { width:100%; border-collapse: collapse; background:#fff; margin-top:16px; }
+  th, td {
+    border:1px solid #ddd;
+    padding:4px 6px;     /* filas más angostas */
+    text-align:left;
+    font-size:12px;      /* letra más pequeña */
+  }
+
+  th {
+    background:#f2f2f2;
+    font-size:12px;      /* títulos más pequeños */
+    font-weight:bold;
+  }
+
+  th { background:#f2f2f2; }
+  .desc { min-width: 260px; }
+  .num { text-align: right; }
+  .actions { margin-top: 12px; display:flex; gap:8px; flex-wrap: wrap; align-items: center; }
+  .btn { padding:8px 12px; background:#007bff; color:#fff; text-decoration:none; border:none; border-radius:6px; cursor:pointer; }
+  .btn:hover { background:#0056b3; }
+  .btn-secondary { background:#6c757d; }
+  .btn-secondary:hover { background:#5a6268; }
+  .btn-danger { background:#dc3545; }
+  .btn-danger:hover { background:#b02a37; }
+  .btn-outline { background:#fff; color:#007bff; border:1px solid #007bff; }
+  .btn-outline:hover { background:#e7f1ff; }
+  .badge { display:inline-block; background:#eef; padding:2px 6px; border-radius:4px; margin-left:8px; }
+  tfoot td { font-weight: bold; background:#fafafa; }
+  .error { color:#c00; margin-top:8px; }
+  .suggest { position:absolute; background:#fff; border:1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.15); border-radius:6px; display:none; z-index:1000; max-height:220px; overflow:auto; }
+  .suggest div { padding:6px 10px; cursor:pointer; }
+  .suggest div:hover { background:#f0f0f0; }
+  .inline-field { display:flex; gap:8px; align-items:center; }
+  .inline-field input[type="text"] { flex:1; }
+  .hint { color:#666; font-size:12px; }
+
+  /* Mini-ventana (modal) de confirmación */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.35);
+    display: none; align-items: center; justify-content: center; z-index: 2000;
+  }
+  .modal {
+    background: #fff; padding: 16px; border-radius: 8px; max-width: 420px; width: 94%;
+    box-shadow: 0 10px 30px rgba(0,0,0,.2);
+  }
+  .modal h3 { margin: 0 0 10px; }
+  .modal .actions { justify-content: flex-end; }
+
+  .cuenta_col { width:120px; }
+  .tercero_col { width:140px; }
+  .nombre_col { width:220px; }
+  .desc { width:320px; }
+  .num { width:110px; text-align:right; }
+  .cc_col { width:120px; }
+  .crit_col { width:110px; }
+
+
+
+
+</style>
+</head>
+<body>
+  <h1>{{ titulo|default:"Registrar documento contable" }}</h1>
+
+  <div class="row">
+    <div>
+      <label>Fecha</label>
+      <input id="fecha" type="date" value="{{ hoy }}">
+      <div class="badge">Sugerencia: hoy</div>
+    </div>
+    <div>
+      <label>Tipo de documento</label>
+      <select id="doc">
+        <option value="">-- Seleccione --</option>
+        {% for d in documentos %}
+        <option value="{{ d.id }}">{{ d.codigo }} — {{ d.nombre }}</option>
+        {% endfor %}
+      </select>
+      <div class="hint">Requerido para consultar / eliminar</div>
+    </div>
+    <div>
+      <label>Consecutivo</label>
+      <div class="inline-field">
+        <!-- ⚠️ Ahora es editable para poder consultar -->
+        <input id="numero" type="text" placeholder="(se asigna al guardar o úsalo para buscar)">
+        <button id="btnBuscar" class="btn btn-outline" type="button" title="Consultar por documento + consecutivo">Buscar</button>
+      </div>
+      <div class="hint">Escribe el número y presiona Enter para consultar</div>
+    </div>
+    <div style="grid-column: 1 / -1;">
+      <label>Descripción (encabezado, opcional)</label>
+      <textarea id="desc_header" rows="2" maxlength="200"></textarea>
+    </div>
+  </div>
+
+  <table id="tabla">
+    <thead>
+      <tr>
+        <th style="width:35px;">#</th>
+        <th class="cuenta_col">Cuenta contable</th>
+        <th class="tercero_col">Tercero</th>
+        <th class="nombre_col">Nombre de tercero</th>
+        <th class="desc">Descripción</th>
+        <th class="num">Débito</th>
+        <th class="num">Crédito</th>
+        <th class="cc_col">Centro de costo</th>
+        <th class="crit_col">Criterio 1</th>
+        <th class="crit_col">Criterio 2</th>
+        <th class="crit_col">Criterio 3</th>
+
+      </tr>
+    </thead>
+    <tbody></tbody>
+    <tfoot>
+      <tr>
+        <td colspan="4" style="text-align:right;">Totales:</td>
+        <td id="totalD" class="num">0</td>
+        <td id="totalC" class="num">0</td>
+        <td colspan="4"></td>
+      </tr>
+    </tfoot>
+  </table>
+
+  <div class="actions">
+    <button class="btn" id="add">Agregar línea</button>
+    <button class="btn" id="save">Guardar</button>
+    <button class="btn btn-danger" id="delete" style="display:none;">Eliminar</button>
+    <input id="csvFile" type="file" accept=".csv" style="display:none">
+    <button class="btn" id="btnCsv" type="button">Cargar CSV</button>
+    <a class="btn btn-secondary" href="#" title="Próximamente">Registrar facturación</a>
+    <a class="btn btn-secondary" href="#" title="Próximamente">Registrar orden de compra</a>
+    
+    <a href="{% url 'nomina_cargue_contable' %}" class="btn">Registrar Nóminas</a>
+    
+    <a class="btn" href="{% url 'contabilidad' %}">← Regresar</a>
+  </div>
+
+  <div id="error" class="error" style="display:none;"></div>
+
+  <!-- Sugerencias de cuentas -->
+  <div id="sugg" class="suggest"></div>
+
+  <!-- Modal de confirmación de eliminación -->
+  <div id="modalOverlay" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <h3 id="modalTitle">Eliminar documento</h3>
+      <p id="modalText">¿Confirmas que deseas eliminar este documento? Esta acción no se puede deshacer.</p>
+      <div class="actions">
+        <button id="modalCancel" class="btn btn-secondary" type="button">Cancelar</button>
+        <button id="modalOk" class="btn btn-danger" type="button">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+// ===== Utilidades =====
+const $ = sel => document.querySelector(sel);
+const tbody = $('#tabla tbody');
+const sugg = $('#sugg');
+const errorBox = $('#error');
+
+let currentLoaded = null; // {doc_id, numero} cuando el asiento está cargado por consulta
+
+function getCookie(name) {
+  const v = (`; ${document.cookie}`).split(`; ${name}=`);
+  if (v.length === 2) return v.pop().split(';').shift();
+}
+
+function showError(msg) {
+  errorBox.style.display = 'block';
+  errorBox.textContent = msg;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function clearError() {
+  errorBox.style.display = 'none';
+  errorBox.textContent = '';
+}
+function formatMiles(numStr) {
+  if (!numStr) return '';
+  const n = numStr.replace(/\D/g, '');
+  return n.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+function parseMilesToFloat(numStr) {
+  if (!numStr) return 0;
+  return parseFloat(numStr.replace(/\./g, '').replace(',', '.')) || 0;
+}
+function sumTotals() {
+  let d = 0, c = 0;
+  tbody.querySelectorAll('tr').forEach(tr => {
+    d += parseMilesToFloat(tr.querySelector('.debito').value);
+    c += parseMilesToFloat(tr.querySelector('.credito').value);
+  });
+  $('#totalD').textContent = formatMiles(String(Math.round(d)));
+  $('#totalC').textContent = formatMiles(String(Math.round(c)));
+}
+
+function numerarFilas(){
+  tbody.querySelectorAll("tr").forEach((tr, i)=>{
+    const c = tr.querySelector(".rownum");
+    if(c) c.textContent = i + 1;
+  });
+}
+
+function resetForm(keepDoc=false) {
+  if (!keepDoc) $('#doc').value = '';
+  $('#fecha').value = '{{ hoy }}';
+  $('#numero').value = '';
+  $('#desc_header').value = '';
+  tbody.innerHTML = '';
+  addRow(false);
+  sumTotals();
+  currentLoaded = null;
+  $('#delete').style.display = 'none';
+}
+
+function addRow(copyPrev=false) {
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td class="rownum"></td>
+    <td><input class="cuenta" type="text" placeholder="Ej: 110101" maxlength="20"></td>
+    <td><input class="tercero" type="text" placeholder="Nro identificación" maxlength="20"></td>
+    <td><input class="nombre_tercero" type="text" placeholder="(auto)" readonly></td>
+    <td><input class="desc_linea" type="text" maxlength="200"></td>
+    <td><input class="debito num" type="text" inputmode="numeric"></td>
+    <td><input class="credito num" type="text" inputmode="numeric"></td>
+    <td><input class="cc" type="text" maxlength="50"></td>
+    <td><input class="c1" type="text" maxlength="50"></td>
+    <td><input class="c2" type="text" maxlength="50"></td>
+    <td><input class="c3" type="text" maxlength="50"></td>`;
+  tbody.appendChild(tr);
+  numerarFilas();
+
+  const cuenta = tr.querySelector('.cuenta');
+  const tercero = tr.querySelector('.tercero');
+  const nombreT = tr.querySelector('.nombre_tercero');
+  const deb = tr.querySelector('.debito');
+  const cre = tr.querySelector('.credito');
+
+  // Autocompletar cuentas (2+ dígitos)
+  cuenta.addEventListener('input', async (e) => {
+    const v = e.target.value.trim();
+    if (v.length < 2) { sugg.style.display = 'none'; return; }
+    try {
+      const rect = cuenta.getBoundingClientRect();
+      sugg.style.left = `${rect.left + window.scrollX}px`;
+      sugg.style.top = `${rect.bottom + window.scrollY + 2}px`;
+      const resp = await fetch(`{% url 'api_cuentas' %}?q=${encodeURIComponent(v)}`);
+      const data = await resp.json();
+      if (!data.results.length) { sugg.style.display = 'none'; return; }
+      sugg.innerHTML = data.results.map(r => `<div data-cod="${r.codigo}">${r.codigo} — ${r.nombre}</div>`).join('');
+      sugg.style.display = 'block';
+      sugg.onclick = (ev) => {
+        if (ev.target.dataset.cod) {
+          cuenta.value = ev.target.dataset.cod;
+          sugg.style.display = 'none';
+          tercero.focus();
+        }
+      };
+    } catch { sugg.style.display = 'none'; }
+  });
+
+  // Buscar tercero al TAB/blur
+  tercero.addEventListener('blur', async () => {
+    const id = tercero.value.trim();
+    if (!id) { nombreT.value=''; return; }
+    const resp = await fetch(`{% url 'api_terceros' %}?id=${encodeURIComponent(id)}`);
+    const data = await resp.json();
+    if (data.found) {
+      nombreT.value = data.nombre;
+    } else {
+      nombreT.value = '';
+      // Doble clic para abrir "Registrar tercero" en nueva pestaña
+      tercero.ondblclick = () => window.open("{% url 'registrar_tercero' %}", "_blank");
+      tercero.title = "Doble clic para crear tercero";
+    }
+  });
+
+  // Débito/Crédito exclusión y formateo
+  const fmt = (el) => {
+    el.value = formatMiles(el.value);
+    sumTotals();
+  };
+  deb.addEventListener('input', () => { if (deb.value) cre.value=''; fmt(deb); });
+  cre.addEventListener('input', () => { if (cre.value) deb.value=''; fmt(cre); });
+  [deb, cre].forEach(el => el.addEventListener('blur', () => { el.value = formatMiles(el.value); }));
+
+  // Duplicar valor desde la fila anterior: Ctrl+Shift+D
+  tr.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.shiftKey && e.code === 'KeyD') {
+      const prev = tr.previousElementSibling;
+      if (!prev) return;
+      const src = e.target;
+      const idx = Array.from(tr.children).findIndex(td => td.contains(src));
+      if (idx >= 0) {
+        const srcClass = src.className;
+        const prevInput = prev.querySelector(`.${srcClass.replace(' num','')}`);
+        if (prevInput) {
+          src.value = prevInput.value;
+          if (src.classList.contains('debito') || src.classList.contains('credito')) sumTotals();
+        }
+      }
+    }
+  });
+
+  if (copyPrev) {
+    const prev = tr.previousElementSibling;
+    if (prev) {
+      ['tercero','nombre_tercero','cc','c1','c2','c3'].forEach(cls=>{
+        const a = tr.querySelector('.'+cls), b = prev.querySelector('.'+cls);
+        if (a && b) a.value = b.value;
+      });
+    }
+  }
+
+  cuenta.focus();
+}
+
+function validateRow(tr, idx) {
+  const need = (cls, msg) => {
+    const el = tr.querySelector('.'+cls);
+    if (!el || !el.value.trim()) throw new Error(`Línea ${idx}: ${msg}`);
+    return el;
+  };
+  need('cuenta', 'la cuenta contable es obligatoria.');
+  need('tercero', 'el tercero es obligatorio.');
+  need('desc_linea', 'la descripción es obligatoria.');
+
+  const deb = tr.querySelector('.debito');
+  const cre = tr.querySelector('.credito');
+  const dv = parseMilesToFloat(deb.value);
+  const cv = parseMilesToFloat(cre.value);
+  if ((dv > 0 && cv > 0) || (dv === 0 && cv === 0)) {
+    throw new Error(`Línea ${idx}: diligencie débito o crédito (no ambos ni ambos 0).`);
+  }
+  return true;
+}
+
+$('#add').addEventListener('click', () => {
+  const last = tbody.lastElementChild;
+  if (last) {
+    try { validateRow(last, tbody.children.length); } catch (e) { showError(e.message); return; }
+  }
+  clearError();
+  addRow(true);
+});
+
+function gatherPayload() {
+  const fecha = $('#fecha').value;
+  const documento_id = $('#doc').value;
+  const numero = $('#numero').value.trim(); // si vacío, lo asigna servidor
+  const descripcion = $('#desc_header').value.trim();
+
+  const lineas = [];
+  tbody.querySelectorAll('tr').forEach((tr, i) => {
+    validateRow(tr, i+1);
+    lineas.push({
+      cuenta_codigo: tr.querySelector('.cuenta').value.trim(),
+      tercero_ident: tr.querySelector('.tercero').value.trim(),
+      nombre_tercero: tr.querySelector('.nombre_tercero').value.trim(),
+      descripcion: tr.querySelector('.desc_linea').value.trim(),
+      debito: tr.querySelector('.debito').value.trim(),
+      credito: tr.querySelector('.credito').value.trim(),
+      centro_costo: tr.querySelector('.cc').value.trim(),
+      criterio1: tr.querySelector('.c1').value.trim(),
+      criterio2: tr.querySelector('.c2').value.trim(),
+      criterio3: tr.querySelector('.c3').value.trim()
+    });
+  });
+
+  return { fecha, documento_id, numero, descripcion, lineas };
+}
+
+$('#save').addEventListener('click', async () => {
+  clearError();
+  try {
+    const payload = gatherPayload();
+    if (!payload.fecha) { showError('La fecha es obligatoria.'); return; }
+    if (!payload.documento_id) { showError('Debe seleccionar un tipo de documento.'); return; }
+    if (!tbody.children.length) { showError('Debe ingresar al menos una línea.'); return; }
+
+    const resp = await fetch("{% url 'asiento_crear' %}", {
+      method: 'POST',
+      headers: {
+        'Content-Type':'application/json',
+        'X-CSRFToken': getCookie('csrftoken') || '{{ csrf_token }}'
+      },
+      body: JSON.stringify(payload)
+    });
+    const data = await resp.json();
+    if (!data.ok) { showError(data.error || 'No se pudo guardar.'); return; }
+
+    $('#numero').value = data.numero || '';
+    alert('Documento guardado correctamente. Número: ' + (data.numero || '(sin número)'));
+    window.location.href = "{% url 'asientos_listar' %}";
+  } catch (e) {
+    showError(e.message || 'Error inesperado');
+  }
+});
+
+// ========= Consulta por documento + consecutivo =========
+async function consultarDocumento() {
+  clearError();
+  const docId = $('#doc').value;
+  const numero = ($('#numero').value || '').trim();
+  if (!docId) { showError('Seleccione el tipo de documento para consultar.'); return; }
+  if (!numero) { showError('Escriba el número de consecutivo para consultar.'); return; }
+
+  try {
+    const url = `{% url 'api_asiento_get' %}?doc_id=${encodeURIComponent(docId)}&numero=${encodeURIComponent(numero)}`;
+    const resp = await fetch(url);
+    const data = await resp.json();
+
+    if (!resp.ok || !data.ok) {
+      // 404 u otro error
+      showError(data.error || 'No se encontró el documento solicitado.');
+      return;
+    }
+
+    // Llenar el formulario con la respuesta
+    fillFromAsiento(data.asiento);
+    currentLoaded = { doc_id: String(docId), numero: String(numero) };
+    $('#delete').style.display = 'inline-block';
+  } catch (e) {
+    showError('No se pudo consultar el documento.');
+  }
+}
+
+function fillFromAsiento(a) {
+  // Encabezado
+  $('#fecha').value = a.fecha || '{{ hoy }}';
+  $('#doc').value = a.documento_id || '';
+  $('#numero').value = a.numero || '';
+  $('#desc_header').value = a.descripcion || '';
+
+  // Líneas
+  tbody.innerHTML = '';
+  (a.lineas || []).forEach(ln => {
+    addRow(false);
+    const tr = tbody.lastElementChild;
+    tr.querySelector('.cuenta').value = ln.cuenta_codigo || '';
+    tr.querySelector('.tercero').value = ln.tercero_ident || '';
+    tr.querySelector('.nombre_tercero').value = ln.nombre_tercero || '';
+    tr.querySelector('.desc_linea').value = ln.descripcion || '';
+    tr.querySelector('.debito').value = ln.debito ? formatMiles(String(Math.round(ln.debito))) : '';
+    tr.querySelector('.credito').value = ln.credito ? formatMiles(String(Math.round(ln.credito))) : '';
+    tr.querySelector('.cc').value = ln.centro_costo || '';
+    tr.querySelector('.c1').value = ln.criterio1 || '';
+    tr.querySelector('.c2').value = ln.criterio2 || '';
+    tr.querySelector('.c3').value = ln.criterio3 || '';
+  });
+  if (!a.lineas || !a.lineas.length) addRow(false);
+  sumTotals();
+}
+
+// Enter en consecutivo + botón Buscar
+$('#numero').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    consultarDocumento();
+  }
+});
+$('#btnBuscar').addEventListener('click', consultarDocumento);
+
+// Al cambiar documento, si hay número escrito, puedes consultar con Enter
+$('#doc').addEventListener('change', async () => {
+  // Además, mostramos consecutivo sugerido como placeholder (no consume)
+  const docId = $('#doc').value;
+  if (!docId) return;
+  try {
+    const url = `{% url 'api_documento_next_number' %}?doc_id=${encodeURIComponent(docId)}`;
+    const r = await fetch(url);
+    const j = await r.json();
+    if (j.ok && j.sugerido) $('#numero').placeholder = `(Sugerido: ${j.sugerido})`;
+  } catch {}
+});
+
+// ========= Eliminación con confirmación =========
+const overlay = $('#modalOverlay');
+$('#delete').addEventListener('click', () => {
+  if (!currentLoaded) { showError('Primero consulta un documento para poder eliminar.'); return; }
+  $('#modalText').textContent = `¿Eliminar el documento ${currentLoaded.numero} del tipo seleccionado?`;
+  overlay.style.display = 'flex';
+});
+$('#modalCancel').addEventListener('click', () => overlay.style.display = 'none');
+
+$('#modalOk').addEventListener('click', async () => {
+  if (!currentLoaded) return;
+  try {
+    const resp = await fetch("{% url 'api_asiento_delete' %}", {
+      method: 'POST',
+      headers: {
+        'Content-Type':'application/json',
+        'X-CSRFToken': getCookie('csrftoken') || '{{ csrf_token }}'
+      },
+      body: JSON.stringify({
+        doc_id: currentLoaded.doc_id,
+        numero: currentLoaded.numero
+      })
+    });
+    const data = await resp.json();
+    if (!resp.ok || !data.ok) {
+      showError(data.error || 'No se pudo eliminar el documento.');
+      overlay.style.display = 'none';
+      return;
+    }
+    overlay.style.display = 'none';
+    alert('Documento eliminado correctamente.');
+    resetForm(true); // conservamos el tipo de documento seleccionado
+  } catch (e) {
+    overlay.style.display = 'none';
+    showError('Error eliminando el documento.');
+  }
+});
+
+// Inicial
+addRow(false);
+
+// Cerrar sugerencias al click fuera
+document.addEventListener('click', (e)=>{
+  if (!sugg.contains(e.target)) sugg.style.display = 'none';
+});
+
+
+
+// ===== Importar CSV (servidor) =====
+$('#btnCsv').addEventListener('click', () => $('#csvFile').click());
+
+$('#csvFile').addEventListener('change', async (e) => {
+  clearError();
+  const f = e.target.files && e.target.files[0];
+  if (!f) return;
+
+  const docId = $('#doc').value;
+  const fecha = $('#fecha').value;
+  const descHdr = ($('#desc_header').value || '').trim();
+
+  if (!docId) { showError('Seleccione el tipo de documento antes de cargar el CSV.'); e.target.value=''; return; }
+  if (!fecha) { showError('Seleccione la fecha antes de cargar el CSV.'); e.target.value=''; return; }
+
+  const fd = new FormData();
+  fd.append('documento_id', docId);
+  fd.append('fecha', fecha);
+  fd.append('descripcion', descHdr);
+  fd.append('file', f);
+
+  try {
+    const resp = await fetch("{% url 'asiento_importar_csv' %}", {
+      method: 'POST',
+      headers: { 'X-CSRFToken': getCookie('csrftoken') || '{{ csrf_token }}' },
+      body: fd
+    });
+    const data = await resp.json();
+
+    if (!resp.ok || !data.ok) {
+      if (data && data.detalles) {
+        showError((data.error || 'Error en importación') + '\n' + data.detalles.join('\n') + (data.mas_errores ? `\n... y ${data.mas_errores} más.` : ''));
+      } else {
+        showError(data.error || 'No se pudo importar el CSV.');
+      }
+      e.target.value='';
+      return;
+    }
+    alert('Documento importado correctamente. Número: ' + (data.numero || '(sin número)'));
+    window.location.href = "{% url 'asientos_listar' %}";
+  } catch {
+    showError('Error importando CSV.');
+  } finally {
+    e.target.value='';
+  }
+});
+
+
+</script>
+</body>
+</html>

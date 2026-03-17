@@ -1,0 +1,686 @@
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="es">
+{% load humanize %}
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>Pago de Nómina</title>
+
+<style>
+
+:root{
+  --bg:#f7f8fb;
+  --card:#ffffff;
+  --border:#d8dee9;
+  --text:#0f172a;
+  --muted:#64748b;
+  --shadow:0 10px 25px rgba(2,18,36,.10);
+  --zebra:#fafafa;
+
+  --green:#16a34a;
+  --green-dark:#15803d;
+
+  --blue:#0d6efd;
+  --blue-dark:#0b5ed7;
+}
+
+*{ box-sizing:border-box; }
+
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  font-size:13px;
+}
+
+.wrap{
+  max-width:1900px;
+  margin:0 auto;
+  padding:12px 14px 18px;
+}
+
+.titulo{
+  background: linear-gradient(90deg,#109155,#34c782);
+  color:#fff;
+  font-size:15px;
+  font-weight:800;
+  padding:12px 16px;
+  border-radius:10px;
+  margin-bottom:12px;
+  box-shadow:0 4px 10px rgba(0,0,0,.08);
+}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:12px;
+  box-shadow:var(--shadow);
+  margin-bottom:12px;
+}
+
+.form-row{
+  display:flex;
+  gap:10px;
+  align-items:end;
+}
+
+.field{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+
+.field label{
+  font-size:11px;
+  font-weight:800;
+}
+
+.field input{
+  width:190px;
+  height:34px;
+  padding:6px 10px;
+  border-radius:7px;
+  border:1px solid #cfd6e3;
+  font-size:12px;
+}
+
+.btn{
+  border:0;
+  cursor:pointer;
+  border-radius:7px;
+  padding:8px 13px;
+  font-weight:900;
+  font-size:12px;
+  height:34px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.btn-primary{
+  color:#fff;
+  background: linear-gradient(120deg,var(--blue),var(--blue-dark));
+}
+
+.table-wrap{
+  overflow:auto;
+  border:1px solid rgba(0,0,0,.08);
+  border-radius:8px;
+  background:#fff;
+}
+
+table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+  min-width:2000px;
+  font-size:11.5px;
+}
+
+thead th{
+  position:sticky;
+  top:0;
+  z-index:2;
+  background:#fff;
+  font-weight:900;
+  font-size:11px;
+  padding:6px 5px;
+  border-bottom:1px solid #e9edf3;
+  white-space:nowrap;
+}
+
+tbody td{
+  padding:2px 1px;
+  border-bottom:1px solid #f1f3f7;
+}
+
+tbody tr:nth-child(even) td{
+  background:var(--zebra);
+}
+
+.num{
+  text-align:right;
+}
+
+tfoot td{
+  background:#f8fafc;
+  border-top:1px solid rgba(0,0,0,.12);
+  font-weight:900;
+  padding:8px 7px;
+}
+
+.actions-row{
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+  margin-top:12px;
+}
+
+.pay-btn{
+  width:26px;
+  height:26px;
+  border:none;
+  border-radius:6px;
+  background:linear-gradient(180deg,var(--green),var(--green-dark));
+  color:#fff;
+  font-size:13px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.pay-header{
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.pago-input{
+  width:110px;
+  height:28px;
+  padding:4px 8px;
+  border:1px solid #cfd6e3;
+  border-radius:6px;
+  font-size:11.5px;
+  text-align:right;
+}
+
+
+
+.medio-pago-input{
+  width:90px;
+  height:22px;
+  padding:3px 6px;
+  border:1px solid #cfd6e3;
+  border-radius:6px;
+  font-size:11.5px;
+  text-align:left;
+  background:#fff;
+  outline:none;
+}
+
+.medio-pago-input:focus{
+  border-color:#86b7fe;
+  box-shadow:0 0 0 3px rgba(13,110,253,.12);
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+
+<div class="titulo">
+Pago de Nómina
+</div>
+
+<div class="card">
+
+<form method="GET">
+<div class="form-row">
+
+<div class="field">
+<label>Seleccionar nómina</label>
+<input
+type="text"
+name="no_nomina"
+value="{{ no_nomina|default_if_none:'' }}"
+placeholder="Digite número de nómina"
+autofocus
+>
+</div>
+
+<button class="btn btn-primary" type="submit">
+Consultar
+</button>
+
+</div>
+</form>
+
+</div>
+
+<div class="card">
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+<tr>
+
+<th>No línea</th>
+<th>Consecutivo de Nómina</th>
+<th>Fecha inicio</th>
+<th>Fecha fin</th>
+<th>Contrato</th>
+<th>Cédula</th>
+<th>Nombre</th>
+<th>Tipo de Nómina</th>
+<th>Tipo de contrato</th>
+<th>Cargo</th>
+<th>Área</th>
+<th class="num">Valor a pagar</th>
+
+
+<th>
+  <div class="pay-header">
+    Pago
+    <button id="btnCopiarPagos" class="pay-btn" title="cargar todos" type="button">✔</button>
+  </div>
+</th>
+
+
+<th>
+  <div class="pay-header">
+    Medio de pago
+    <button id="btnCopiarMedioPago" class="pay-btn" title="cargar todos" type="button">💳</button>
+  </div>
+</th>
+
+</tr>
+</thead>
+
+<tbody>
+
+{% if filas %}
+
+{% for row in filas %}
+
+<tr data-nomina-empleado-id="{{ row.nomina_empleado_id }}">
+
+
+
+
+<td>{{ row.no_linea }}</td>
+<td>{{ row.consecutivo_nomina }}</td>
+<td>{{ row.fecha_inicio|date:"Y-m-d" }}</td>
+<td>{{ row.fecha_fin|date:"Y-m-d" }}</td>
+<td>{{ row.contrato }}</td>
+<td>{{ row.cedula }}</td>
+<td>{{ row.nombre }}</td>
+<td>{{ row.tipo_nomina }}</td>
+<td>{{ row.tipo_contrato }}</td>
+<td>{{ row.cargo }}</td>
+<td>{{ row.area }}</td>
+
+<td class="num valor-pagar-cell" data-value="{{ row.valor_pagar }}">
+  {{ row.valor_pagar|floatformat:2|intcomma }}
+</td>
+
+
+<td class="num">
+<input
+type="text"
+class="pago-input js-pago-input"
+value=""
+placeholder="0"
+>
+</td>
+
+<td>
+  <input
+    type="text"
+    class="medio-pago-input js-medio-pago-input"
+    value=""
+    placeholder="Código"
+    autocomplete="off"
+  >
+</td>
+
+</tr>
+
+{% endfor %}
+
+{% else %}
+
+<tr>
+<td colspan="14" style="text-align:center; padding:18px;">
+No hay registros cargados todavía.
+</td>
+</tr>
+
+{% endif %}
+
+</tbody>
+
+{% if filas %}
+<tfoot>
+
+<tr>
+
+<td colspan="11" style="text-align:right;">
+TOTALES
+</td>
+
+<td class="num">
+{{ total_valor_pagar|floatformat:2|intcomma }}
+</td>
+
+<td class="num" id="totalPago">
+0.00
+</td>
+
+<td></td>
+
+</tr>
+
+</tfoot>
+{% endif %}
+
+</table>
+
+</div>
+
+<div class="actions-row">
+
+
+<button class="btn btn-primary" type="button" id="btnContabilizarPagoNomina">
+Contabilizar
+</button>
+
+<button class="btn btn-primary">
+Cargar Excel
+</button>
+
+<button class="btn btn-primary">
+PDF
+</button>
+
+<button class="btn btn-primary">
+Eliminar
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+
+<div id="modalFechaContab" style="
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.35);
+  z-index:3000;
+  align-items:center;
+  justify-content:center;
+">
+  <div style="
+    background:#fff;
+    width:320px;
+    max-width:92vw;
+    border-radius:10px;
+    padding:16px;
+    box-shadow:0 10px 30px rgba(0,0,0,.18);
+  ">
+    <div style="font-weight:900; margin-bottom:10px;">Fecha de contabilización</div>
+
+    <label style="display:block; font-size:12px; font-weight:700; margin-bottom:4px;">
+      Fecha
+    </label>
+    <input type="date" id="fechaContabilizacion" style="
+      width:100%;
+      height:34px;
+      padding:6px 8px;
+      border:1px solid #cfd6e3;
+      border-radius:6px;
+      margin-bottom:6px;
+    ">
+
+    <div style="font-size:11px; color:#64748b; margin-bottom:12px;">
+      Recomendación: fecha actual
+    </div>
+
+    <div style="display:flex; justify-content:flex-end; gap:8px;">
+      <button type="button" class="btn btn-primary" id="btnCancelarContab">Cancelar</button>
+      <button type="button" class="btn btn-primary" id="btnConfirmarContab">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+
+
+<script>
+
+function limpiarNumero(texto){
+  return (texto || "").replace(/[^0-9.-]/g,"");
+}
+
+function aNumero(texto){
+  const limpio = limpiarNumero(texto);
+  const n = parseFloat(limpio);
+  return isNaN(n) ? 0 : n;
+}
+
+function formatearNumero(valor){
+  return Number(valor || 0).toLocaleString("en-US",{
+    minimumFractionDigits:2,
+    maximumFractionDigits:2
+  });
+}
+
+function actualizarTotalPago(){
+
+  let total = 0;
+
+  document.querySelectorAll(".js-pago-input").forEach(inp=>{
+    total += aNumero(inp.value);
+  });
+
+  const totalPago = document.getElementById("totalPago");
+
+  if(totalPago){
+    totalPago.textContent = formatearNumero(total);
+  }
+
+}
+
+function bindPagoInputs(){
+
+  document.querySelectorAll(".js-pago-input").forEach(inp=>{
+
+    /* SOLO recalcula total mientras escribe */
+    inp.addEventListener("input",function(){
+      actualizarTotalPago();
+    });
+
+    /* cuando entra al campo quita formato */
+    inp.addEventListener("focus",function(){
+      const numero = aNumero(this.value);
+      this.value = numero ? numero : "";
+    });
+
+    /* cuando sale del campo aplica formato */
+    inp.addEventListener("blur",function(){
+
+      const numero = aNumero(this.value);
+
+      if(numero){
+        this.value = formatearNumero(numero);
+      }else{
+        this.value = "";
+      }
+
+      actualizarTotalPago();
+
+    });
+
+  });
+
+}
+
+bindPagoInputs();
+actualizarTotalPago();
+
+
+function copiar_pagos_columna(){
+
+  const filas = document.querySelectorAll("tbody tr");
+
+  filas.forEach(tr => {
+
+    const valorCell = tr.querySelector(".valor-pagar-cell");
+    const pagoInput = tr.querySelector(".js-pago-input");
+
+    if(valorCell && pagoInput){
+
+      const valor = valorCell.dataset.value || valorCell.innerText;
+
+      const numero = aNumero(valor);
+
+      pagoInput.value = formatearNumero(numero);
+
+    }
+
+  });
+
+  actualizarTotalPago();
+
+}
+
+document.getElementById("btnCopiarPagos")
+?.addEventListener("click", copiar_pagos_columna);
+
+
+
+function copiar_medio_pago_columna(){
+
+  const inputs = document.querySelectorAll(".js-medio-pago-input");
+
+  if(!inputs.length){
+    return;
+  }
+
+  const valorBase = (inputs[0].value || "").trim();
+
+  inputs.forEach((inp, index) => {
+    if(index === 0) return;
+    inp.value = valorBase;
+  });
+
+}
+
+document.getElementById("btnCopiarMedioPago")
+?.addEventListener("click", copiar_medio_pago_columna);
+
+
+
+
+function getCookie(name){
+  const v = (`; ${document.cookie}`).split(`; ${name}=`);
+  if(v.length === 2) return v.pop().split(";").shift();
+}
+
+function parseTablaPagoNomina(){
+  const rows = [];
+  const trs = document.querySelectorAll("table tbody tr[data-nomina-empleado-id]");
+
+  trs.forEach(tr => {
+    const tds = tr.querySelectorAll("td");
+    if(!tds || tds.length < 14) return;
+
+    const pagoInput = tr.querySelector(".js-pago-input");
+    const medioPagoInput = tr.querySelector(".js-medio-pago-input");
+
+    rows.push({
+      nomina_empleado_id: tr.dataset.nominaEmpleadoId || "",
+      consecutivo_nomina: (tds[1].innerText || "").trim(),
+      fecha_inicio: (tds[2].innerText || "").trim(),
+      fecha_fin: (tds[3].innerText || "").trim(),
+      contrato: (tds[4].innerText || "").trim(),
+      cedula: (tds[5].innerText || "").trim(),
+      nombre: (tds[6].innerText || "").trim(),
+      tipo_nomina: (tds[7].innerText || "").trim(),
+      tipo_contrato: (tds[8].innerText || "").trim(),
+      cargo: (tds[9].innerText || "").trim(),
+      area: (tds[10].innerText || "").trim(),
+      valor_pagar: (tds[11].innerText || "").trim(),
+      pago: pagoInput ? (pagoInput.value || "").trim() : "",
+      medio_pago: medioPagoInput ? (medioPagoInput.value || "").trim() : "",
+    });
+  });
+
+  return rows;
+}
+
+
+
+const modal = document.getElementById("modalFechaContab");
+const fechaInput = document.getElementById("fechaContabilizacion");
+
+document.getElementById("btnContabilizarPagoNomina")?.addEventListener("click", function(){
+  const noNomina = (document.querySelector('input[name="no_nomina"]')?.value || "").trim();
+
+  if(!noNomina){
+    alert("Debes consultar una nómina antes de contabilizar.");
+    return;
+  }
+
+  const hoy = new Date().toISOString().split("T")[0];
+  fechaInput.value = hoy;
+  modal.style.display = "flex";
+});
+
+document.getElementById("btnCancelarContab")?.addEventListener("click", function(){
+  modal.style.display = "none";
+});
+
+document.getElementById("btnConfirmarContab")?.addEventListener("click", async function(){
+  const noNomina = (document.querySelector('input[name="no_nomina"]')?.value || "").trim();
+  const fechaContabilizacion = (fechaInput.value || "").trim();
+
+  if(!fechaContabilizacion){
+    alert("Debes seleccionar la fecha de contabilización.");
+    return;
+  }
+
+  const filas = parseTablaPagoNomina();
+
+  if(!filas.length){
+    alert("No hay filas para guardar.");
+    return;
+  }
+
+  const resp = await fetch("{% url 'Contabilizar_guardar_nominapago' %}", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": getCookie("csrftoken")
+    },
+    body: JSON.stringify({
+      no_nomina: noNomina,
+      fecha_contabilizacion: fechaContabilizacion,
+      filas: filas
+    })
+  });
+
+  const data = await resp.json();
+
+  if(!data.ok){
+    alert(data.error || "No fue posible contabilizar la nómina pagada.");
+    return;
+  }
+
+  modal.style.display = "none";
+  alert(data.mensaje || "Nómina pagada contabilizada correctamente.");
+  window.location.href = "{% url 'asientos_listar' %}";
+});
+
+
+
+</script>
+
+
+
+</body>
+</html>

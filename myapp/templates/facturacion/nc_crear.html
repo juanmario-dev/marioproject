@@ -1,0 +1,684 @@
+
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Nota Crédito</title>
+
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background:#f7f8fb; }
+    header { background:#021224; color:#fff; padding:18px 20px; font-size:20px; font-weight:bold; }
+    .wrap { padding: 20px; }
+
+    .actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+    .btn{
+      padding:10px 14px;
+      border:none;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:bold;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+    }
+    .btn-primary { background:#007bff; color:#fff; }
+    .btn-secondary { background:#6c757d; color:#fff; }
+    .btn-danger { background:#dc3545; color:#fff; }
+    .btn-success { background:#198754; color:#fff; }
+    .btn-success:hover { background:#157347; }
+    .btn-warning{
+      background:#ffc107;
+      color:#1f2937;
+      border:1px solid #eab308;
+    }
+    .btn-warning:hover{ background:#ffb300; }
+
+    .card {
+      background:#fff;
+      border:1px solid #e5e7eb;
+      border-radius:12px;
+      padding:16px;
+      margin-bottom:18px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 18px;
+      align-items:end;
+    }
+    .col-2  { grid-column: span 2; }
+    .col-3  { grid-column: span 3; }
+    .col-4  { grid-column: span 4; }
+    .col-5  { grid-column: span 4; }
+    .col-6  { grid-column: span 6; }
+    .col-7  { grid-column: span 7; }
+    .col-8  { grid-column: span 8; }
+    .col-9  { grid-column: span 9; }
+    .col-12 { grid-column: span 12; }
+
+    label { font-weight:bold; font-size:13px; margin-bottom:4px; display:block; }
+    input, select, textarea{
+      width:100%;
+      padding:8px;
+      border:1px solid #ccc;
+      border-radius:8px;
+      box-sizing:border-box;
+    }
+    small { color:#555; font-size:12px; }
+    .pill { display:inline-block; padding:3px 8px; border-radius:999px; background:#eef; margin-top:6px; }
+
+    .input-sm { max-width: 180px; }
+    .input-xs { max-width: 140px; }
+
+    table { width:100%; border-collapse:collapse; margin-top:12px; background:#fff; }
+    th, td { border:1px solid #ddd; padding:10px; }
+    th { background:#f2f2f2; }
+    .num { text-align:right; }
+
+    th.w-desc, td.w-desc { width:40%; }
+    th.w-cant, td.w-cant { width:8%; }
+    th.w-std,  td.w-std  { width:13%; }
+
+    .nit-actions { display:flex; flex-direction:column; gap:10px; }
+
+    .totales-wrap { display:flex; justify-content:flex-end; }
+    .totales{
+      width: 320px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+    .totales .row{
+      display:flex;
+      align-items:center;
+      gap:20px;
+    }
+    .totales .row label{
+      width: 120px;
+      margin: 0;
+      font-size:13px;
+    }
+    .totales .row input{
+      flex: 1;
+      text-align:right;
+    }
+
+    .abonos-box { display:flex; gap:8px; align-items:center; flex:1; }
+    .btn-icon{
+      width: 42px;
+      height: 40px;
+      border-radius:10px;
+      border:1px solid #cbd5e1;
+      background:#f1f5f9;
+      cursor:pointer;
+      font-size:18px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .btn-icon:hover { background:#e2e8f0; }
+
+    .pay-box{
+      border:2px dashed #94a3b8;
+      border-radius:12px;
+      padding:16px;
+      background:#f8fafc;
+      text-align:center;
+    }
+    .pay-grid{
+      display:flex;
+      justify-content:center;
+      gap:18px;
+      flex-wrap:wrap;
+      margin-top:12px;
+    }
+    .pay-btn{
+      width:180px;
+      height:90px;
+      border-radius:14px;
+      border:1px solid #cbd5e1;
+      background:#fff;
+      font-size:18px;
+      font-weight:bold;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+  </style>
+</head>
+
+<body>
+<header>NOTA CRÉDITO</header>
+
+<div class="wrap">
+
+  <div class="card">
+    <div class="grid">
+      <div class="col-3">
+        <label>Fecha de la Nota Crédito </label>
+        <input class="input-sm" type="date" id="fecha_factura" value="{{ hoy }}">
+        <small class="pill">Sugerencia: hoy</small>
+      </div>
+
+      <div class="col-2">
+        <label>Días de pago</label>
+        <input class="input-xs" type="number" id="dias_pago" value="0" min="0" step="1">
+      </div>
+
+      <div class="col-3">
+        <label>Fecha vencimiento</label>
+        <input class="input-sm" type="date" id="fecha_venc">
+        <small>Editable</small>
+      </div>
+
+      <div class="col-2">
+        <label>Consecutivo</label>
+        <input class="input-xs" type="text" id="consecutivo">
+        <small>⚡ Sugerido: <strong>{{ consecutivo_sugerido }}</strong></small>
+      </div>
+
+      <div class="col-3">
+        <label>Factura (consecutivo FV)</label>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <input class="input-sm" type="text" id="factura_ref" placeholder="Ej: 000007">
+          <button type="button" class="btn btn-secondary" id="btnBuscarFV">Buscar</button>
+        </div>
+        <small>Escribe el consecutivo FV y presiona Enter o Buscar</small>
+      </div>
+
+      <div class="col-2"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">Datos del cliente</h3>
+
+    <div class="grid">
+      <div class="col-3 nit-actions">
+        <div>
+          <label>NIT (sin dígito)</label>
+          <input id="nit" type="text" placeholder="Escribe el NIT y presiona Enter">
+          <small>Debe existir en Terceros</small>
+        </div>
+
+        <button class="btn btn-success" type="button"
+          onclick="window.open('{% url 'registrar_tercero' %}','_blank')">
+          Crear cliente
+        </button>
+      </div>
+
+      <div class="col-4">
+        <label>Razón social</label>
+        <input id="nombre" type="text" readonly>
+      </div>
+
+      <div class="col-3">
+        <label>Correo</label>
+        <input id="correo" type="text" readonly>
+      </div>
+
+      <div class="col-2">
+        <label>Dirección</label>
+        <input id="direccion" type="text" readonly>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">Motivo de la Nota Crédito</h3>
+    <textarea id="motivo" rows="4" placeholder="Escribe el motivo..." style="width:100%;"></textarea>
+  </div>
+
+  <div class="grid">
+    <div class="col-5">
+      <label>Referencia</label>
+      <input id="ref_input" type="text" placeholder="Escribe mínimo 4 caracteres" list="refList" autocomplete="off">
+      <datalist id="refList"></datalist>
+      <small>Escribe 4+ caracteres y el sistema sugiere referencias existentes</small>
+    </div>
+
+    <div class="col-5">
+      <label>Producto</label>
+      <select id="producto_select">
+        <option value="">-- Seleccione --</option>
+      </select>
+      <small>También puedes buscar por nombre desde aquí</small>
+    </div>
+
+    <button class="btn btn-warning" id="btnAgregarProducto" type="button">➕ Agregar</button>
+  </div>
+
+  <p>.</p><p>.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th class="w-desc">Descripción</th>
+        <th class="num w-cant">Cantidad</th>
+        <th class="num w-std">Precio</th>
+        <th class="num w-std">Descuento</th>
+        <th class="num w-std">Impuestos</th>
+        <th class="num w-std">Total</th>
+      </tr>
+    </thead>
+    <tbody id="tabla"></tbody>
+    <tfoot>
+      <tr>
+        <td colspan="5" class="num"><strong>Subtotal</strong></td>
+        <td class="num"><strong id="subTotal">0</strong></td>
+      </tr>
+    </tfoot>
+  </table>
+
+  <div class="actions">
+    <button class="btn btn-secondary" id="addRowBtn" type="button">Agregar línea</button>
+  </div>
+
+  <div class="card">
+    <div class="totales-wrap">
+      <div class="totales">
+        <div class="row">
+          <label>Subtotal</label>
+          <input id="subtotal2" type="text" readonly value="0">
+        </div>
+
+        <div class="row">
+          <label>IVA</label>
+          <input id="iva" type="text" readonly value="0">
+        </div>
+
+        <div class="row">
+          <label>Retenciones</label>
+          <input id="retenciones" type="text" value="0">
+        </div>
+
+        <div class="row">
+          <label>Abonos</label>
+          <div class="abonos-box">
+            <input id="abonos" type="text" readonly value="0">
+            <button class="btn-icon" id="btnCartera" type="button" title="Ver estado de cartera (pendiente)">🔎</button>
+          </div>
+        </div>
+
+        <div class="row">
+          <label>Total a pagar</label>
+          <input id="total_pagar" type="text" readonly value="0">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card pay-box">
+    <strong>Pague aquí</strong>
+    <div class="pay-grid">
+      <button class="pay-btn" type="button">PSE</button>
+      <button class="pay-btn" type="button">Nequi</button>
+      <button class="pay-btn" type="button">Daviplata</button>
+      <button class="pay-btn" type="button">Tarjeta</button>
+    </div>
+    <div style="margin-top:10px;">
+      <small>En PDF incluiremos código de barras con: NIT + NºFactura + Valor a pagar (fase siguiente).</small>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-primary" id="btnGuardar" type="button">Guardar</button>
+    <a class="btn btn-secondary" id="btnPdf" href="#" target="_blank" data-url-template="{% url 'nc_pdf' 999999 %}">Generar PDF</a>
+    <a class="btn btn-secondary" href="{% url 'facturacioncxc' %}">← Volver</a>
+  </div>
+
+</div>
+
+{{ productos|json_script:"productos-data" }}
+
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  // ✅ declarar ANTES de usarlos
+  const facturaRefInput = document.getElementById("factura_ref");
+  const btnBuscarFV = document.getElementById("btnBuscarFV");
+  const tbody = document.getElementById("tabla");
+
+  // hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+
+  let LAST_NC_ID = null; // para PDF
+
+  async function buscarNCporConsecutivo(cons) {
+    const url = "{% url 'nc_por_consecutivo' %}" + "?consecutivo=" + encodeURIComponent(cons);
+    const resp = await fetch(url, { headers: { "Accept": "application/json" } });
+    const data = await resp.json();
+
+    if (!resp.ok || !data.ok) {
+      alert(data.error || "No se encontró la nota crédito.");
+      return;
+    }
+
+    const n = data.nota;
+
+    LAST_NC_ID = n.id;
+    window.LAST_NC_ID = n.id; // si ya lo usas así
+
+    // cabecera
+    document.getElementById("consecutivo").value = n.consecutivo || "";
+    document.getElementById("fecha_factura").value = n.fecha_nc || ""; // estás usando ese id como fecha NC
+    document.getElementById("factura_ref").value = n.factura_origen || "";
+
+    // tercero
+    document.getElementById("nit").value = n.nit || "";
+    document.getElementById("nombre").value = n.razon_social || "";
+    document.getElementById("correo").value = n.correo || "";
+    document.getElementById("direccion").value = n.direccion || "";
+
+    // motivo
+    document.getElementById("motivo").value = n.motivo || "";
+
+    // tabla
+    tbody.innerHTML = "";
+    (data.lineas || []).forEach(linea => {
+      addRow();
+      const tr = tbody.lastElementChild;
+
+      tr.querySelector(".desc").value = linea.descripcion || "";
+      tr.querySelector(".cant").value = linea.cantidad || "1";
+      setMoneyInput(tr.querySelector(".precio"), Number(linea.precio || 0));
+      tr.querySelector(".dto").value = Number(linea.descuento_pct || 0);
+      tr.querySelector(".imp").value = Number(linea.impuesto_pct || 0);
+      tr.querySelector(".total_linea").textContent = formatMoneyText(linea.total || 0);
+    });
+
+    recalc();
+    alert("✅ NC cargada: " + (n.consecutivo || ""));
+   }
+
+   const ncConsInput = document.getElementById("consecutivo");
+
+   ncConsInput.addEventListener("blur", () => {
+  const cons = (ncConsInput.value || "").trim();
+    if (!cons) return;
+    buscarNCporConsecutivo(cons);
+  });
+
+  ncConsInput.addEventListener("keydown", (e) => {
+   if (e.key === "Enter") {
+     e.preventDefault();
+     ncConsInput.blur();
+    }
+  });
+
+
+
+  // hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+
+  let FV_ORIGEN_ID = null;
+  window.LAST_NC_ID = null;
+
+  if (!facturaRefInput || !btnBuscarFV || !tbody) {
+    alert("❌ Faltan elementos en el HTML (factura_ref / btnBuscarFV / tabla). Mira consola.");
+    return;
+  }
+
+  // ===== CSRF =====
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return '';
+  }
+
+  // ===== helpers dinero =====
+  const fmtCOP = new Intl.NumberFormat('es-CO', { maximumFractionDigits: 0 });
+
+  function parseMoneyInput(inp) {
+    const raw = (inp?.dataset?.raw || "0").toString();
+    const n = Number(raw || 0);
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  function setMoneyInput(inp, value) {
+    const n = Number(value || 0);
+    const safe = Number.isFinite(n) ? Math.max(0, Math.round(n)) : 0;
+    inp.dataset.raw = String(safe);
+    inp.value = safe ? fmtCOP.format(safe) : "";
+  }
+
+  function initMoneyInput(inp) {
+    if (!inp) return;
+    const initialDigits = (inp.value || "").replace(/\D/g, "");
+    inp.dataset.raw = initialDigits || (inp.dataset.raw || "0");
+    inp.value = inp.dataset.raw && inp.dataset.raw !== "0"
+      ? fmtCOP.format(Number(inp.dataset.raw))
+      : "";
+
+    inp.addEventListener("input", () => {
+      const digits = (inp.value || "").replace(/\D/g, "");
+      inp.dataset.raw = digits || "0";
+      inp.value = digits && digits !== "0" ? fmtCOP.format(Number(digits)) : "";
+    });
+  }
+
+  function formatMoneyText(value) {
+    const n = Number(value || 0);
+    const safe = Number.isFinite(n) ? Math.round(n) : 0;
+    return fmtCOP.format(safe);
+  }
+
+  // ✅ limpia números tipo "1.234.567"
+  function parseTextNumber(v) {
+    return Number(String(v || "0").replace(/[^\d.-]/g, "")) || 0;
+  }
+
+  // ===== tabla =====
+  function addRow() {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td class="w-desc"><input class="desc" type="text" placeholder="Descripción"></td>
+      <td class="w-cant"><input class="cant num" type="number" min="0" step="1" value="1"></td>
+      <td class="w-std"><input class="precio num money" type="text" inputmode="numeric" data-raw="0" value=""></td>
+      <td class="w-std"><input class="dto num" type="number" min="0" step="0.01" value="0"></td>
+      <td class="w-std"><input class="imp num" type="number" min="0" step="0.01" value="0"></td>
+      <td class="w-std num"><strong class="total_linea">0</strong></td>
+    `;
+    tbody.appendChild(tr);
+
+    initMoneyInput(tr.querySelector(".money"));
+
+    tr.querySelectorAll("input").forEach(inp => inp.addEventListener("input", recalc));
+    tr.querySelectorAll("input").forEach(inp => inp.addEventListener("change", recalc));
+  }
+
+  function recalc() {
+    let subtotal = 0;
+    let totalImpuestos = 0;
+
+    tbody.querySelectorAll("tr").forEach(tr => {
+      const cant = parseFloat(tr.querySelector(".cant").value || "0");
+      const precio = parseMoneyInput(tr.querySelector(".precio"));
+      const dtoPct = parseFloat(tr.querySelector(".dto").value || "0");
+      const impPct = parseFloat(tr.querySelector(".imp").value || "0");
+
+      const bruto = cant * precio;
+      const base = bruto - (bruto * dtoPct / 100);
+      const total = base * (1 + impPct / 100);
+      const impuestos = total - base;
+
+      tr.querySelector(".total_linea").textContent = formatMoneyText(total);
+
+      subtotal += base;
+      totalImpuestos += impuestos;
+    });
+
+    document.getElementById("subTotal").textContent = formatMoneyText(subtotal);
+    document.getElementById("subtotal2").value = formatMoneyText(subtotal);
+    document.getElementById("iva").value = formatMoneyText(totalImpuestos);
+
+    const ret = parseTextNumber(document.getElementById("retenciones").value);
+    const ab  = parseTextNumber(document.getElementById("abonos").value);
+
+    const totalPagar = Math.max(0, (subtotal + totalImpuestos) - ret - ab);
+    document.getElementById("total_pagar").value = formatMoneyText(totalPagar);
+  }
+
+  document.getElementById("retenciones").addEventListener("input", recalc);
+  document.getElementById("retenciones").addEventListener("change", recalc);
+
+  // init
+  addRow();
+  recalc();
+
+  function collectLineasNC() {
+    const lineas = [];
+    tbody.querySelectorAll("tr").forEach(tr => {
+      const desc = tr.querySelector(".desc")?.value?.trim() || "";
+      if (!desc) return;
+
+      const cant = Number(tr.querySelector(".cant")?.value || 0);
+      const precio = Number(tr.querySelector(".precio")?.dataset?.raw || 0);
+      const dto = Number(tr.querySelector(".dto")?.value || 0);
+      const imp = Number(tr.querySelector(".imp")?.value || 0);
+
+      lineas.push({
+        descripcion: desc,
+        cantidad: cant,
+        precio,
+        descuento_pct: dto,
+        impuesto_pct: imp
+      });
+    });
+    return lineas;
+  }
+
+  // ===== Guardar NC =====
+  document.getElementById("btnGuardar").addEventListener("click", async () => {
+    const payload = {
+      consecutivo: document.getElementById("consecutivo").value,
+      fecha_nc: document.getElementById("fecha_factura").value,
+      factura_ref: document.getElementById("factura_ref").value,
+      fv_origen_id: FV_ORIGEN_ID,
+
+      nit: document.getElementById("nit").value,
+      razon_social: document.getElementById("nombre").value,
+      correo: document.getElementById("correo").value,
+      direccion: document.getElementById("direccion").value,
+
+      motivo: document.getElementById("motivo").value,
+
+      subtotal: (document.getElementById("subtotal2").value || "0").replace(/[^\d.-]/g, ""),
+      iva: (document.getElementById("iva").value || "0").replace(/[^\d.-]/g, ""),
+      total: (document.getElementById("total_pagar").value || "0").replace(/[^\d.-]/g, ""),
+
+      lineas: collectLineasNC(),
+    };
+
+    if (!payload.fv_origen_id && !payload.factura_ref.trim()) {
+      alert("Debes buscar una factura origen para crear la NC.");
+      return;
+    }
+    if (!payload.lineas.length) {
+      alert("Debes agregar al menos una línea.");
+      return;
+    }
+
+    const resp = await fetch("{% url 'nc_guardar' %}", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCookie("csrftoken"),
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await resp.json();
+    if (!resp.ok || !data.ok) {
+      alert("Error guardando NC: " + (data.error || "desconocido"));
+      return;
+    }
+
+    alert("NC guardada ✅ Consecutivo: " + data.consecutivo);
+    document.getElementById("consecutivo").value = data.consecutivo;
+    window.LAST_NC_ID = data.id;
+  });
+
+  // ===== PDF NC =====
+  document.getElementById("btnPdf").addEventListener("click", function(e){
+    e.preventDefault();
+    if(!window.LAST_NC_ID){
+      alert("Primero guarda o consulta una NC.");
+      return;
+    }
+    const a = document.getElementById("btnPdf");
+    const template = a.dataset.urlTemplate;
+    const url = template.replace("999999", String(window.LAST_NC_ID));
+    window.open(url, "_blank");
+  });
+
+  // ===== Cargar FV =====
+  function fillDesdeFactura(payload) {
+    const f = payload.factura;
+    FV_ORIGEN_ID = f.id || null;
+
+    document.getElementById("fecha_factura").value = f.fecha_factura || "";
+    document.getElementById("dias_pago").value = f.dias_pago ?? 0;
+    document.getElementById("fecha_venc").value = f.fecha_vencimiento || "";
+
+    document.getElementById("nit").value = f.nit || "";
+    document.getElementById("nombre").value = f.razon_social || "";
+    document.getElementById("correo").value = f.correo || "";
+    document.getElementById("direccion").value = f.direccion || "";
+
+    tbody.innerHTML = "";
+    (payload.lineas || []).forEach(linea => {
+      addRow();
+      const tr = tbody.lastElementChild;
+
+      tr.querySelector(".desc").value = linea.descripcion || "";
+      tr.querySelector(".cant").value = linea.cantidad || "1";
+      setMoneyInput(tr.querySelector(".precio"), Number(linea.precio || 0));
+      tr.querySelector(".dto").value = Number(linea.descuento_pct || 0);
+      tr.querySelector(".imp").value = Number(linea.impuesto_pct || 0);
+    });
+
+    recalc();
+    alert("✅ FV cargada: " + (f.consecutivo || ""));
+  }
+
+  async function buscarFacturaParaNC(cons) {
+    const url = "{% url 'fv_por_consecutivo' %}" + "?consecutivo=" + encodeURIComponent(cons);
+    const resp = await fetch(url, { headers: { "Accept": "application/json" } });
+    const data = await resp.json();
+
+    if (!resp.ok || !data.ok) {
+      alert(data.error || "No se encontró la factura.");
+      return;
+    }
+    fillDesdeFactura(data);
+  }
+
+  btnBuscarFV.addEventListener("click", () => {
+    const cons = (facturaRefInput.value || "").trim();
+    if (!cons) return alert("Digite el consecutivo FV.");
+    buscarFacturaParaNC(cons);
+  });
+
+  facturaRefInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const cons = (facturaRefInput.value || "").trim();
+      if (!cons) return alert("Digite el consecutivo FV.");
+      buscarFacturaParaNC(cons);
+    }
+  });
+
+});
+</script>
+
+
+</body>
+</html>

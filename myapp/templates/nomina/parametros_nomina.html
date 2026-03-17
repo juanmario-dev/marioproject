@@ -1,0 +1,990 @@
+
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Parámetros</title>
+
+  <style>
+    :root{
+      --bg:#f6f7fb;
+      --nav:#021224;
+      --card:#fff;
+      --border:#e5e7eb;
+      --text:#0f172a;
+      --muted:#64748b;
+
+      /* Tabs */
+      --tab:#0ea5e9;
+      --tab-dark:#0284c7;
+      --tab-soft:#e0f2fe;
+      --ring: rgba(14,165,233,.18);
+
+      /* Excel-ish */
+      --grid:#e5e7eb;
+      --grid2:#eef2f7;
+      --head:#f3f4f6;
+      --zebra:#fbfbfd;
+      --hover:#f6faff;
+
+      --shadow: 0 8px 18px rgba(2,18,36,.08);
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    header{
+      background: var(--nav);
+      color:#fff;
+      padding: 12px 14px;
+      text-align:center;
+      font-size: 16px;
+      font-weight: 900;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 6px 14px rgba(2,18,36,.16);
+      letter-spacing:.2px;
+    }
+
+    .wrap{
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 12px 10px 26px;
+    }
+
+    .panel{
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      padding: 12px;
+    }
+
+    .title{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .title h1{
+      margin:0;
+      font-size: 15px;
+      font-weight: 900;
+      letter-spacing:.2px;
+      color:#021224;
+    }
+    .subtitle{
+      margin-top:4px;
+      font-size: 11.5px;
+      color: var(--muted);
+      font-weight: 600;
+      line-height: 1.25;
+    }
+
+    /* Tabs chips */
+    .tabbar{
+      display:flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items:center;
+      border-top: 1px solid #eef2f7;
+      padding-top: 10px;
+      margin-top: 6px;
+    }
+    .tabbtn{
+      border: 1px solid rgba(2,132,199,.22);
+      background: linear-gradient(180deg, #ffffff 0%, var(--tab-soft) 100%);
+      color:#0b2b3a;
+      padding: 8px 12px;
+      border-radius: 12px;
+      font-weight: 900;
+      cursor:pointer;
+      transition: all .12s ease;
+      user-select:none;
+      display:inline-flex;
+      gap: 8px;
+      align-items:center;
+      box-shadow: none;
+    }
+    .tabbtn:hover{
+      transform: translateY(-1px);
+      border-color: rgba(2,132,199,.35);
+    }
+    .tabbtn.active{
+      background: linear-gradient(180deg, var(--tab) 0%, var(--tab-dark) 100%);
+      border-color: rgba(2,132,199,.55);
+      color:#fff;
+      box-shadow: 0 8px 16px rgba(14,165,233,.18);
+    }
+    .pill{
+      font-size: 10.5px;
+      font-weight: 900;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.75);
+      border: 1px solid rgba(255,255,255,.55);
+      color:#0b2b3a;
+    }
+    .tabbtn.active .pill{
+      background: rgba(255,255,255,.18);
+      border-color: rgba(255,255,255,.25);
+      color:#fff;
+    }
+
+    .pane{ display:none; margin-top: 10px; }
+    .pane.active{ display:block; }
+
+    /* Excel table card */
+    .table-card{
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      overflow:hidden;
+      background:#f8fafc;
+      box-shadow: none;
+    }
+    .table-head{
+      padding: 10px 12px;
+      background: #f1f5f9;
+      border-bottom: 1px solid #d1d5db;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .table-head .h{
+      font-weight: 900;
+      color:#021224;
+      letter-spacing:.2px;
+      font-size: 13px;
+    }
+    .table-head .note{
+      font-size: 11.5px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .table-scroll{
+      overflow:auto;
+      width: 100%;
+      background:#fff;
+    }
+
+    table{
+      border-collapse: collapse;
+      width: 100%;
+      min-width: 720px;
+      font-size: 12px;
+    }
+    thead th{
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: var(--head);
+      border-bottom: 1px solid #cbd5e1;
+      border-right: 1px solid var(--grid);
+      color: #111827;
+      font-size: 11px;
+      letter-spacing: .2px;
+      text-align:left;
+      padding: 8px 8px;
+      white-space: nowrap;
+      font-weight: 900;
+    }
+    thead th:last-child{ border-right: none; }
+
+    tbody td{
+      border-top: 1px solid var(--grid);
+      border-right: 1px solid var(--grid2);
+      padding: 7px 8px;
+      vertical-align: middle;
+      background:#fff;
+    }
+    tbody td:last-child{ border-right: none; }
+
+    tbody tr:nth-child(even) td{ background: var(--zebra); }
+    tbody tr:hover td{ background: var(--hover); }
+
+    /* Row selection */
+    tr.row-selected td{
+      outline: 2px solid rgba(14,165,233,.30);
+      outline-offset: -2px;
+      background: #f0f9ff !important;
+    }
+
+    .inp{
+      width: 100%;
+      min-width: 140px;
+      padding: 6px 7px;
+      border-radius: 6px;
+      border: 1px solid #d1d5db;
+      outline: none;
+      font-size: 12px;
+      background:#fff;
+      box-shadow: none;
+    }
+    .inp:focus{
+      border-color: rgba(14,165,233,.7);
+      box-shadow: 0 0 0 2px var(--ring);
+    }
+
+    .mini{ min-width: 110px; }
+
+    /* Toggle (activo) */
+    .toggle{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+    }
+    .switch{
+      position: relative;
+      width: 42px;
+      height: 22px;
+      display:inline-block;
+    }
+    .switch input{ display:none; }
+    .slider{
+      position:absolute;
+      inset:0;
+      background:#e5e7eb;
+      border-radius: 999px;
+      border: 1px solid #d1d5db;
+      transition: .15s ease;
+    }
+    .slider:before{
+      content:"";
+      position:absolute;
+      width: 18px;
+      height: 18px;
+      left: 2px;
+      top: 1px;
+      background:#fff;
+      border-radius: 999px;
+      border: 1px solid #d1d5db;
+      transition: .15s ease;
+      box-shadow: 0 2px 6px rgba(2,18,36,.12);
+    }
+    .switch input:checked + .slider{
+      background: rgba(14,165,233,.35);
+      border-color: rgba(2,132,199,.45);
+    }
+    .switch input:checked + .slider:before{
+      transform: translateX(20px);
+      border-color: rgba(2,132,199,.35);
+    }
+    .tag{
+      font-size: 11px;
+      font-weight: 900;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid #d1d5db;
+      background:#fff;
+      color:#111827;
+    }
+
+    /* Actions */
+    .actions{
+      margin-top: 10px;
+      display:flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content:flex-end;
+      padding-top: 10px;
+      border-top: 1px solid #eef2f7;
+    }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      border-radius: 12px;
+      padding: 8px 12px;
+      font-weight: 900;
+      text-decoration:none;
+      cursor:pointer;
+      border: 1px solid var(--border);
+      background:#fff;
+      color: var(--text);
+      transition: all .12s ease;
+      user-select:none;
+      font-size: 12.5px;
+    }
+    .btn:hover{ transform: translateY(-1px); }
+
+    .btn-primary{
+      border:none;
+      color:#fff;
+      background: linear-gradient(180deg, var(--tab) 0%, var(--tab-dark) 100%);
+      box-shadow: 0 10px 16px rgba(14,165,233,.18);
+    }
+    .btn-danger{
+      border: 1px solid rgba(220,53,69,.25);
+      color:#b42318;
+      background:#fff;
+    }
+    .btn-soft{
+      border: 1px solid rgba(2,132,199,.22);
+      background: #f0f9ff;
+      color:#0b2b3a;
+    }
+
+    .hint{
+      font-size: 11.5px;
+      color: var(--muted);
+      font-weight: 600;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+
+<body>
+<header>PARÁMETROS</header>
+
+<div class="wrap">
+  <div class="panel">
+
+    <div class="title">
+      <div>
+        <h1>Parámetros</h1>
+        <div class="subtitle">Configura listas maestras para nómina (ya conectado a BD).</div>
+      </div>
+    </div>
+
+    <div class="tabbar" role="tablist" aria-label="Menú de parámetros">
+      <button class="tabbtn active" type="button" data-tab="generales" role="tab" aria-selected="true">
+        Datos generales <span class="pill" id="pill-generales">0</span>
+      </button>
+      <button class="tabbtn" type="button" data-tab="tipos_nomina" role="tab" aria-selected="false">
+        Tipos de Nómina <span class="pill" id="pill-tipos_nomina">0</span>
+      </button>
+      <button class="tabbtn" type="button" data-tab="tipos_contrato" role="tab" aria-selected="false">
+        Tipos de contrato <span class="pill" id="pill-tipos_contrato">0</span>
+      </button>
+      <button class="tabbtn" type="button" data-tab="areas" role="tab" aria-selected="false">
+        Áreas institucionales <span class="pill" id="pill-areas">0</span>
+      </button>
+
+      <button class="tabbtn" type="button" data-tab="salario_minimo" role="tab" aria-selected="false">
+        Salario mínimo <span class="pill" id="pill-salario_minimo">0</span>
+      </button>
+      <button class="tabbtn" type="button" data-tab="auxilio_transporte" role="tab" aria-selected="false">
+        Auxilio transporte <span class="pill" id="pill-auxilio_transporte">0</span>
+      </button>
+      <button class="tabbtn" type="button" data-tab="uvt" role="tab" aria-selected="false">
+        UVT <span class="pill" id="pill-uvt">0</span>
+      </button>
+
+
+
+    </div>
+
+    <!-- ====== Pane: Generales ====== -->
+    <section class="pane active" id="pane-generales" role="tabpanel">
+      <div class="table-card">
+        <div class="table-head">
+          <div class="h">Datos generales</div>
+          <div class="note">Agregar filas ilimitadas.</div>
+        </div>
+
+        <div class="table-scroll">
+          <table id="table-generales">
+            <thead>
+              <tr>
+                <th style="width:140px;">Consecutivo</th>
+                <th>Descripción</th>
+                <th style="width:140px;">Activo</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in rows_generales %}
+              <tr data-id="{{ r.id }}">
+                <td><input class="inp mini" value="{{ r.consecutivo }}" placeholder="Ej: 0001"></td>
+                <td><input class="inp" value="{{ r.descripcion }}" placeholder="Descripción..."></td>
+                <td>
+                  <div class="toggle">
+                    <label class="switch" title="Activar / Desactivar">
+                      <input type="checkbox" {% if r.activo %}checked{% endif %}>
+                      <span class="slider"></span>
+                    </label>
+                    <span class="tag">{% if r.activo %}Activo{% else %}Inactivo{% endif %}</span>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-soft" type="button" data-add="generales">+ Nueva fila</button>
+          <button class="btn btn-primary" type="button" data-save="generales">Guardar</button>
+          <button class="btn btn-soft" type="button" data-edit="generales">Modificar</button>
+          <button class="btn btn-danger" type="button" data-del="generales">Eliminar</button>
+          <a class="btn" href="{% url 'nomina_panel' %}">Regresar</a>
+        </div>
+      </div>
+      <div class="hint">Tip: Haz clic sobre una fila para seleccionarla.</div>
+    </section>
+
+    <!-- ====== Pane: Tipos Nómina ====== -->
+    <section class="pane" id="pane-tipos_nomina" role="tabpanel">
+      <div class="table-card">
+        <div class="table-head">
+          <div class="h">Tipos de Nómina</div>
+          <div class="note">Agregar filas ilimitadas.</div>
+        </div>
+
+        <div class="table-scroll">
+          <table id="table-tipos_nomina">
+            <thead>
+              <tr>
+                <th style="width:140px;">Consecutivo</th>
+                <th>Descripción</th>
+                <th style="width:140px;">Activo</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in rows_tipos_nomina %}
+              <tr data-id="{{ r.id }}">
+                <td><input class="inp mini" value="{{ r.consecutivo }}" placeholder="Ej: 0001"></td>
+                <td><input class="inp" value="{{ r.descripcion }}" placeholder="Descripción..."></td>
+                <td>
+                  <div class="toggle">
+                    <label class="switch" title="Activar / Desactivar">
+                      <input type="checkbox" {% if r.activo %}checked{% endif %}>
+                      <span class="slider"></span>
+                    </label>
+                    <span class="tag">{% if r.activo %}Activo{% else %}Inactivo{% endif %}</span>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-soft" type="button" data-add="tipos_nomina">+ Nueva fila</button>
+          <button class="btn btn-primary" type="button" data-save="tipos_nomina">Guardar</button>
+          <button class="btn btn-soft" type="button" data-edit="tipos_nomina">Modificar</button>
+          <button class="btn btn-danger" type="button" data-del="tipos_nomina">Eliminar</button>
+          <a class="btn" href="{% url 'nomina_panel' %}">Regresar</a>
+        </div>
+      </div>
+      <div class="hint">Tip: Haz clic sobre una fila para seleccionarla.</div>
+    </section>
+
+    <!-- ====== Pane: Tipos Contrato ====== -->
+    <section class="pane" id="pane-tipos_contrato" role="tabpanel">
+      <div class="table-card">
+        <div class="table-head">
+          <div class="h">Tipos de contrato</div>
+          <div class="note">Agregar filas ilimitadas.</div>
+        </div>
+
+        <div class="table-scroll">
+          <table id="table-tipos_contrato">
+            <thead>
+              <tr>
+                <th style="width:140px;">Consecutivo</th>
+                <th>Descripción</th>
+                <th style="width:140px;">Activo</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in rows_tipos_contrato %}
+              <tr data-id="{{ r.id }}">
+                <td><input class="inp mini" value="{{ r.consecutivo }}" placeholder="Ej: 0001"></td>
+                <td><input class="inp" value="{{ r.descripcion }}" placeholder="Descripción..."></td>
+                <td>
+                  <div class="toggle">
+                    <label class="switch" title="Activar / Desactivar">
+                      <input type="checkbox" {% if r.activo %}checked{% endif %}>
+                      <span class="slider"></span>
+                    </label>
+                    <span class="tag">{% if r.activo %}Activo{% else %}Inactivo{% endif %}</span>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-soft" type="button" data-add="tipos_contrato">+ Nueva fila</button>
+          <button class="btn btn-primary" type="button" data-save="tipos_contrato">Guardar</button>
+          <button class="btn btn-soft" type="button" data-edit="tipos_contrato">Modificar</button>
+          <button class="btn btn-danger" type="button" data-del="tipos_contrato">Eliminar</button>
+          <a class="btn" href="{% url 'nomina_panel' %}">Regresar</a>
+        </div>
+      </div>
+      <div class="hint">Tip: Haz clic sobre una fila para seleccionarla.</div>
+    </section>
+
+    <!-- ====== Pane: Áreas ====== -->
+<section class="pane" id="pane-areas" role="tabpanel">
+      <div class="table-card">
+        <div class="table-head">
+          <div class="h">Áreas institucionales</div>
+          <div class="note">Agregar filas ilimitadas.</div>
+        </div>
+
+        <div class="table-scroll">
+          <table id="table-areas">
+            <thead>
+              <tr>
+                <th style="width:140px;">Consecutivo</th>
+                <th>Descripción</th>
+                <th style="width:140px;">Activo</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in rows_areas %}
+              <tr data-id="{{ r.id }}">
+                <td><input class="inp mini" value="{{ r.consecutivo }}" placeholder="Ej: 0001"></td>
+                <td><input class="inp" value="{{ r.descripcion }}" placeholder="Descripción..."></td>
+                <td>
+                  <div class="toggle">
+                    <label class="switch" title="Activar / Desactivar">
+                      <input type="checkbox" {% if r.activo %}checked{% endif %}>
+                      <span class="slider"></span>
+                    </label>
+                    <span class="tag">{% if r.activo %}Activo{% else %}Inactivo{% endif %}</span>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-soft" type="button" data-add="areas">+ Nueva fila</button>
+          <button class="btn btn-primary" type="button" data-save="areas">Guardar</button>
+          <button class="btn btn-soft" type="button" data-edit="areas">Modificar</button>
+          <button class="btn btn-danger" type="button" data-del="areas">Eliminar</button>
+          <a class="btn" href="{% url 'nomina_panel' %}">Regresar</a>
+        </div>
+      </div>
+      <div class="hint">Tip: Haz clic sobre una fila para seleccionarla.</div>
+</section>
+
+    <!-- ====== Pane: salario minimo ====== -->
+
+<section class="pane" id="pane-salario_minimo" role="tabpanel">
+  <div class="table-card">
+    <div class="table-head">
+      <div class="h">Salario mínimo</div>
+      <div class="note">Año y valor. Filas ilimitadas.</div>
+    </div>
+
+    <div class="table-scroll">
+      <table id="table-salario_minimo" data-kind="anio_valor">
+        <thead>
+          <tr>
+            <th style="width:160px;">Año</th>
+            <th style="width:260px;">Valor</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in rows_salario_minimo %}
+          <tr data-id="{{ r.id }}">
+            <td><input class="inp mini" value="{{ r.consecutivo }}" placeholder="Ej: 2026"></td>
+            <td><input class="inp money" value="{{ r.descripcion }}" placeholder="Ej: 1.300.000"></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-soft" type="button" data-add="salario_minimo">+ Nueva fila</button>
+      <button class="btn btn-primary" type="button" data-save="salario_minimo">Guardar</button>
+      <button class="btn btn-soft" type="button" data-edit="salario_minimo">Modificar</button>
+      <button class="btn btn-danger" type="button" data-del="salario_minimo">Eliminar</button>
+      <a class="btn" href="{% url 'nomina_panel' %}">Regresar</a>
+    </div>
+  </div>
+  <div class="hint">Tip: Haz clic sobre una fila para seleccionarla.</div>
+</section>
+
+    <!-- ====== Pane: Auxilio de transporte ====== -->
+     <section class="pane" id="pane-auxilio_transporte" role="tabpanel">
+  <div class="table-card">
+    <div class="table-head">
+      <div class="h">Auxilio de transporte</div>
+      <div class="note">Año y valor. Filas ilimitadas.</div>
+    </div>
+
+    <div class="table-scroll">
+      <table id="table-auxilio_transporte" data-kind="anio_valor">
+        <thead>
+          <tr>
+            <th style="width:160px;">Año</th>
+            <th style="width:260px;">Valor</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in rows_auxilio_transporte %}
+          <tr data-id="{{ r.id }}">
+            <td><input class="inp mini" value="{{ r.consecutivo }}" placeholder="Ej: 2026"></td>
+            <td><input class="inp money" value="{{ r.descripcion }}" placeholder="Ej: 162.000"></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-soft" type="button" data-add="auxilio_transporte">+ Nueva fila</button>
+      <button class="btn btn-primary" type="button" data-save="auxilio_transporte">Guardar</button>
+      <button class="btn btn-soft" type="button" data-edit="auxilio_transporte">Modificar</button>
+      <button class="btn btn-danger" type="button" data-del="auxilio_transporte">Eliminar</button>
+      <a class="btn" href="{% url 'nomina_panel' %}">Regresar</a>
+    </div>
+  </div>
+  <div class="hint">Tip: Haz clic sobre una fila para seleccionarla.</div>
+</section>
+
+
+    <!-- ====== Pane: UVT ====== -->
+
+<section class="pane" id="pane-uvt" role="tabpanel">
+  <div class="table-card">
+    <div class="table-head">
+      <div class="h">UVT</div>
+      <div class="note">Año y valor. Filas ilimitadas.</div>
+    </div>
+
+    <div class="table-scroll">
+      <table id="table-uvt" data-kind="anio_valor">
+        <thead>
+          <tr>
+            <th style="width:160px;">Año</th>
+            <th style="width:260px;">Valor</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in rows_uvt %}
+          <tr data-id="{{ r.id }}">
+            <td><input class="inp mini" value="{{ r.consecutivo }}" placeholder="Ej: 2026"></td>
+            <td><input class="inp money" value="{{ r.descripcion }}" placeholder="Ej: 47.065"></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-soft" type="button" data-add="uvt">+ Nueva fila</button>
+      <button class="btn btn-primary" type="button" data-save="uvt">Guardar</button>
+      <button class="btn btn-soft" type="button" data-edit="uvt">Modificar</button>
+      <button class="btn btn-danger" type="button" data-del="uvt">Eliminar</button>
+      <a class="btn" href="{% url 'nomina_panel' %}">Regresar</a>
+    </div>
+  </div>
+  <div class="hint">Tip: Haz clic sobre una fila para seleccionarla.</div>
+</section>
+    
+
+  </div>
+</div>
+
+<script>
+  // ===== Tabs =====
+  const tabButtons = Array.from(document.querySelectorAll(".tabbtn"));
+  const panes = {
+    generales: document.getElementById("pane-generales"),
+    tipos_nomina: document.getElementById("pane-tipos_nomina"),
+    tipos_contrato: document.getElementById("pane-tipos_contrato"),
+    areas: document.getElementById("pane-areas"),
+
+    salario_minimo: document.getElementById("pane-salario_minimo"),
+    auxilio_transporte: document.getElementById("pane-auxilio_transporte"),
+    uvt: document.getElementById("pane-uvt"),
+
+  };
+
+  function setActive(tab){
+    tabButtons.forEach(b => {
+      const isActive = b.dataset.tab === tab;
+      b.classList.toggle("active", isActive);
+      b.setAttribute("aria-selected", isActive ? "true" : "false");
+    });
+    Object.keys(panes).forEach(k => panes[k].classList.toggle("active", k === tab));
+  }
+  tabButtons.forEach(btn => btn.addEventListener("click", () => setActive(btn.dataset.tab)));
+
+  // ===== CSRF =====
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+  const csrftoken = getCookie('csrftoken');
+
+  // ===== Selección =====
+  const selected = {
+    generales:null, tipos_nomina:null, tipos_contrato:null, areas:null,
+    salario_minimo:null, auxilio_transporte:null, uvt:null
+  };
+
+  function bindRowClicks(key){
+    const tbody = document.querySelector(`#table-${key} tbody`);
+    tbody.querySelectorAll("tr").forEach(tr => {
+      tr.addEventListener("click", () => selectRow(key, tr));
+      const chk = tr.querySelector("input[type='checkbox']");
+      const tag = tr.querySelector(".tag");
+      if(chk && tag){
+        chk.addEventListener("change", () => tag.textContent = chk.checked ? "Activo" : "Inactivo");
+      }
+    });
+  }
+
+  function selectRow(key, tr){
+    const tbody = document.querySelector(`#table-${key} tbody`);
+    tbody.querySelectorAll("tr").forEach(r => r.classList.remove("row-selected"));
+    tr.classList.add("row-selected");
+    selected[key] = tr;
+  }
+
+  // ===== Pills =====
+  function updatePill(key){
+    const tbody = document.querySelector(`#table-${key} tbody`);
+    const count = tbody.querySelectorAll("tr").length;
+    const pill = document.getElementById(`pill-${key}`);
+    if(pill) pill.textContent = String(count);
+  }
+
+  // ===== Crear fila UI =====
+ 
+  function makeRow(kind="std"){
+    const tr = document.createElement("tr");
+
+    if(kind === "anio_valor"){
+      tr.innerHTML = `
+        <td><input class="inp mini" placeholder="Ej: 2026"></td>
+        <td><input class="inp money" placeholder="Ej: 1.300.000"></td>
+     `;
+     return tr;
+    }
+
+    // std (tu tabla tradicional)
+    tr.innerHTML = `
+      <td><input class="inp mini" placeholder="Ej: 0001"></td>
+      <td><input class="inp" placeholder="Descripción..."></td>
+      <td>
+        <div class="toggle">
+          <label class="switch" title="Activar / Desactivar">
+            <input type="checkbox" checked>
+            <span class="slider"></span>
+          </label>
+          <span class="tag">Activo</span>
+        </div>
+      </td>
+     `;
+     return tr;
+  }
+
+
+  function addRow(key){
+    const table = document.querySelector(`#table-${key}`);
+    const kind = table.getAttribute("data-kind") || "std";
+    const tbody = table.querySelector("tbody");
+
+    const tr = makeRow(kind);
+
+    tr.addEventListener("click", () => selectRow(key, tr));
+
+    // si es std, enlazar toggle/tag
+    if(kind === "std"){
+      const chk = tr.querySelector("input[type='checkbox']");
+      const tag = tr.querySelector(".tag");
+      if(chk && tag){
+        chk.addEventListener("change", () => tag.textContent = chk.checked ? "Activo" : "Inactivo");
+      }
+    }
+
+    tbody.appendChild(tr);
+    updatePill(key);
+  }
+
+
+
+  // ===== Helpers =====
+
+  function readRow(tr){
+    const tds = tr.querySelectorAll("td");
+    const id = tr.getAttribute("data-id");
+    const categoria = tr.closest("table")?.id?.replace("table-","") || "";
+
+    const kind = tr.closest("table")?.getAttribute("data-kind") || "std";
+
+    if(kind === "anio_valor"){
+      const anio = (tds[0].querySelector("input")?.value || "").trim();
+      const valor = (tds[1].querySelector("input")?.value || "").trim();
+      // Guardamos en el mismo modelo:
+      // consecutivo = año
+      // descripcion = valor
+      return { id: id ? Number(id) : null, consecutivo: anio, descripcion: valor, activo: true };
+    }
+
+    // std
+    const consecutivo = (tds[0].querySelector("input")?.value || "").trim();
+    const descripcion = (tds[1].querySelector("input")?.value || "").trim();
+    const activo = !!tds[2].querySelector("input[type='checkbox']")?.checked;
+    return { id: id ? Number(id) : null, consecutivo, descripcion, activo };
+  }
+
+
+
+
+  function writeRowId(tr, id){
+    tr.setAttribute("data-id", String(id));
+  }
+
+  async function apiPost(url, data){
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": csrftoken,
+      },
+      body: JSON.stringify(data)
+    });
+    const json = await res.json().catch(()=> ({}));
+    if(!res.ok || !json.ok){
+      throw new Error(json.error || "Error servidor.");
+    }
+    return json;
+  }
+
+  async function guardarTab(key){
+    const tbody = document.querySelector(`#table-${key} tbody`);
+    const trs = Array.from(tbody.querySelectorAll("tr"));
+    if(trs.length === 0) return alert("Agrega al menos una fila.");
+
+    const rows = trs.map(readRow);
+
+    for(const r of rows){
+      if(!r.consecutivo || !r.descripcion){
+        return alert("Hay filas incompletas. Consecutivo y Descripción son obligatorios.");
+      }
+    }
+
+    try{
+      const data = await apiPost("{% url 'nomina_parametro_guardar' %}", {
+        categoria: key,
+        rows
+      });
+
+      data.rows.forEach((r, idx) => {
+        writeRowId(trs[idx], r.id);
+      });
+
+      alert("✅ Guardado correctamente.");
+    }catch(e){
+      alert("❌ " + e.message);
+    }
+  }
+
+  async function modificarSeleccionada(key){
+    const tr = selected[key];
+    if(!tr) return alert("Selecciona una fila primero.");
+
+    const r = readRow(tr);
+    if(!r.id) return alert("Esa fila aún no está guardada. Usa Guardar primero.");
+
+    if(!r.consecutivo || !r.descripcion){
+      return alert("Consecutivo y Descripción son obligatorios.");
+    }
+
+    try{
+      await apiPost("{% url 'nomina_parametro_modificar' %}", {
+        categoria: key,
+        id: r.id,
+        consecutivo: r.consecutivo,
+        descripcion: r.descripcion,
+        activo: r.activo
+      });
+      alert("✅ Modificado correctamente.");
+    }catch(e){
+      alert("❌ " + e.message);
+    }
+  }
+
+  async function eliminarSeleccionada(key){
+    const tr = selected[key];
+    if(!tr) return alert("Selecciona una fila primero.");
+
+    const r = readRow(tr);
+    if(!r.id){
+      if(!confirm("Esta fila no está guardada. ¿Eliminarla igual?")) return;
+      tr.remove();
+      selected[key] = null;
+      updatePill(key);
+      return;
+    }
+
+    if(!confirm("¿Eliminar la fila seleccionada?")) return;
+
+    try{
+      await apiPost("{% url 'nomina_parametro_eliminar' %}", { id: r.id });
+      tr.remove();
+      selected[key] = null;
+      updatePill(key);
+      alert("✅ Eliminado.");
+    }catch(e){
+      alert("❌ " + e.message);
+    }
+  }
+
+  // Bind botones
+  document.querySelectorAll("[data-add]").forEach(btn=>{
+    btn.addEventListener("click", ()=> addRow(btn.getAttribute("data-add")));
+  });
+  document.querySelectorAll("[data-save]").forEach(btn=>{
+    btn.addEventListener("click", ()=> guardarTab(btn.getAttribute("data-save")));
+  });
+  document.querySelectorAll("[data-edit]").forEach(btn=>{
+    btn.addEventListener("click", ()=> modificarSeleccionada(btn.getAttribute("data-edit")));
+  });
+  document.querySelectorAll("[data-del]").forEach(btn=>{
+    btn.addEventListener("click", ()=> eliminarSeleccionada(btn.getAttribute("data-del")));
+  });
+
+  // Inicializar
+  ["generales","tipos_nomina","tipos_contrato","areas","salario_minimo","auxilio_transporte","uvt"].forEach(k => {
+    bindRowClicks(k);
+    updatePill(k);
+    const tbody = document.querySelector(`#table-${k} tbody`);
+    if(tbody.querySelectorAll("tr").length === 0) addRow(k);
+  });
+
+
+</script>
+
+</body>
+</html>

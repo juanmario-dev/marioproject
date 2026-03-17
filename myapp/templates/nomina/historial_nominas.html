@@ -1,0 +1,342 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<style>
+.titulo-modulo{
+  background: linear-gradient(90deg, #109155, #34c782);
+  color:#fff;
+  font-size:14px;
+  font-weight:600;
+  padding:12px 16px;
+  border-radius:8px;
+  margin-bottom:12px;
+  box-shadow:0 4px 10px rgba(0,0,0,.08);
+}
+
+:root{
+  --bg:#f7f8fb;
+  --card:#ffffff;
+  --border:#d8dee9;
+  --text:#0f172a;
+  --muted:#64748b;
+  --blue:#0d6efd;
+  --blue-dark:#0b5ed7;
+  --shadow:0 10px 25px rgba(2,18,36,.10);
+  --zebra:#fafafa;
+}
+
+*{box-sizing:border-box;}
+
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  font-size:13px;
+}
+
+.wrap{
+  max-width:1900px;
+  margin:0 auto;
+  padding:10px 12px 14px;
+}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:10px;
+  box-shadow:var(--shadow);
+  margin-bottom:10px;
+}
+
+.filters{
+  display:flex;
+  flex-wrap:nowrap;
+  gap:10px;
+  align-items:flex-end;
+  overflow-x:auto;
+  overflow-y:hidden;
+  padding-bottom:6px;
+}
+
+.filters .field{
+  flex:0 0 auto;
+  min-width:0;
+}
+
+.field label{
+  display:block;
+  font-size:10.5px;
+  font-weight:800;
+  color:#111;
+  margin:0 0 4px;
+}
+
+.field input{
+  width:100%;
+  height:26px;
+  padding:4px 8px;
+  border-radius:6px;
+  border:1px solid #cfd6e3;
+  font-size:12px;
+  background:#fff;
+  outline:none;
+}
+
+.filters .field:nth-child(1){width:120px;}
+.filters .field:nth-child(2){width:120px;}
+.filters .field:nth-child(3){width:150px;}
+.filters .field:nth-child(4){width:150px;}
+
+.actions-row{
+  display:flex;
+  justify-content:flex-end;
+  align-items:center;
+  gap:10px;
+  margin-top:10px;
+  flex-wrap:wrap;
+}
+
+.btn{
+  border:0;
+  cursor:pointer;
+  border-radius:6px;
+  padding:8px 12px;
+  font-weight:900;
+  font-size:12px;
+  height:34px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+  white-space:nowrap;
+}
+
+.btn-primary{
+  color:#fff;
+  background:linear-gradient(120deg,var(--blue) 0%,var(--blue-dark) 100%);
+}
+
+.btn-dark{
+  background:#111;
+  color:#fff;
+}
+
+.table-wrap{
+  overflow:auto;
+  border:1px solid rgba(0,0,0,.08);
+  border-radius:6px;
+  background:#fff;
+}
+
+table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+  min-width:1200px;
+  background:#fff;
+  font-size:11.5px;
+}
+
+thead th{
+  position:sticky;
+  top:0;
+  z-index:2;
+  background:#fff;
+  color:#000;
+  font-weight:900;
+  font-size:11px;
+  padding:6px 6px;
+  text-align:left;
+  border:0;
+  white-space:nowrap;
+}
+
+tbody td{
+  padding:4px 6px;
+  border:0;
+  background:#fff;
+  white-space:nowrap;
+  vertical-align:middle;
+}
+
+tbody tr:nth-child(even) td{
+  background:var(--zebra);
+}
+
+.muted{
+  color:var(--muted);
+  font-weight:700;
+}
+
+.pill{
+  display:inline-flex;
+  align-items:center;
+  padding:3px 8px;
+  border-radius:999px;
+  border:1px solid rgba(0,0,0,.12);
+  font-size:11px;
+  font-weight:800;
+  background:#fff;
+}
+
+.actions{
+  display:flex;
+  gap:6px;
+  align-items:center;
+}
+
+.btn-mini{
+  border:1px solid rgba(0,0,0,.12);
+  background:#fff;
+  cursor:pointer;
+  border-radius:6px;
+  padding:6px 8px;
+  font-size:11px;
+  font-weight:900;
+  text-decoration:none;
+  color:#111;
+}
+.btn-mini:hover{ background:#f3f4f6; }
+
+.link-nomina{
+  text-decoration:none;
+  font-weight:900;
+  color:#0d6efd;
+}
+.link-nomina:hover{ text-decoration:underline; }
+
+.link-delete{
+  text-decoration:none;
+  font-weight:900;
+  color: var(--blue);
+}
+.link-delete:hover{ text-decoration:underline; }
+</style>
+</head>
+
+<body>
+<div class="wrap">
+
+  <div class="titulo-modulo">Historial de Nóminas</div>
+
+  <!-- FILTROS -->
+  <div class="card">
+    <form method="GET">
+      <div class="filters">
+
+        <div class="field">
+          <label>Fecha inicio</label>
+          <input type="date" name="fecha_inicio" value="{{ request.GET.fecha_inicio }}">
+        </div>
+
+        <div class="field">
+          <label>Fecha fin</label>
+          <input type="date" name="fecha_fin" value="{{ request.GET.fecha_fin }}">
+        </div>
+
+        <div class="field">
+          <label>Consecutivo inicio</label>
+          <input type="text" name="cons_inicio" placeholder="000001" value="{{ request.GET.cons_inicio }}">
+        </div>
+
+        <div class="field">
+          <label>Consecutivo final</label>
+          <input type="text" name="cons_fin" placeholder="000999" value="{{ request.GET.cons_fin }}">
+        </div>
+
+      </div>
+
+      <div class="actions-row">
+        <button class="btn btn-primary" type="submit">Aplicar filtros</button>
+        <a class="btn btn-dark" href="{% url 'nomina_subpanel' %}">Retroceder</a>
+      </div>
+    </form>
+  </div>
+
+  <!-- TABLA -->
+  <div class="card">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Consecutivo</th>
+            <th>Fecha elaboración</th>
+            <th>Fecha inicio</th>
+            <th>Fecha fin</th>
+            <th>Estado</th>
+            <th>Acción contable</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for n in nominas %}
+          <tr>
+            <td>
+              <a class="link-nomina" href="{% url 'nomina_ver' %}?no_nomina={{ n.consecutivo }}">
+                {{ n.consecutivo }}
+              </a>
+            </td>
+
+            <td>{{ n.created_at|date:"Y-m-d H:i" }}</td>
+            <td>{{ n.fecha_ini|date:"Y-m-d" }}</td>
+            <td>{{ n.fecha_fin|date:"Y-m-d" }}</td>
+
+            <td><span class="pill">Pendiente</span></td>
+
+            <td>
+              <a
+                class="link-delete"
+                href="{% url 'nomina_eliminar' %}?no_nomina={{ n.consecutivo }}"
+                onclick="return confirm('¿Seguro que deseas eliminar completamente la nómina No. {{ n.consecutivo }}? Esta acción borrará encabezado, empleados y movimientos.');"
+              >
+                Eliminar
+              </a>
+            </td>
+
+            <td>
+              <div class="actions">
+                <a class="btn-mini" href="{% url 'nomina_ver' %}?no_nomina={{ n.consecutivo }}">Abrir</a>
+                <a class="btn-mini" href="{% url 'nomina_cargue_exportar_excel' %}?no_nomina={{ n.consecutivo }}">Excel</a>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="7" class="muted" style="text-align:center;padding:10px;">
+              No hay nóminas registradas
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  const params = new URLSearchParams(window.location.search);
+
+  if(params.get("deleted") === "1"){
+    alert("🗑️ La nómina fue eliminada correctamente.");
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+  if(params.get("delete_error") === "1"){
+    alert("❌ No fue posible eliminar la nómina.");
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,249 @@
+
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Información en desprendibles de nómina</title>
+
+<style>
+:root{
+  --bg:#f7f8fb;
+  --card:#ffffff;
+  --border:#d8dee9;
+  --text:#0f172a;
+  --muted:#64748b;
+  --blue:#0d6efd;
+  --blue-dark:#0b5ed7;
+  --green:#16a34a;
+  --green-dark:#15803d;
+  --shadow:0 10px 25px rgba(2,18,36,.10);
+}
+
+*{ box-sizing:border-box; }
+
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+
+.wrap{
+  max-width:980px;
+  margin:30px auto;
+  padding:0 16px 24px;
+}
+
+.titulo{
+  background:linear-gradient(90deg,#021224,#0d6efd);
+  color:#fff;
+  padding:16px 20px;
+  border-radius:10px;
+  font-size:18px;
+  font-weight:700;
+  margin-bottom:18px;
+  box-shadow:var(--shadow);
+}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;
+  box-shadow:var(--shadow);
+  padding:22px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(280px, 1fr));
+  gap:16px 18px;
+}
+
+.campo{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.campo-full{
+  grid-column:1 / -1;
+}
+
+label{
+  font-size:13px;
+  font-weight:700;
+  color:#111827;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="file"]{
+  width:100%;
+  padding:10px 12px;
+  border:1px solid var(--border);
+  border-radius:8px;
+  font-size:14px;
+  background:#fff;
+  outline:none;
+  transition:border-color .2s ease, box-shadow .2s ease;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="file"]:focus{
+  border-color:var(--blue);
+  box-shadow:0 0 0 3px rgba(13,110,253,.12);
+}
+
+.logo-box{
+  margin-top:8px;
+}
+
+.logo-preview{
+  width:130px;
+  min-height:90px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#fff;
+  overflow:hidden;
+  padding:8px;
+}
+
+.logo-preview img{
+  max-width:100%;
+  max-height:100px;
+  object-fit:contain;
+  display:block;
+}
+
+.sin-logo{
+  font-size:12px;
+  color:var(--muted);
+  text-align:center;
+}
+
+.acciones{
+  margin-top:22px;
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+.btn{
+  border:none;
+  text-decoration:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:11px 18px;
+  border-radius:8px;
+  font-size:14px;
+  font-weight:700;
+  cursor:pointer;
+  transition:all .2s ease;
+}
+
+.btn-guardar{
+  background:var(--green);
+  color:#fff;
+}
+
+.btn-guardar:hover{
+  background:var(--green-dark);
+}
+
+.btn-volver{
+  background:#e5e7eb;
+  color:#111827;
+}
+
+.btn-volver:hover{
+  background:#d1d5db;
+}
+
+@media (max-width: 768px){
+  .grid{
+    grid-template-columns:1fr;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="titulo">
+    Información en desprendibles de nómina
+  </div>
+
+  <div class="card">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <div class="grid">
+
+        <div class="campo">
+          <label>Nombre de empresa</label>
+          <input type="text" name="nombre_empresa" value="{{ datos.nombre_empresa|default:'' }}">
+        </div>
+
+        <div class="campo">
+          <label>Nit</label>
+          <input type="text" name="nit" value="{{ datos.nit|default:'' }}">
+        </div>
+
+        <div class="campo">
+          <label>Telefono</label>
+          <input type="text" name="telefono" value="{{ datos.telefono|default:'' }}">
+        </div>
+
+        <div class="campo">
+          <label>Correo electrónico</label>
+          <input type="email" name="correo_electronico" value="{{ datos.correo_electronico|default:'' }}">
+        </div>
+
+        <div class="campo campo-full">
+          <label>Dirección</label>
+          <input type="text" name="direccion" value="{{ datos.direccion|default:'' }}">
+        </div>
+
+        <div class="campo campo-full">
+          <label>Pagina web</label>
+          <input type="text" name="pagina_web" value="{{ datos.pagina_web|default:'' }}">
+        </div>
+
+        <div class="campo campo-full">
+          <label>Logo</label>
+          <input type="file" name="logo">
+
+          <div class="logo-box">
+            <div class="logo-preview">
+              {% if datos and datos.logo %}
+                <img src="{{ datos.logo.url }}" alt="Logo">
+              {% else %}
+                <div class="sin-logo">Sin logo cargado</div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="acciones">
+        <button type="submit" class="btn btn-guardar">Guardar</button>
+        <a href="{% url 'certificados_subpanel' %}" class="btn btn-volver">Retroceder</a>
+      </div>
+    </form>
+  </div>
+
+</div>
+
+</body>
+</html>

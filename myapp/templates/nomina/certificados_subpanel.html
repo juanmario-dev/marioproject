@@ -1,0 +1,170 @@
+
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Certificados</title>
+
+<style>
+
+:root{
+  --bg:#f7f8fb;
+  --card:#ffffff;
+  --border:#d8dee9;
+  --text:#0f172a;
+  --muted:#64748b;
+
+  --green:#16a34a;
+  --green-dark:#15803d;
+
+  --blue:#0d6efd;
+  --blue-dark:#0b5ed7;
+
+  --shadow:0 10px 25px rgba(2,18,36,.10);
+}
+
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+
+/* contenedor principal */
+
+.wrap{
+  max-width:900px;
+  margin:40px auto;
+  padding:20px;
+}
+
+/* titulo */
+
+.titulo{
+  background:linear-gradient(90deg,#021224,#0d6efd);
+  color:white;
+  padding:16px 20px;
+  border-radius:10px;
+  font-size:18px;
+  font-weight:600;
+  margin-bottom:20px;
+  box-shadow:var(--shadow);
+}
+
+/* tarjeta */
+
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:25px;
+  box-shadow:var(--shadow);
+}
+
+/* grid botones */
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:16px;
+}
+
+/* botones */
+
+.btn{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  text-decoration:none;
+  font-size:14px;
+  font-weight:600;
+
+  padding:16px;
+  border-radius:8px;
+
+  transition:all .2s ease;
+}
+
+/* botones principales */
+
+.btn-blue{
+  background:var(--blue);
+  color:white;
+}
+
+.btn-blue:hover{
+  background:var(--blue-dark);
+}
+
+/* parametros */
+
+.btn-green{
+  background:var(--green);
+  color:white;
+}
+
+.btn-green:hover{
+  background:var(--green-dark);
+}
+
+/* retroceder */
+
+.btn-back{
+  background:#e5e7eb;
+  color:#111;
+}
+
+.btn-back:hover{
+  background:#d1d5db;
+}
+
+</style>
+</head>
+
+
+<body>
+
+<div class="wrap">
+
+<div class="titulo">
+📄 Certificados
+</div>
+
+<div class="card">
+
+<div class="grid">
+
+<a href="#" class="btn btn-blue">
+Certificados DIAN 220
+</a>
+
+<a href="{% url 'nomina_cargue_desprendibles' %}" class="btn btn-blue">
+Desprendibles de Nómina
+</a>
+
+<a href="{% url 'parametros_desprendibles' %}"class="btn btn-green">
+Parametros de Desprendibles
+</a>
+
+<a href="/nomina/" class="btn btn-back">
+⬅ Retroceder
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+</body>
+</html>
+

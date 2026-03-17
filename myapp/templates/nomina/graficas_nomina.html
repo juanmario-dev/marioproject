@@ -1,0 +1,484 @@
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="es">
+{% load humanize %}
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Gráficas de nómina</title>
+
+  <style>
+    :root{
+      --bg:#f4f7fb;
+      --card:#ffffff;
+      --nav:#0f172a;
+      --primary:#0d6efd;
+      --primary-dark:#0b5ed7;
+      --success:#109155;
+      --success-dark:#0c6d40;
+      --purple:#6f42c1;
+      --purple-soft:#efe8ff;
+      --green-soft:#e9f9f0;
+      --text:#0f172a;
+      --muted:#64748b;
+      --border:#dbe3ef;
+      --zebra:#f8fafc;
+      --shadow:0 10px 25px rgba(2,18,36,.08);
+      --shadow2:0 14px 30px rgba(2,18,36,.12);
+      --radius:16px;
+      --bar-dev:#16a34a;
+      --bar-car:#7c3aed;
+    }
+
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      font-family: Arial, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      font-size:13px;
+    }
+
+    .wrap{
+      max-width: 1900px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    .header{
+      background: linear-gradient(90deg, #021224, #0f172a);
+      color:#fff;
+      border-radius:14px;
+      padding:12px 16px;
+      margin-bottom:10px;
+      box-shadow: var(--shadow2);
+    }
+
+    .header h1{
+      margin:0;
+      font-size:18px;
+      font-weight:700;
+    }
+
+    .header p{
+      margin:4px 0 0;
+      color:#cbd5e1;
+      font-size:12px;
+    }
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      margin-bottom:14px;
+      overflow:hidden;
+    }
+
+    .card-title{
+      padding:10px 14px;
+      font-size:13px;
+      font-weight:700;
+      background:linear-gradient(90deg, #109155, #34c782);
+      color:#fff;
+    }
+
+    .card-title.purple{
+      background:linear-gradient(90deg, #6f42c1, #8b5cf6);
+    }
+
+    .filters{
+      padding:12px 14px;
+    }
+
+    .filter-grid{
+      display:grid;
+      grid-template-columns: repeat(5, minmax(160px, 1fr));
+      gap:6px;
+      align-items:end;
+    }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+    }
+
+    .field label{
+      font-size:10px;
+      font-weight:700;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.3px;
+    }
+
+    .field input{
+      width:100%;
+      height:23px;
+      border:1px solid var(--border);
+      border-radius:8px;
+      padding:4px 8px;
+      font-size:12px;
+      background:#fff;
+      outline:none;
+    }
+
+    .field input:focus{
+      border-color:#86b7fe;
+      box-shadow:0 0 0 3px rgba(13,110,253,.12);
+    }
+
+    .actions{
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+      margin-top:8px;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      height:32px;
+      padding:0 12px;
+      border:none;
+      border-radius:8px;
+      cursor:pointer;
+      text-decoration:none;
+      font-size:12px;
+      font-weight:700;
+      transition:.2s ease;
+    }
+
+    .btn-primary{
+      background:var(--primary);
+      color:#fff;
+    }
+    .btn-primary:hover{ background:var(--primary-dark); }
+
+    .btn-light{
+      background:#eef2f7;
+      color:#0f172a;
+      border:1px solid var(--border);
+    }
+
+    .summary{
+      padding:8px 12px;
+      border-top:1px solid var(--border);
+      background:#f8fafc;
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .alert{
+      margin:10px 14px 0;
+      padding:10px 12px;
+      border-radius:10px;
+      background:#fff8db;
+      border:1px solid #f6e58d;
+      color:#7c6500;
+      font-size:12px;
+    }
+
+    .table-wrap{
+      overflow:auto;
+      max-height:72vh;
+    }
+
+    table{
+      width:max-content;
+      min-width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      font-size:11px;
+    }
+
+    thead th{
+      position:sticky;
+      top:0;
+      z-index:2;
+      background:#0f172a;
+      color:#fff;
+      text-align:left;
+      padding:6px 6px;
+      white-space:nowrap;
+      border-bottom:1px solid #1e293b;
+    }
+
+    tbody td{
+      padding:4px 6px;
+      border-bottom:1px solid #edf2f7;
+      white-space:nowrap;
+      vertical-align:middle;
+    }
+
+    tbody tr:nth-child(even){
+      background:var(--zebra);
+    }
+
+    tbody tr:hover{
+      background:#eef6ff;
+    }
+
+    .sticky-col{
+      position:sticky;
+      left:0;
+      z-index:1;
+      background:inherit;
+    }
+
+    .concept-col{
+      min-width:260px;
+      max-width:260px;
+      white-space:normal;
+      line-height:1.2;
+      font-weight:700;
+    }
+
+    .num{
+      text-align:right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .cell-chart{
+      min-width:110px;
+    }
+
+    .bar-box{
+      width:100%;
+      height:14px;
+      background:#edf2f7;
+      border-radius:999px;
+      overflow:hidden;
+      margin-bottom:2px;
+    }
+
+    .bar-dev{
+      height:100%;
+      background:linear-gradient(90deg, #22c55e, #16a34a);
+      border-radius:999px;
+    }
+
+    .bar-car{
+      height:100%;
+      background:linear-gradient(90deg, #8b5cf6, #6f42c1);
+      border-radius:999px;
+    }
+
+    .cell-value{
+      display:block;
+      text-align:right;
+      font-size:10px;
+      color:#0f172a;
+    }
+
+    .empty{
+      padding:24px 16px;
+      text-align:center;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .year-badge{
+      display:inline-block;
+      background:#dbeafe;
+      color:#1d4ed8;
+      padding:4px 10px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:700;
+      margin-left:8px;
+    }
+
+    @media (max-width: 1400px){
+      .filter-grid{
+        grid-template-columns: repeat(3, minmax(160px, 1fr));
+      }
+    }
+
+    @media (max-width: 900px){
+      .filter-grid{
+        grid-template-columns: repeat(2, minmax(160px, 1fr));
+      }
+    }
+
+    @media (max-width: 600px){
+      .filter-grid{
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <div class="header">
+      <h1>Gráficas de nómina
+        {% if anio_usado %}
+          <span class="year-badge">Año mostrado: {{ anio_usado }}</span>
+        {% endif %}
+      </h1>
+      <p>Visualización mensual de enero a diciembre. Solo se muestran devengos y carga prestacional.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Filtros</div>
+
+      {% if aviso_anio %}
+        <div class="alert">{{ aviso_anio }}</div>
+      {% endif %}
+
+      <div class="filters">
+        <form method="get">
+          <div class="filter-grid">
+
+            <div class="field">
+              <label for="cedula">Cédula</label>
+              <input type="text" id="cedula" name="cedula" value="{{ filtros.cedula }}">
+            </div>
+
+            <div class="field">
+              <label for="area">Área</label>
+              <input type="text" id="area" name="area" value="{{ filtros.area }}">
+            </div>
+
+            <div class="field">
+              <label for="tipo_nomina">Tipo de nómina</label>
+              <input type="text" id="tipo_nomina" name="tipo_nomina" value="{{ filtros.tipo_nomina }}">
+            </div>
+
+            <div class="field">
+              <label for="tipo_contrato">Tipo de contrato</label>
+              <input type="text" id="tipo_contrato" name="tipo_contrato" value="{{ filtros.tipo_contrato }}">
+            </div>
+
+            <div class="field">
+              <label for="concepto">Concepto</label>
+              <input type="text" id="concepto" name="concepto" value="{{ filtros.concepto }}">
+            </div>
+
+            <div class="field">
+              <label for="fecha_ini">Fecha fin desde</label>
+              <input type="date" id="fecha_ini" name="fecha_ini" value="{{ filtros.fecha_ini }}">
+            </div>
+
+            <div class="field">
+              <label for="fecha_fin">Fecha fin hasta</label>
+              <input type="date" id="fecha_fin" name="fecha_fin" value="{{ filtros.fecha_fin }}">
+            </div>
+
+            <div class="field">
+              <label for="nomina_desde">Nómina desde</label>
+              <input type="text" id="nomina_desde" name="nomina_desde" value="{{ filtros.nomina_desde }}">
+            </div>
+
+            <div class="field">
+              <label for="nomina_hasta">Nómina hasta</label>
+              <input type="text" id="nomina_hasta" name="nomina_hasta" value="{{ filtros.nomina_hasta }}">
+            </div>
+
+          </div>
+
+          <div class="actions">
+            <button type="submit" class="btn btn-primary">📊 Aplicar filtros</button>
+            <a href="{% url 'graficas_nomina' %}" class="btn btn-light">Limpiar filtros</a>
+          </div>
+        </form>
+      </div>
+
+      <div class="summary">
+        Conceptos devengos: <strong>{{ total_devengos_conceptos }}</strong>
+        &nbsp; | &nbsp;
+        Conceptos carga: <strong>{{ total_carga_conceptos }}</strong>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Devengos mensualizados</div>
+
+      {% if devengos_filas %}
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th class="sticky-col concept-col">Concepto</th>
+                {% for m_num, m_label in meses %}
+                  <th>{{ m_label }}</th>
+                {% endfor %}
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for fila in devengos_filas %}
+                <tr>
+                  <td class="sticky-col concept-col">{{ fila.codigo }} - {{ fila.nombre }}</td>
+
+                  {% for celda in fila.meses %}
+                    <td class="cell-chart">
+                      <div class="bar-box">
+                        <div class="bar-dev" style="width: {{ celda.pct }}%;"></div>
+                      </div>
+                      <span class="cell-value">${{ celda.valor|floatformat:0|intcomma }}</span>
+                    </td>
+                  {% endfor %}
+
+                  <td class="num"><strong>${{ fila.total|floatformat:0|intcomma }}</strong></td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="empty">No hay información de devengos para los filtros aplicados.</div>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <div class="card-title purple">Carga prestacional mensualizada</div>
+
+      {% if carga_filas %}
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th class="sticky-col concept-col">Concepto</th>
+                {% for m_num, m_label in meses %}
+                  <th>{{ m_label }}</th>
+                {% endfor %}
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for fila in carga_filas %}
+                <tr>
+                  <td class="sticky-col concept-col">{{ fila.codigo }} - {{ fila.nombre }}</td>
+
+                  {% for celda in fila.meses %}
+                    <td class="cell-chart">
+                      <div class="bar-box">
+                        <div class="bar-car" style="width: {{ celda.pct }}%;"></div>
+                      </div>
+                      <span class="cell-value">${{ celda.valor|floatformat:0|intcomma }}</span>
+                    </td>
+                  {% endfor %}
+
+                  <td class="num"><strong>${{ fila.total|floatformat:0|intcomma }}</strong></td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="empty">No hay información de carga prestacional para los filtros aplicados.</div>
+      {% endif %}
+    </div>
+
+  </div>
+</body>
+</html>

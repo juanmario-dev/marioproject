@@ -1,0 +1,225 @@
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Página Principal</title>
+
+<style>
+
+:root{
+  --bg:#f4f7fb;
+  --card:#ffffff;
+  --navy:#0f172a;
+  --blue:#2563eb;
+  --blue-dark:#1d4ed8;
+  --green:#16a34a;
+  --green-dark:#15803d;
+  --gray:#64748b;
+  --border:#dbe3ef;
+  --shadow:0 14px 30px rgba(15,23,42,0.10);
+}
+
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: linear-gradient(180deg,#eef4fb 0%,#f7f9fc 100%);
+  color:var(--navy);
+}
+
+.wrap{
+  max-width:1200px;
+  margin:auto;
+  padding:20px;
+}
+
+/* HEADER */
+
+.topbar{
+  background:linear-gradient(135deg,#0f172a,#1e3a8a);
+  color:white;
+  border-radius:14px;
+  padding:20px 24px;
+  margin-bottom:25px;
+  box-shadow:var(--shadow);
+  text-align:center;
+}
+
+.topbar h1{
+  margin:0;
+  font-size:24px;
+}
+
+.topbar p{
+  margin:6px 0 0;
+  font-size:13px;
+  color:#dbeafe;
+}
+
+/* PANEL */
+
+.panel{
+  background:var(--card);
+  border-radius:16px;
+  padding:25px;
+  box-shadow:var(--shadow);
+}
+
+/* GRID */
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:18px;
+}
+
+/* TARJETAS */
+
+.card-btn{
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  text-decoration:none;
+  background:#ffffff;
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:18px;
+  transition:all .18s ease;
+}
+
+.card-btn:hover{
+  transform:translateY(-4px);
+  border-color:#bfdbfe;
+  box-shadow:0 12px 22px rgba(37,99,235,0.15);
+}
+
+/* ICONOS */
+
+.icon{
+  width:44px;
+  height:44px;
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:20px;
+  margin-bottom:10px;
+  background:linear-gradient(135deg,#dbeafe,#eff6ff);
+}
+
+/* TITULO TARJETA */
+
+.card-btn h3{
+  margin:0 0 6px;
+  font-size:15px;
+}
+
+.card-btn p{
+  margin:0;
+  font-size:12px;
+  color:var(--gray);
+}
+
+/* FOOTER */
+
+.footer{
+  margin-top:22px;
+  text-align:right;
+}
+
+.btn-back{
+  display:inline-block;
+  padding:10px 18px;
+  border-radius:8px;
+  background:linear-gradient(135deg,var(--green),var(--green-dark));
+  color:white;
+  text-decoration:none;
+  font-weight:bold;
+  font-size:13px;
+}
+
+.btn-back:hover{
+  transform:translateY(-2px);
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+
+<div class="topbar">
+<h1>Mario Dicelys Empresa de Contabilidad</h1>
+<p>Sistema empresarial de gestión contable, financiera y administrativa.</p>
+</div>
+
+<div class="panel">
+
+<div class="grid">
+
+<a href="{% url 'contabilidad' %}" class="card-btn">
+<div>
+<div class="icon">📚</div>
+<h3>Contabilidad</h3>
+<p>Registro de asientos contables, documentos y plan de cuentas.</p>
+</div>
+</a>
+
+<a href="{% url 'facturacioncxc' %}" class="card-btn">
+<div>
+<div class="icon">🧾</div>
+<h3>Facturación y CxC</h3>
+<p>Gestión de facturación, cartera y notas crédito.</p>
+</div>
+</a>
+
+<a href="{% url 'nomina_panel' %}" class="card-btn">
+<div>
+<div class="icon">👨‍💼</div>
+<h3>Nómina</h3>
+<p>Administración de empleados, contratos y liquidación de nómina.</p>
+</div>
+</a>
+
+<a href="#" class="card-btn">
+<div>
+<div class="icon">📦</div>
+<h3>Gestión de compras</h3>
+<p>Control de proveedores, órdenes de compra e inventarios.</p>
+</div>
+</a>
+
+<a href="#" class="card-btn">
+<div>
+<div class="icon">📊</div>
+<h3>Presupuesto</h3>
+<p>Planificación financiera y control presupuestal.</p>
+</div>
+</a>
+
+<a href="#" class="card-btn">
+<div>
+<div class="icon">💰</div>
+<h3>Impuestos</h3>
+<p>Gestión de obligaciones fiscales y reportes tributarios.</p>
+</div>
+</a>
+
+<a href="{% url 'logout' %}">Salir</a>
+
+</div>
+
+</div>
+
+</div>
+
+</body>
+</html>
+

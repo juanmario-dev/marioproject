@@ -1,0 +1,872 @@
+
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Ingreso de novedades</title>
+
+  <style>
+    :root{
+      --bg:#f7f8fb;
+      --nav:#021224;
+      --card:#ffffff;
+      --border:#d8dee9;
+      --text:#0f172a;
+
+      --blue:#0d6efd;
+      --blue-dark:#0b5ed7;
+
+      --yellow:#ffc107;
+      --yellow-dark:#e0a800;
+      --yellow-text:#1f2a37;
+
+      --shadow: 0 10px 25px rgba(2,18,36,.10);
+    }
+
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      font-family: Arial, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+
+    /* HEADER */
+ 
+
+    header{
+      background:var(--nav);
+      color:#fff;
+      padding:10px 14px;   /* menos alto */
+      text-align:center;
+      font-size:16px;      /* más pequeño */
+      font-weight:800;
+      letter-spacing:.2px;
+    }
+
+    .wrap{
+      padding:14px;
+      max-width:1600px;
+      margin:0 auto;
+    }
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:8px;
+      padding:12px;
+      box-shadow: var(--shadow);
+      margin-bottom:12px;
+    }
+
+    /* Tabs */
+    .tabs{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .tab-btn{
+      border:1px solid rgba(13,110,253,.22);
+      background:#fff;
+      color:#0b2a55;
+      padding:8px 12px;
+      border-radius:6px;
+      cursor:pointer;
+      font-weight:800;
+      font-size:13px;
+    }
+
+    .tab-btn.active{
+      background: linear-gradient(120deg, var(--blue) 0%, var(--blue-dark) 100%);
+      color:#fff;
+      border-color:transparent;
+    }
+
+    .section{ display:none; }
+    .section.active{ display:block; }
+
+    /* ===== TABLA BASE (Generales) estilo Excel ===== */
+    .table-wrap{
+      margin-top:10px;
+      overflow:auto;
+      border:1px solid var(--border);
+      border-radius:6px;
+      background:#fff;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      min-width:1500px;
+    }
+
+    thead th{
+      background:#f1f3f6;
+      font-size:12px;
+      font-weight:900;
+      padding:6px;
+      text-align:left;
+      border:1px solid #d9dee7;
+      white-space:nowrap;
+      color:#111;
+    }
+
+    tbody td{
+      padding:4px;
+      border:1px solid #d9dee7;
+      background:#fff;
+    }
+
+    tbody tr:nth-child(even) td{
+      background:#f5f7fb;
+    }
+
+    td input, td select, td textarea{
+      width:100%;
+      padding:5px;
+      font-size:13px;
+      border:1px solid #cfd6e3;
+      border-radius:3px;
+      background:#fff;
+    }
+
+    td textarea{
+      min-height:32px;
+      resize:vertical;
+    }
+
+    /* Anchos (Generales) */
+    .w-cedula{ min-width:140px; }
+    .w-nombre{ min-width:300px; }
+    .w-contrato{ min-width:140px; }
+    .w-fecha{ min-width:130px; }
+    .w-concepto{ min-width:220px; }
+    .w-valor{ min-width:140px; }
+    .w-descuenta{ min-width:170px; }
+    .w-dias{ min-width:120px; }
+    .w-descripcion{ min-width:420px; }
+
+    /* Botones */
+    .actions{
+      display:flex;
+      gap:10px;
+      justify-content:flex-end;
+      margin-top:10px;
+      flex-wrap:wrap;
+    }
+
+    .btn{
+      border:0;
+      cursor:pointer;
+      border-radius:6px;
+      padding:8px 16px;
+      font-weight:900;
+      font-size:13px;
+    }
+
+    .btn-add{
+      background: linear-gradient(120deg, var(--blue) 0%, var(--blue-dark) 100%);
+      color:#fff;
+    }
+
+    .btn-delete{
+      background: linear-gradient(120deg, var(--yellow) 0%, var(--yellow-dark) 100%);
+      color:var(--yellow-text);
+    }
+
+    /* ====== HISTÓRICO (B/N, compacto, sin líneas) ====== */
+    .filters{
+       display:grid;
+       grid-template-columns: 
+         160px 240px 160px 200px 
+        200px 160px 160px 220px;  /* concepto ya no gigante */
+       gap:8px;
+       align-items:end;
+       margin-top: 4px;
+    }
+
+    .field label{
+      display:block;
+      font-size:11px;
+      font-weight:800;
+      color:#111;
+      margin:0 0 4px;
+    }
+
+    .filters input, .filters select{
+      width:100%;
+      padding:7px 8px;
+      border-radius:5px;
+      border:1px solid #cfd6e3;
+      font-size:12px;
+      background:#fff;
+      outline:none;
+    }
+
+    .field-wide{ grid-column: 1 / -1; }
+
+    .hist-actions{
+      display:flex;
+      justify-content:flex-end;
+      margin-top:8px;
+    }
+
+    .btn-filter{
+      background:#111;
+      color:#fff;
+      border:0;
+      cursor:pointer;
+      border-radius:6px;
+      padding:8px 12px;
+      font-weight:900;
+      font-size:12px;
+    }
+
+    .table-wrap-plain{
+      margin-top:10px;
+      overflow:auto;
+      /* sin borde externo también, si lo quieres aún más limpio, borra estas 2 líneas: */
+      border:1px solid rgba(0,0,0,.08);
+      border-radius:6px;
+      background:#fff;
+    }
+
+    .plain-table{
+      width:100%;
+      border-collapse:separate; /* para evitar “grid” visual */
+      border-spacing:0;         /* sin huecos */
+      min-width:1500px;
+      background:#fff;
+    }
+
+    .plain-table thead th{
+      background:#fff;          /* blanco */
+      color:#000;               /* negro */
+      font-weight:900;          /* negrilla */
+      font-size:11px;           /* más pequeño */
+      padding:6px 6px;
+      text-align:left;
+      border:0;                 /* sin líneas */
+      white-space:nowrap;
+    }
+
+    .plain-table tbody td{
+      padding:4px 6px;
+      border:0;                 /* sin líneas */
+      background:#fff;
+    }
+
+    /* zebra muy suave (si lo quieres 100% blanco, borra esta regla) */
+    .plain-table tbody tr:nth-child(even) td{
+      background:#fafafa;
+    }
+
+    .plain-table td input,
+    .plain-table td select,
+    .plain-table td textarea{
+      border:0;                 /* sin borde en inputs */
+      background:transparent;   /* se integra al blanco */
+      padding:2px 2px;
+      font-size:11.5px;         /* compacto */
+      outline:none;
+    }
+
+    .plain-table td textarea{
+      min-height:26px;
+      resize:vertical;
+    }
+
+    /* Anchos (Histórico) */
+    .h-cedula{ min-width:140px; }
+    .h-nombre{ min-width:320px; }
+    .h-contrato{ min-width:140px; }
+    .h-fecha{ min-width:120px; }
+    .h-concepto{ min-width:220px; }
+    .h-valor{ min-width:130px; }
+    .h-descuenta{ min-width:150px; }
+    .h-dias{ min-width:90px; }
+    .h-descripcion{ min-width:520px; }
+
+    @media (max-width: 1200px){
+      .filters{ grid-template-columns: 1fr 1fr 1fr 1fr; }
+      .field-wide{ grid-column: 1 / -1; }
+    }
+    @media (max-width: 640px){
+      .filters{ grid-template-columns: 1fr 1fr; }
+      .hist-actions{ justify-content:stretch; }
+      .btn-filter{ width:100%; }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>Ingreso de novedades</header>
+
+<div class="wrap">
+
+  <div class="card">
+    <div class="tabs">
+      <button class="tab-btn active" type="button" data-target="#sec-generales">Novedades generales</button>
+      <button class="tab-btn" type="button" data-target="#sec-horas">Horas Extras</button>
+      <button class="tab-btn" type="button" data-target="#sec-impuestos">Impuestos</button>
+      <button class="tab-btn" type="button" data-target="#sec-libranzas">Libranzas</button>
+      <button class="tab-btn" type="button" data-target="#sec-historico">Historico de Novedades</button>
+      <a class="btn btn-delete" href="{% url 'nomina_panel' %}">Regresar</a>
+    </div>
+    
+  </div>
+
+  <!-- ====== Novedades Generales ====== -->
+  <section id="sec-generales" class="card section active">
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th class="w-cedula">Cedula</th>
+            <th class="w-nombre">Nombre</th>
+            <th class="w-contrato">Contrato</th>
+            <th class="w-fecha">Fecha inicio</th>
+            <th class="w-fecha">Fecha fin</th>
+            <th class="w-concepto">Concepto</th>
+            <th class="w-valor">Valor</th>
+            <th class="w-descuenta">¿descuenta sueldo?</th>
+            <th class="w-dias">Días</th>
+            <th class="w-descripcion">Descripción</th>
+          </tr>
+        </thead>
+        
+        <tbody>
+         <tr id="row-generales">
+            <td><input id="g_cedula" type="text"></td>
+            <td><input id="g_nombre" type="text" readonly></td>
+            <td><input id="g_contrato" type="text" readonly></td>
+            <td><input id="g_fecha_ini" type="date"></td>
+            <td><input id="g_fecha_fin" type="date"></td>
+            <td>
+             <select id="g_concepto">
+               <option value="">-- Seleccionar --</option>
+
+
+               <optgroup label="Devengos">
+                {% for c in conceptos_devengos %}
+                  <option value="{{ c.id }}">{{ c.codigo }} - {{ c.nombre }}</option>
+                {% endfor %}
+               </optgroup>
+
+               <optgroup label="Deducciones">
+                {% for c in conceptos_deducciones %}
+                  <option value="{{ c.id }}">{{ c.codigo }} - {{ c.nombre }}</option>
+                {% endfor %}
+               </optgroup>
+
+               <optgroup label="Carga prestacional">
+                {% for c in conceptos_carga %}
+                  <option value="{{ c.id }}">{{ c.codigo }} - {{ c.nombre }}</option>
+                {% endfor %}
+               </optgroup>
+
+               <optgroup label="De pago">
+                {% for c in conceptos_pago %}
+                  <option value="{{ c.id }}">{{ c.codigo }} - {{ c.nombre }}</option>
+                {% endfor %}
+               </optgroup>
+               
+              
+
+             </select>
+            </td>
+            
+            <td><input id="g_valor" type="text" inputmode="numeric" placeholder="0"></td>
+            <td>
+              <select id="g_descuenta">
+               <option>No</option>
+               <option>Sí</option>
+              </select>
+            </td>
+            <td><input id="g_dias" type="number" min="0"></td>
+            <td><textarea id="g_descripcion"></textarea></td>
+          </tr>
+       </tbody>
+
+
+      </table>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-add" type="button" id="btnAgregarNovedad">Agregar</button>
+      <!-- este eliminar de generales lo podemos usar luego si quieres limpiar la fila -->
+      <button class="btn btn-delete" type="button" id="btnLimpiarGeneral">Eliminar</button>
+    </div>
+
+  </section>
+
+  <!-- ====== Placeholders (por ahora) ====== -->
+  <section id="sec-horas" class="card section">
+    <div style="font-size:12px;color:#64748b;">Pendiente: formulario de horas extras.</div>
+  </section>
+
+  <section id="sec-impuestos" class="card section">
+    <div style="font-size:12px;color:#64748b;">Pendiente: formulario de impuestos.</div>
+  </section>
+
+  <section id="sec-libranzas" class="card section">
+    <div style="font-size:12px;color:#64748b;">Pendiente: formulario de libranzas.</div>
+  </section>
+
+  <!-- ====== HISTÓRICO ====== -->
+  <section id="sec-historico" class="card section">
+
+    <!-- Filtros -->
+    <div class="filters">
+      <div class="field">
+        <label for="h_cedula">Cedula</label>
+        <input id="h_cedula" type="text" placeholder="1069...">
+      </div>
+
+      <div class="field">
+        <label for="h_empleado">Empleado</label>
+        <input id="h_empleado" type="text" placeholder="Nombre">
+      </div>
+
+      <div class="field">
+        <label for="h_contrato">Contrato</label>
+        <input id="h_contrato" type="text" placeholder="CT-001">
+      </div>
+
+      <div class="field">
+        <label for="h_tipo_nomina">Tipo de nómina</label>
+        <select id="h_tipo_nomina">
+          <option value="">-- Seleccionar --</option>
+          <option>Mensual</option>
+          <option>Quincenal</option>
+          <option>Semanal</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="h_tipo_contrato">Tipo de contrato</label>
+        <select id="h_tipo_contrato">
+          <option value="">-- Seleccionar --</option>
+          <option>Término indefinido</option>
+          <option>Término fijo</option>
+          <option>Prestación de servicios</option>
+          <option>Aprendiz</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="h_fecha_ini">Fecha inicio</label>
+        <input id="h_fecha_ini" type="date">
+      </div>
+
+      <div class="field">
+        <label for="h_fecha_fin">Fecha Fin</label>
+        <input id="h_fecha_fin" type="date">
+      </div>
+
+      <div class="field">
+        <label for="h_concepto">Concepto</label>
+        <select id="h_concepto">
+          <option value="">-- Seleccionar --</option>
+          <option>Incapacidad</option>
+          <option>Licencia</option>
+          <option>Sanción</option>
+          <option>Otro</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="hist-actions">
+      <button class="btn-filter" type="button">Aplicar filtros</button>
+    </div>
+
+    <!-- Tabla compacta blanco/negro sin bordes -->
+    <div class="table-wrap-plain">
+      <table class="plain-table">
+        <thead>
+          <tr>
+            <th style="width:34px;">✓</th>
+            <th class="h-cedula">Cedula</th>
+            <th class="h-nombre">Nombre</th>
+            <th class="h-contrato">Contrato</th>
+            <th class="h-fecha">Fecha inicio</th>
+            <th class="h-fecha">Fecha fin</th>
+            <th class="h-concepto">Concepto</th>
+            <th class="h-valor">Valor</th>
+            <th class="h-descuenta">Desc. sueldo</th>
+            <th class="h-dias">Días</th>
+            <th class="h-descripcion">Descripción</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+          <tbody id="histBody">
+           {% for n in historico_novedades %}
+            <tr data-id="{{ n.id }}">
+             <td style="text-align:center;">
+              <input type="checkbox" class="hist-check" title="Seleccionar fila">
+             </td>
+             <td><input type="text" value="{{ n.cedula }}" readonly></td>
+             <td><input type="text" value="{{ n.nombre }}" readonly></td>
+             <td><input type="text" value="{{ n.contrato }}" readonly></td>
+             <td><input type="text" value="{{ n.fecha_inicio|date:'Y-m-d' }}" readonly></td>
+             <td><input type="text" value="{{ n.fecha_fin|date:'Y-m-d' }}" readonly></td>
+             <td><input type="text" value="{{ n.concepto.codigo }} - {{ n.concepto.nombre }}" readonly></td>
+             <td><input type="text" class="money" value="{{ n.valor }}" readonly></td>
+             <td><input type="text" value="{% if n.descuenta_sueldo %}Sí{% else %}No{% endif %}" readonly></td>
+             <td><input type="text" value="{{ n.dias }}" readonly></td>
+             <td><input type="text" value="{{ n.descripcion|default_if_none:'' }}" readonly></td>
+            </tr>
+           {% endfor %}
+          </tbody>
+      </table>
+
+      <div class="actions" style="justify-content:flex-end; margin-top:10px;">
+       <button class="btn btn-delete" type="button" id="btnHistEliminar">Eliminar</button>
+      </div>
+    </div>
+
+  </section>
+
+</div>
+
+<script>
+  const tabButtons = document.querySelectorAll(".tab-btn");
+  const sections = document.querySelectorAll(".section");
+
+  tabButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      tabButtons.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      const target = btn.getAttribute("data-target");
+      sections.forEach(sec => sec.classList.remove("active"));
+      const el = document.querySelector(target);
+      if (el) el.classList.add("active");
+    });
+  });
+
+
+  
+  async function fetchEmpleado(cedula){
+    const url = `{% url "empleado_por_cedula" %}?cedula=` + encodeURIComponent(cedula);
+    const res = await fetch(url);
+    const data = await res.json().catch(()=> ({}));
+    return { res, data };
+  }
+
+  function nombreCompleto(e){
+    const parts = [e.nombre_1, e.nombre_2, e.apellido_1, e.apellido_2]
+      .map(x => (x || "").trim())
+      .filter(Boolean);
+    return parts.join(" ");
+  }
+
+  async function cargarNombreYContrato(){
+    const ced = (document.getElementById("g_cedula").value || "").trim();
+    const nombreEl = document.getElementById("g_nombre");
+    const contratoEl = document.getElementById("g_contrato");
+
+    if(!ced){
+      nombreEl.value = "";
+      contratoEl.value = "";
+      return;
+    }
+
+    const { res, data } = await fetchEmpleado(ced);
+
+    if(!res.ok || !data.ok){
+      if(data.not_found){
+        nombreEl.value = "";
+        contratoEl.value = "";
+        alert("ℹ️ No existe un empleado con esa cédula. Regístralo en Ingreso de personal.");
+        return;
+      }
+      alert("❌ Error consultando empleado.");
+      return;
+    }
+
+    const e = data.empleado;
+    nombreEl.value = nombreCompleto(e);
+    contratoEl.value = e.no_contrato || "";
+  }
+
+  document.addEventListener("DOMContentLoaded", function(){
+    const cedInput = document.getElementById("g_cedula");
+
+    // Enter: buscar y NO enviar nada
+    cedInput.addEventListener("keydown", function(ev){
+      if(ev.key === "Enter"){
+        ev.preventDefault();
+        cargarNombreYContrato();
+      }
+    });
+
+    // Tab: normalmente dispara blur => buscamos
+    cedInput.addEventListener("blur", function(){
+      cargarNombreYContrato();
+    });
+  });
+
+
+
+  
+  function val(id){ return (document.getElementById(id)?.value || "").trim(); }
+
+ 
+ 
+  function crearFilaHistorico(row){
+    const tr = document.createElement("tr");
+
+    // ✅ importante: guardar el id si viene desde BD
+    if(row && row.id) tr.dataset.id = String(row.id);
+
+    // helpers seguros
+    const safe = (v) => (v === null || v === undefined) ? "" : String(v);
+    const safeText = (v) => safe(v).replaceAll('"', "&quot;");
+
+    // valor formateado
+    const valorNumber = parseMoneyToNumber(safe(row.valor));
+    const valorPretty = valorNumber ? formatMoneyCO(valorNumber) : "";
+
+    tr.innerHTML = `
+      <td style="text-align:center;">
+        <input type="checkbox" class="hist-check" title="Seleccionar fila">
+      </td>
+
+      <td><input type="text" value="${safeText(row.cedula)}" readonly></td>
+      <td><input type="text" value="${safeText(row.nombre)}" readonly></td>
+      <td><input type="text" value="${safeText(row.contrato)}" readonly></td>
+
+      <td><input type="text" value="${safeText(row.fecha_inicio || row.fecha_ini)}" readonly></td>
+      <td><input type="text" value="${safeText(row.fecha_fin)}" readonly></td>
+
+      <td><input type="text" value="${safeText(row.concepto_text || row.concepto)}" readonly></td>
+
+      <td><input type="text" class="money" value="${safeText(valorPretty)}" readonly></td>
+
+      <td><input type="text" value="${safeText(row.descuenta)}" readonly></td>
+      <td><input type="text" value="${safeText(row.dias)}" readonly></td>
+
+      <td><input type="text" value="${safeText(safe(row.descripcion))}" readonly></td>
+    `;
+
+    return tr;
+  }
+
+  function limpiarGenerales(){
+    const ids = ["g_cedula","g_nombre","g_contrato","g_fecha_ini","g_fecha_fin","g_valor","g_dias","g_descripcion"];
+    ids.forEach(i => { const el = document.getElementById(i); if(el) el.value=""; });
+    const c = document.getElementById("g_concepto"); if(c) c.value="";
+    const d = document.getElementById("g_descuenta"); if(d) d.value="No";
+    document.getElementById("g_cedula")?.focus();
+  }
+
+  document.addEventListener("DOMContentLoaded", function(){
+    const btnAdd = document.getElementById("btnAgregarNovedad");
+    const btnDel = document.getElementById("btnHistEliminar");
+    const histBody = document.getElementById("histBody");
+    const btnLimpiar = document.getElementById("btnLimpiarGeneral");
+
+    btnAdd?.addEventListener("click", async function(){
+      const gValorEl = document.getElementById("g_valor");
+      const valorRaw = gValorEl?.dataset.raw || String(parseMoneyToNumber(gValorEl?.value || ""));
+      const conceptoSelect = document.getElementById("g_concepto");
+      const conceptoId = conceptoSelect?.value || "";
+      const conceptoText = conceptoSelect?.options[conceptoSelect.selectedIndex]?.text || "";
+      const row = {
+        cedula: val("g_cedula"),
+        nombre: val("g_nombre"),
+        contrato: val("g_contrato"),
+        fecha_ini: document.getElementById("g_fecha_ini")?.value || "",
+        fecha_fin: document.getElementById("g_fecha_fin")?.value || "",
+        concepto_id: conceptoId,
+        concepto: conceptoText,
+        valor: valorRaw,
+        descuenta: val("g_descuenta") || "No",
+        dias: document.getElementById("g_dias")?.value || "",
+        descripcion: (document.getElementById("g_descripcion")?.value || "").trim(),
+      };
+
+      if(!row.cedula){
+        alert("❌ Debes digitar la cédula.");
+        return;
+      }
+      if(!row.nombre){
+        alert("❌ Primero carga el empleado por cédula (Enter o Tab).");
+        return;
+      }
+      if(!row.concepto){
+        alert("❌ Selecciona un concepto.");
+        return;
+      }
+
+      if(!histBody){
+        alert("❌ No se encontró la tabla del histórico (falta id='histBody').");
+        return;
+      }
+
+      if(!conceptoId){
+        alert("❌ Selecciona un concepto.");
+      return;
+      }
+
+      const payload = {
+       cedula: row.cedula,
+       nombre: row.nombre,
+       contrato: row.contrato,
+       fecha_inicio: row.fecha_ini,
+       fecha_fin: row.fecha_fin,
+       concepto_id: row.concepto_id,
+       valor: row.valor,
+       descuenta: row.descuenta,
+       dias: row.dias,
+       descripcion: row.descripcion,
+      };
+
+      const { res, data } = await postJSON("{% url 'novedad_crear' %}", payload);
+
+      if(!res.ok || !data.ok){
+       alert("❌ " + (data.error || "No se pudo guardar."));
+       return;
+      }
+
+      // pintar fila ya guardada (con ID en BD)
+      const tr = crearFilaHistorico(data.novedad);
+      tr.dataset.id = data.novedad.id; // importante para eliminar luego
+      histBody.appendChild(tr);
+
+      limpiarGenerales();
+      alert("✅ El empleado ha sido guardado exitosamente.");
+
+    
+
+    });
+
+      btnDel?.addEventListener("click", async function(){
+      const checks = Array.from(document.querySelectorAll(".hist-check"));
+      const selected = checks.filter(c => c.checked).map(c => c.closest("tr"));
+      if(selected.length === 0){
+        alert("ℹ️ Selecciona una o más novedades para eliminar.");
+        return;
+      }
+      const ok = confirm(`¿Seguro que deseas eliminar ${selected.length} novedad(es) del histórico?`);
+      if(!ok) return;
+
+
+      const ids = selected
+       .map(tr => tr?.dataset?.id)
+       .filter(Boolean)
+       .map(x => parseInt(x, 10));
+
+      const { res, data } = await postJSON("{% url 'novedad_eliminar' %}", { ids });
+
+      if(!res.ok || !data.ok){
+       alert("❌ " + (data.error || "No se pudo eliminar."));
+       return;
+      }
+
+      selected.forEach(tr => tr.remove());
+      alert("✅ Novedad(es) eliminada(s) correctamente.");
+
+
+    });
+
+
+
+
+    // botón eliminar de generales (lo usamos como "limpiar fila")
+    btnLimpiar?.addEventListener("click", function(){
+      const ok = confirm("¿Deseas limpiar la fila de Novedades generales?");
+      if(ok) limpiarGenerales();
+    });
+  });
+
+
+  function parseMoneyToNumber(str){
+  // deja solo números y coma/punto
+  const s = (str || "").toString().trim();
+  if(!s) return 0;
+
+  // quitar separadores de miles (.) y espacios
+  // convertir coma decimal a punto decimal
+  const cleaned = s.replace(/\s/g, "").replace(/\./g, "").replace(/,/g, ".");
+  const n = parseFloat(cleaned);
+  return isNaN(n) ? 0 : n;
+}
+
+function formatMoneyCO(number){
+  // Formato Colombia: miles con punto, decimales con coma
+  return new Intl.NumberFormat("es-CO", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2
+  }).format(number);
+}
+
+function formatMoneyInput(input){
+  const raw = parseMoneyToNumber(input.value);
+  input.dataset.raw = String(raw);     // guardamos el número real
+  input.value = raw ? formatMoneyCO(raw) : "";  // mostramos bonito
+}
+
+
+document.addEventListener("DOMContentLoaded", function(){
+  const gValor = document.getElementById("g_valor");
+  if(!gValor) return;
+
+  // mientras escribe: solo deja dígitos, punto, coma y espacios
+  gValor.addEventListener("input", function(){
+    gValor.value = gValor.value.replace(/[^0-9.,\s]/g, "");
+  });
+
+  // al salir: formatea a miles y guarda valor real
+  gValor.addEventListener("blur", function(){
+    const raw = parseMoneyToNumber(gValor.value);
+    gValor.dataset.raw = String(raw);
+    gValor.value = raw ? formatMoneyCO(raw) : "";
+  });
+});
+
+
+
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+const csrftoken = getCookie('csrftoken');
+
+async function postJSON(url, payload){
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type":"application/json",
+      "X-CSRFToken": csrftoken
+    },
+    body: JSON.stringify(payload)
+  });
+  const data = await res.json().catch(()=> ({}));
+  return {res, data};
+}
+
+
+</script>
+
+</body>
+</html>

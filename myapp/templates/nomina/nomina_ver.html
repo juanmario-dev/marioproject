@@ -1,0 +1,144 @@
+
+
+
+
+<!DOCTYPE html>
+<html lang="es">
+{% load humanize %}
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<style>
+  :root{
+    --bg:#f7f8fb;
+    --card:#ffffff;
+    --border:#d8dee9;
+    --text:#0f172a;
+    --muted:#64748b;
+    --shadow:0 10px 25px rgba(2,18,36,.10);
+    --zebra:#fafafa;
+    --blue:#0d6efd;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text);font-size:13px;}
+  .wrap{max-width:1900px;margin:0 auto;padding:10px 12px 14px;}
+  .titulo{
+    background: linear-gradient(90deg, #109155, #34c782);
+    color:#fff;font-size:14px;font-weight:700;
+    padding:12px 16px;border-radius:8px;margin-bottom:12px;
+    box-shadow:0 4px 10px rgba(0,0,0,.08);
+    display:flex;justify-content:space-between;align-items:center;gap:10px;
+  }
+  .card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px;box-shadow:var(--shadow);margin-bottom:10px;}
+  .muted{color:var(--muted);font-weight:700;}
+  .btn{
+    border:0;cursor:pointer;border-radius:6px;
+    padding:8px 12px;font-weight:900;font-size:12px;height:34px;
+    display:inline-flex;align-items:center;justify-content:center;
+    text-decoration:none;white-space:nowrap;
+    background:#111;color:#fff;
+  }
+  .btn-blue{background:var(--blue);color:#fff;}
+  .table-wrap{overflow:auto;border:1px solid rgba(0,0,0,.08);border-radius:6px;background:#fff;}
+  table{width:100%;border-collapse:separate;border-spacing:0;min-width:1200px;background:#fff;font-size:11.5px;}
+  thead th{
+    position:sticky;top:0;z-index:2;background:#fff;color:#000;
+    font-weight:900;font-size:11px;padding:6px 6px;text-align:left;border:0;white-space:nowrap;
+  }
+  tbody td{padding:4px 6px;border:0;background:#fff;white-space:nowrap;vertical-align:middle;}
+  tbody tr:nth-child(even) td{background:var(--zebra);}
+  .num{text-align:right;font-variant-numeric:tabular-nums;}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+
+  {% if not nomina %}
+    <div class="titulo">Ver nómina</div>
+    <div class="card muted">No se encontró la nómina solicitada.</div>
+  {% else %}
+
+  <div class="titulo">
+    <div>
+      Nómina {{ nomina.consecutivo }}
+      <span class="muted">({{ nomina.fecha_ini|date:"Y-m-d" }} a {{ nomina.fecha_fin|date:"Y-m-d" }})</span>
+    </div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <a class="btn" href="{% url 'historial_nominas' %}">Volver</a>
+      <a class="btn btn-blue" href="{% url 'nomina_cargue_exportar_excel' %}?no_nomina={{ nomina.consecutivo }}">Excel</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="muted" style="margin-bottom:8px;">
+      Fecha creación: {{ nomina.created_at|date:"Y-m-d H:i" }}
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Contrato</th>
+            <th>Cédula</th>
+            <th>Nombre</th>
+            <th>Cargo</th>
+            <th>Tipo nómina</th>
+            <th>Tipo contrato</th>
+            <th>Área</th>
+            <th class="num">Sueldo base</th>
+            <th class="num">Días</th>
+
+            {% for c in conceptos %}
+              <th class="num">
+                {{ c.codigo }} - {{ c.nombre }}
+              </th>
+            {% endfor %}
+
+            <th class="num">Total salario</th>
+            <th class="num">Total deducciones</th>
+            <th class="num">Total a pagar</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for row in filas %}
+            {% with e=row.e %}
+            <tr>
+              <td>{{ e.contrato }}</td>
+              <td>{{ e.cedula }}</td>
+              <td>{{ e.nombre }}</td>
+              <td>{{ e.cargo }}</td>
+              <td>{{ e.tipo_nomina }}</td>
+              <td>{{ e.tipo_contrato }}</td>
+              <td>{{ e.area }}</td>
+              <td class="num">{{ e.sueldo_base|floatformat:2|intcomma }}</td>
+              <td class="num">{{ e.dias_laborados }}</td>
+
+              {% for v in row.valores %}
+                <td class="num">{{ v|floatformat:2|intcomma }}</td>
+              {% endfor %}
+
+              <td class="num">{{ e.total_salario|floatformat:2|intcomma }}</td>
+              <td class="num">{{ e.total_deducciones|floatformat:2|intcomma }}</td>
+              <td class="num">{{ e.total_pagar|floatformat:2|intcomma }}</td>
+
+            </tr>
+            {% endwith %}
+          {% empty %}
+            <tr>
+              <td colspan="30" class="muted" style="text-align:center;padding:10px;">
+                No hay empleados en esta nómina.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% endif %}
+</div>
+</body>
+</html>
