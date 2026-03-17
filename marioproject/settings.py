@@ -26,11 +26,7 @@ SECRET_KEY = 'django-insecure-rd_7pm6)(4tha*i^)l0)^w%pmeps5+y#el-7opdhk!piuce89e
 DEBUG = True
 
 
-ALLOWED_HOSTS = [
-    "marioproject-1.onrender.com",
-    "localhost",
-    "127.0.0.1",
-]
+ALLOWED_HOSTS = ["*"]
 
 
 
