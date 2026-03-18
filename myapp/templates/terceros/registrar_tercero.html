@@ -3,20 +3,155 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Registrar Tercero</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Registrar Tercero - DataCounter</title>
+
+<style>
+:root{
+  --bg:#f4f7fb;
+  --card:#ffffff;
+  --primary:#2563eb;
+  --green:#16a34a;
+  --green-dark:#15803d;
+  --text:#0f172a;
+  --muted:#64748b;
+  --border:#e2e8f0;
+  --shadow:0 15px 35px rgba(0,0,0,0.08);
+}
+
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:var(--bg);
+}
+
+/* HEADER */
+.header{
+  background:linear-gradient(90deg,#1e3a8a,#2563eb);
+  color:white;
+  padding:14px 20px;
+  font-weight:600;
+}
+
+/* CONTENEDOR */
+.container{
+  max-width:900px;
+  margin:10px auto;
+}
+
+/* CARD */
+.card{
+  background:white;
+  border-radius:12px;
+  padding:25px;
+  box-shadow:var(--shadow);
+}
+
+/* TITULO */
+.title{
+  font-size:18px;
+  margin-bottom:20px;
+}
+
+/* GRID FORM */
+.form-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:16px;
+}
+
+.form-group{
+  display:flex;
+  flex-direction:column;
+}
+
+.full{
+  grid-column: span 2;
+}
+
+label{
+  font-size:13px;
+  color:var(--muted);
+  margin-bottom:4px;
+}
+
+input, select{
+  padding:8px;
+  border:1px solid var(--border);
+  border-radius:6px;
+}
+
+/* BOTONES */
+.actions{
+  margin-top:20px;
+  display:flex;
+  gap:10px;
+}
+
+.btn{
+  padding:10px 16px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.btn-primary{
+  background:var(--green);
+  color:white;
+}
+
+.btn-primary:hover{
+  background:var(--green-dark);
+}
+
+.btn-secondary{
+  background:#e2e8f0;
+}
+</style>
+
 </head>
+
 <body>
-    <h1>Registrar Tercero</h1>
+
+<div class="header">
+  DataCounter: Registro de Terceros
+</div>
+
+<div class="container">
+
+  <div class="card">
+
+    <div class="title">Registrar Tercero</div>
+
     <form method="POST">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Guardar</button>
+      {% csrf_token %}
+
+      <div class="form-grid">
+
+        {% for field in form %}
+        <div class="form-group {% if field.name == 'direccion' or field.name == 'razon_social' %}full{% endif %}">
+          <label>{{ field.label }}</label>
+          {{ field }}
+        </div>
+        {% endfor %}
+
+      </div>
+
+      <div class="actions">
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a href="{% url 'listar_terceros' %}" class="btn btn-secondary">Consultar</a>
+      </div>
+
     </form>
-    <a href="{% url 'listar_terceros' %}">Consultar Terceros</a>
+
+  </div>
+
+</div>
+
 </body>
 </html>
-
 
 
 

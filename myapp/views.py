@@ -1897,13 +1897,33 @@ from django.views.decorators.http import require_POST
 from .models import FacturaVenta, FacturaVentaLinea
 
 
-def _to_decimal(x, default="0"):
+
+def _to_decimal(valor, default="0"):
     try:
-        if x is None or x == "":
+        if valor is None:
             return Decimal(default)
-        return Decimal(str(x))
+
+        txt = str(valor).strip()
+        if txt == "":
+            return Decimal(default)
+
+        txt = txt.replace(" ", "").replace("$", "").replace("%", "")
+
+        has_comma = "," in txt
+        has_dot = "." in txt
+
+        if has_comma and has_dot:
+            if txt.rfind(",") > txt.rfind("."):
+                txt = txt.replace(".", "").replace(",", ".")
+            else:
+                txt = txt.replace(",", "")
+        elif has_comma and not has_dot:
+            txt = txt.replace(",", ".")
+
+        return Decimal(txt)
     except (InvalidOperation, ValueError, TypeError):
         return Decimal(default)
+    
 
 
 def _next_consecutivo():
@@ -3086,7 +3106,7 @@ from .models import (
 )
 
 # ✅ Si ya las tienes en otro lado, elimina estas y usa las tuyas
-def _to_decimal(v, default="0"):
+def _to_decimal_aux2(v, default="0"):
     try:
         if v is None or v == "":
             return Decimal(default)
@@ -3738,7 +3758,7 @@ from .models import ReciboCaja, ReciboCajaLinea, Tercero, FacturaVenta
 
 
 
-def _to_decimal(value) -> Decimal:
+def _to_decimal_aux3(value) -> Decimal:
     if value is None:
         return Decimal("0")
     if isinstance(value, (int, float, Decimal)):
@@ -4202,7 +4222,7 @@ from .models import (
     Tercero
 )
 
-def _to_decimal(x, default="0"):
+def _to_decimal_aux4(x, default="0"):
     try:
         if x is None:
             return Decimal(default)
@@ -4639,7 +4659,7 @@ from .models import (
 
 from decimal import Decimal, InvalidOperation
 
-def _to_decimal(v):
+def _to_decimal_co(v):
     """
     Convierte strings tipo:
     - "1.000.000,50" -> 1000000.50   (CO)
@@ -6503,7 +6523,7 @@ from .models import Nomina, NominaEmpleado, NominaMovimiento
 from .models import ConceptoNomina  # ajusta si está en otro lado
 
 
-def _to_decimal(v):
+def _to_decimal_simple(v):
     try:
         if v is None or v == "":
             return Decimal("0")
