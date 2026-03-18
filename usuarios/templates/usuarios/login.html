@@ -1,12 +1,517 @@
 
 
-<h2>Iniciar Sesión</h2>
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit">Entrar</button>
-</form>
-<a href="{% url 'register' %}">Crear cuenta</a>
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar sesión | DataCounter Colombia</title>
+
+  <style>
+    :root{
+      --bg-1:#0f172a;
+      --bg-2:#1e3a8a;
+      --bg-3:#0ea5e9;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#64748b;
+      --border:#dbe4f0;
+      --input-bg:#f8fafc;
+      --primary:#16a34a;
+      --primary-dark:#15803d;
+      --secondary:#2563eb;
+      --danger:#dc2626;
+      --shadow:0 25px 60px rgba(2, 6, 23, 0.28);
+      --radius:22px;
+    }
+
+    *{
+      box-sizing:border-box;
+    }
+
+    html, body{
+      margin:0;
+      padding:0;
+      font-family:Arial, Helvetica, sans-serif;
+      min-height:100%;
+      background:
+        radial-gradient(circle at top left, rgba(14,165,233,.22), transparent 30%),
+        radial-gradient(circle at bottom right, rgba(22,163,74,.18), transparent 28%),
+        linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 52%, #0b5ed7 100%);
+      color:#fff;
+    }
+
+    .page{
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:32px 18px;
+    }
+
+    .auth-shell{
+      width:100%;
+      max-width:1120px;
+      min-height:650px;
+      display:grid;
+      grid-template-columns: 1.08fr 0.92fr;
+      background:rgba(255,255,255,0.08);
+      backdrop-filter: blur(8px);
+      border:1px solid rgba(255,255,255,0.12);
+      border-radius:28px;
+      overflow:hidden;
+      box-shadow:var(--shadow);
+    }
+
+    .brand-panel{
+      position:relative;
+      padding:52px 48px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      overflow:hidden;
+    }
+
+    .brand-panel::before,
+    .brand-panel::after{
+      content:"";
+      position:absolute;
+      border-radius:50%;
+      background:rgba(255,255,255,0.08);
+      z-index:0;
+    }
+
+    .brand-panel::before{
+      width:260px;
+      height:260px;
+      top:-70px;
+      right:-60px;
+    }
+
+    .brand-panel::after{
+      width:340px;
+      height:340px;
+      bottom:-120px;
+      left:-110px;
+    }
+
+    .brand-top,
+    .brand-bottom{
+      position:relative;
+      z-index:1;
+    }
+
+    .brand-badge{
+      display:inline-flex;
+      align-items:center;
+      gap:12px;
+      padding:10px 16px;
+      background:rgba(255,255,255,0.10);
+      border:1px solid rgba(255,255,255,0.16);
+      border-radius:999px;
+      margin-bottom:28px;
+      font-size:13px;
+      letter-spacing:.3px;
+    }
+
+    .brand-icon{
+      width:40px;
+      height:40px;
+      border-radius:12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:linear-gradient(135deg, #22c55e, #2563eb);
+      color:#fff;
+      font-size:18px;
+      font-weight:bold;
+      box-shadow:0 10px 24px rgba(0,0,0,.18);
+      flex-shrink:0;
+    }
+
+    .brand-title{
+      margin:0;
+      font-size:40px;
+      line-height:1.08;
+      font-weight:800;
+      letter-spacing:.2px;
+    }
+
+    .brand-title span{
+      color:#86efac;
+    }
+
+    .brand-text{
+      max-width:520px;
+      margin-top:18px;
+      font-size:16px;
+      line-height:1.75;
+      color:rgba(255,255,255,0.86);
+    }
+
+    .feature-list{
+      margin:34px 0 0;
+      padding:0;
+      list-style:none;
+      display:grid;
+      gap:14px;
+    }
+
+    .feature-list li{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      font-size:15px;
+      color:rgba(255,255,255,.92);
+    }
+
+    .check{
+      width:28px;
+      height:28px;
+      border-radius:999px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:rgba(255,255,255,.14);
+      border:1px solid rgba(255,255,255,.14);
+      font-size:14px;
+      flex-shrink:0;
+    }
+
+    .brand-footer{
+      display:grid;
+      grid-template-columns:repeat(3, 1fr);
+      gap:14px;
+      margin-top:34px;
+    }
+
+    .stat{
+      background:rgba(255,255,255,0.08);
+      border:1px solid rgba(255,255,255,0.12);
+      border-radius:18px;
+      padding:16px 14px;
+    }
+
+    .stat strong{
+      display:block;
+      font-size:20px;
+      margin-bottom:6px;
+    }
+
+    .stat span{
+      font-size:12px;
+      color:rgba(255,255,255,.82);
+    }
+
+    .form-panel{
+      background:var(--card);
+      color:var(--text);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:40px 30px;
+    }
+
+    .form-card{
+      width:100%;
+      max-width:420px;
+    }
+
+    .mobile-brand{
+      display:none;
+      margin-bottom:18px;
+      text-align:center;
+    }
+
+    .mobile-brand .mini{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:56px;
+      height:56px;
+      border-radius:16px;
+      background:linear-gradient(135deg, #22c55e, #2563eb);
+      color:#fff;
+      font-size:22px;
+      font-weight:700;
+      margin-bottom:10px;
+      box-shadow:0 10px 24px rgba(37,99,235,.22);
+    }
+
+    .eyebrow{
+      display:inline-block;
+      font-size:12px;
+      font-weight:700;
+      letter-spacing:1.1px;
+      color:var(--secondary);
+      text-transform:uppercase;
+      margin-bottom:10px;
+    }
+
+    .form-title{
+      margin:0;
+      font-size:32px;
+      font-weight:800;
+      color:var(--text);
+    }
+
+    .form-subtitle{
+      margin:10px 0 28px;
+      color:var(--muted);
+      line-height:1.6;
+      font-size:14px;
+    }
+
+    .error-box{
+      background:#fef2f2;
+      border:1px solid #fecaca;
+      color:#991b1b;
+      padding:14px 16px;
+      border-radius:14px;
+      font-size:14px;
+      margin-bottom:18px;
+    }
+
+    form p{
+      margin:0 0 16px;
+    }
+
+    form label{
+      display:block;
+      margin-bottom:8px;
+      font-size:13px;
+      font-weight:700;
+      color:#334155;
+    }
+
+    form input,
+    form select,
+    form textarea{
+      width:100%;
+      padding:14px 15px;
+      border:1px solid var(--border);
+      border-radius:14px;
+      background:var(--input-bg);
+      font-size:14px;
+      color:var(--text);
+      outline:none;
+      transition:.22s ease;
+    }
+
+    form input:focus,
+    form select:focus,
+    form textarea:focus{
+      border-color:#93c5fd;
+      background:#fff;
+      box-shadow:0 0 0 4px rgba(37,99,235,.10);
+    }
+
+    .helptext{
+      display:block;
+      margin-top:6px;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.5;
+    }
+
+    .errorlist{
+      margin:8px 0 0;
+      padding-left:18px;
+      color:var(--danger);
+      font-size:12px;
+    }
+
+    .btn{
+      width:100%;
+      border:none;
+      border-radius:15px;
+      padding:15px 18px;
+      font-size:15px;
+      font-weight:700;
+      cursor:pointer;
+      color:#fff;
+      background:linear-gradient(135deg, var(--primary), var(--primary-dark));
+      box-shadow:0 14px 28px rgba(21,128,61,.24);
+      transition:transform .18s ease, box-shadow .18s ease, opacity .18s ease;
+      margin-top:6px;
+    }
+
+    .btn:hover{
+      transform:translateY(-1px);
+      box-shadow:0 18px 34px rgba(21,128,61,.28);
+      opacity:.98;
+    }
+
+    .form-links{
+      margin-top:20px;
+      text-align:center;
+      font-size:14px;
+      color:var(--muted);
+    }
+
+    .form-links a{
+      color:var(--secondary);
+      text-decoration:none;
+      font-weight:700;
+    }
+
+    .form-links a:hover{
+      text-decoration:underline;
+    }
+
+    .footer-note{
+      margin-top:26px;
+      text-align:center;
+      font-size:12px;
+      color:#94a3b8;
+      line-height:1.6;
+    }
+
+    @media (max-width: 960px){
+      .auth-shell{
+        grid-template-columns:1fr;
+        max-width:560px;
+      }
+
+      .brand-panel{
+        display:none;
+      }
+
+      .form-panel{
+        padding:34px 22px;
+      }
+
+      .mobile-brand{
+        display:block;
+      }
+
+      .form-title{
+        font-size:28px;
+        text-align:center;
+      }
+
+      .form-subtitle{
+        text-align:center;
+      }
+    }
+
+    @media (max-width: 520px){
+      .page{
+        padding:16px;
+      }
+
+      .form-panel{
+        padding:26px 18px;
+      }
+
+      .form-title{
+        font-size:24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="auth-shell">
+
+      <section class="brand-panel">
+        <div class="brand-top">
+          <div class="brand-badge">
+            <div class="brand-icon">DC</div>
+            <div>Plataforma contable y administrativa</div>
+          </div>
+
+          <h1 class="brand-title">
+            DataCounter <span>Colombia</span>
+          </h1>
+
+          <p class="brand-text">
+            Bienvenido a una experiencia de acceso más moderna, segura y profesional.
+            Administra tu operación contable, financiera y empresarial desde una sola plataforma.
+          </p>
+
+          <ul class="feature-list">
+            <li><span class="check">✓</span> Acceso seguro a tu sistema</li>
+            <li><span class="check">✓</span> Gestión empresarial centralizada</li>
+            <li><span class="check">✓</span> Plataforma diseñada para crecimiento real</li>
+          </ul>
+        </div>
+
+        <div class="brand-bottom">
+          <div class="brand-footer">
+            <div class="stat">
+              <strong>ERP</strong>
+              <span>Contabilidad, nómina, facturación y cartera</span>
+            </div>
+            <div class="stat">
+              <strong>Cloud</strong>
+              <span>Acceso desde web y múltiples dispositivos</span>
+            </div>
+            <div class="stat">
+              <strong>Pro</strong>
+              <span>Interfaz corporativa y experiencia moderna</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="form-panel">
+        <div class="form-card">
+
+          <div class="mobile-brand">
+            <div class="mini">DC</div>
+            <div style="font-weight:800; font-size:22px; color:#0f172a;">DataCounter Colombia</div>
+          </div>
+
+          <span class="eyebrow">Acceso al sistema</span>
+          <h2 class="form-title">Iniciar sesión</h2>
+          <p class="form-subtitle">
+            Ingresa tus credenciales para acceder al sistema.
+          </p>
+
+          {% if form.non_field_errors %}
+            <div class="error-box">
+              {{ form.non_field_errors }}
+            </div>
+          {% endif %}
+
+          <form method="post">
+            {% csrf_token %}
+
+            {% for field in form %}
+              <p>
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}
+                  <span class="helptext">{{ field.help_text }}</span>
+                {% endif %}
+                {% if field.errors %}
+                  {{ field.errors }}
+                {% endif %}
+              </p>
+            {% endfor %}
+
+            <button type="submit" class="btn">Entrar</button>
+          </form>
+
+          <div class="form-links">
+            ¿No tienes cuenta?
+            <a href="{% url 'register' %}">Crear cuenta</a>
+          </div>
+
+          <div class="footer-note">
+            DataCounter Colombia · Software contable y administrativo
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</body>
+</html>
 
 
 
