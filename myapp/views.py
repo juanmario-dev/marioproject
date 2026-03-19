@@ -938,12 +938,28 @@ def reportes_movimientos(request):
     })
 
 
+# funcion para exportar libro auxiliar
+
+import csv
+from datetime import date
+from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
+from django.db.models import Q
+
 @login_required(login_url='login')
 def reportes_export_csv(request):
     """
     Exporta el mismo conjunto filtrado que la vista de reportes a CSV (sin límite).
+    Ajustado para Excel:
+    - separador ;
+    - limpia tabulaciones y saltos de línea
     """
-    # Repetimos los mismos filtros
+
+    def limpiar_texto(valor):
+        if valor is None:
+            return ''
+        return str(valor).replace('\r', ' ').replace('\n', ' ').replace('\t', ' ').strip()
+
     f_desde = (request.GET.get('fecha_desde') or '').strip()
     f_hasta = (request.GET.get('fecha_hasta') or '').strip()
     doc_id  = (request.GET.get('doc_id') or '').strip()
@@ -951,41 +967,57 @@ def reportes_export_csv(request):
     terc    = (request.GET.get('tercero') or '').strip()
     qtext   = (request.GET.get('q') or '').strip()
 
-    movs = MovimientoContable.objects.select_related('asiento','asiento__documento','cuenta','tercero').all()
+    movs = MovimientoContable.objects.select_related(
+        'asiento', 'asiento__documento', 'cuenta', 'tercero'
+    ).all()
 
     if f_desde:
         try:
             yyyy, mm, dd = map(int, f_desde.split('-'))
-            movs = movs.filter(asiento__fecha__gte=date(yyyy,mm,dd))
-        except: pass
+            movs = movs.filter(asiento__fecha__gte=date(yyyy, mm, dd))
+        except:
+            pass
+
     if f_hasta:
         try:
             yyyy, mm, dd = map(int, f_hasta.split('-'))
-            movs = movs.filter(asiento__fecha__lte=date(yyyy,mm,dd))
-        except: pass
+            movs = movs.filter(asiento__fecha__lte=date(yyyy, mm, dd))
+        except:
+            pass
 
     if doc_id:
         movs = movs.filter(asiento__documento_id=doc_id)
+
     if cta:
         movs = movs.filter(cuenta__codigo__startswith=cta)
+
     if terc:
         movs = movs.filter(tercero__numero_identificacion=terc)
+
     if qtext:
         movs = movs.filter(
             Q(asiento__descripcion__icontains=qtext) |
             Q(descripcion__icontains=qtext)
         )
 
-    movs = movs.order_by('asiento__fecha','asiento_id','id')
+    movs = movs.order_by('asiento__fecha', 'asiento_id', 'id')
 
-    # CSV
     resp = HttpResponse(content_type='text/csv; charset=utf-8')
     resp['Content-Disposition'] = 'attachment; filename="reporte_movimientos.csv"'
-    writer = csv.writer(resp)
+
+    # BOM para que Excel abra bien tildes/ñ
+    resp.write('\ufeff')
+
+    # Separador compatible con Excel regional
+    writer = csv.writer(resp, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+
     writer.writerow([
-        'fecha','doc_codigo','numero','cuenta','nombre_cuenta','tercero','nombre_tercero',
-        'descripcion_linea','descripcion_asiento','debito','credito','centro_costo','criterio1','criterio2','criterio3'
+        'fecha', 'doc_codigo', 'numero', 'cuenta', 'nombre_cuenta',
+        'tercero', 'nombre_tercero', 'descripcion_linea',
+        'descripcion_asiento', 'debito', 'credito',
+        'centro_costo', 'criterio1', 'criterio2', 'criterio3'
     ])
+
     for m in movs:
         if m.tercero:
             if m.tercero.razon_social:
@@ -994,22 +1026,30 @@ def reportes_export_csv(request):
                 nom_t = f"{m.tercero.primer_nombre} {m.tercero.segundo_nombre or ''} {m.tercero.primer_apellido} {m.tercero.segundo_apellido or ''}".strip()
             ident = m.tercero.numero_identificacion
         else:
-            nom_t = ''; ident = ''
+            nom_t = ''
+            ident = ''
+
         writer.writerow([
             m.asiento.fecha.isoformat(),
-            m.asiento.documento.codigo,
-            m.asiento.numero or '',
-            m.cuenta.codigo,
-            m.cuenta.nombre,
-            ident, nom_t,
-            m.descripcion or '',
-            m.asiento.descripcion or '',
+            limpiar_texto(m.asiento.documento.codigo),
+            limpiar_texto(m.asiento.numero or ''),
+            limpiar_texto(m.cuenta.codigo),
+            limpiar_texto(m.cuenta.nombre),
+            limpiar_texto(ident),
+            limpiar_texto(nom_t),
+            limpiar_texto(m.descripcion or ''),
+            limpiar_texto(m.asiento.descripcion or ''),
             f"{m.debito:.2f}",
             f"{m.credito:.2f}",
             '1' if m.centro_costo else '0',
-            m.criterio1 or '', m.criterio2 or '', m.criterio3 or ''
+            limpiar_texto(m.criterio1 or ''),
+            limpiar_texto(m.criterio2 or ''),
+            limpiar_texto(m.criterio3 or ''),
         ])
+
     return resp
+
+
 
 
 
@@ -8837,4 +8877,281 @@ def graficas_nomina(request):
 
 
 
+
+
+
+# funcion para hacer el balance general / balance_general.html
+
+from decimal import Decimal
+import calendar
+
+from django.contrib.auth.decorators import login_required
+from django.db.models import Sum, Value, DecimalField
+from django.db.models.functions import Coalesce, Substr
+from django.shortcuts import render
+
+from .models import MovimientoContable, CuentaContable
+
+
+@login_required(login_url='login')
+def balance_general(request):
+    anio = request.GET.get("anio")
+    mes = request.GET.get("mes")
+
+    activos = []
+    pasivos = []
+    patrimonio = []
+
+    total_activos = Decimal("0")
+    total_pasivos = Decimal("0")
+    total_patrimonio = Decimal("0")
+    total_pasivo_patrimonio = Decimal("0")
+    resultado_operacion = Decimal("0")
+    fecha_corte = None
+
+    meses = [
+        (1, "Enero"), (2, "Febrero"), (3, "Marzo"), (4, "Abril"),
+        (5, "Mayo"), (6, "Junio"), (7, "Julio"), (8, "Agosto"),
+        (9, "Septiembre"), (10, "Octubre"), (11, "Noviembre"), (12, "Diciembre"),
+    ]
+
+    anios_disponibles = (
+        MovimientoContable.objects
+        .values_list("asiento__fecha__year", flat=True)
+        .distinct()
+        .order_by("-asiento__fecha__year")
+    )
+
+    if anio and mes:
+        try:
+            anio_int = int(anio)
+            mes_int = int(mes)
+
+            ultimo_dia = calendar.monthrange(anio_int, mes_int)[1]
+            fecha_corte = f"{anio_int}-{mes_int:02d}-{ultimo_dia:02d}"
+
+            movimientos = (
+                MovimientoContable.objects
+                .filter(asiento__fecha__lte=fecha_corte)
+                .annotate(codigo_2=Substr("cuenta__codigo", 1, 2))
+                .values("codigo_2")
+                .annotate(
+                    total_debito=Coalesce(
+                        Sum("debito"),
+                        Value(0),
+                        output_field=DecimalField(max_digits=18, decimal_places=2)
+                    ),
+                    total_credito=Coalesce(
+                        Sum("credito"),
+                        Value(0),
+                        output_field=DecimalField(max_digits=18, decimal_places=2)
+                    ),
+                )
+                .order_by("codigo_2")
+            )
+
+            cuentas_nivel_2 = {}
+            codigos_2 = [m["codigo_2"] for m in movimientos if m["codigo_2"]]
+            if codigos_2:
+                cuentas_nivel_2 = {
+                    c.codigo: c.nombre
+                    for c in CuentaContable.objects.filter(codigo__in=codigos_2)
+                }
+
+            for mov in movimientos:
+                codigo_2 = mov["codigo_2"]
+                if not codigo_2 or len(codigo_2) < 2:
+                    continue
+
+                primer_digito = codigo_2[0]
+                total_debito = mov["total_debito"] or Decimal("0")
+                total_credito = mov["total_credito"] or Decimal("0")
+                saldo = total_debito - total_credito
+                if primer_digito in ["2", "3"]:
+                  saldo = saldo * Decimal("-1")
+
+                nombre_cuenta = cuentas_nivel_2.get(codigo_2, f"Cuenta {codigo_2}")
+
+                item = {
+                    "codigo": codigo_2,
+                    "nombre": nombre_cuenta,
+                    "saldo": saldo,
+                }
+
+                if primer_digito == "1":
+                    activos.append(item)
+                    total_activos += saldo
+
+                elif primer_digito == "2":
+                    pasivos.append(item)
+                    total_pasivos += saldo
+
+                elif primer_digito == "3":
+                    patrimonio.append(item)
+                    total_patrimonio += saldo
+
+            # Resultado operación = cuentas 4,5,6,7 como créditos - débitos
+            resultado_qs = (
+                MovimientoContable.objects
+                .filter(
+                    asiento__fecha__lte=fecha_corte,
+                    cuenta__codigo__regex=r'^[4567]'
+                )
+                .aggregate(
+                    total_debito=Coalesce(
+                        Sum("debito"),
+                        Value(0),
+                        output_field=DecimalField(max_digits=18, decimal_places=2)
+                    ),
+                    total_credito=Coalesce(
+                        Sum("credito"),
+                        Value(0),
+                        output_field=DecimalField(max_digits=18, decimal_places=2)
+                    ),
+                )
+            )
+
+            resultado_operacion = (
+                (resultado_qs["total_credito"] or Decimal("0")) -
+                (resultado_qs["total_debito"] or Decimal("0"))
+            )
+
+            patrimonio.append({
+                "codigo": "",
+                "nombre": "Resultado operación",
+                "saldo": resultado_operacion,
+            })
+
+            total_patrimonio += resultado_operacion
+            total_pasivo_patrimonio = total_pasivos + total_patrimonio
+
+        except Exception as e:
+            print("Error en balance_general:", str(e))
+
+    context = {
+        "anio": anio,
+        "mes": mes,
+        "meses": meses,
+        "anios_disponibles": anios_disponibles,
+        "fecha_corte": fecha_corte,
+        "activos": activos,
+        "pasivos": pasivos,
+        "patrimonio": patrimonio,
+        "total_activos": total_activos,
+        "total_pasivos": total_pasivos,
+        "total_patrimonio": total_patrimonio,
+        "total_pasivo_patrimonio": total_pasivo_patrimonio,
+        "resultado_operacion": resultado_operacion,
+    }
+
+    return render(request, "contabilidad/Balance_general.html", context)
+
+
+
+from decimal import Decimal
+from datetime import date
+
+from django.contrib.auth.decorators import login_required
+from django.db.models import Sum, Value, DecimalField
+from django.db.models.functions import Coalesce, Substr
+from django.shortcuts import render
+
+from .models import MovimientoContable, CuentaContable
+
+
+@login_required(login_url='login')
+def estado_resultados(request):
+    fecha_inicio = (request.GET.get("fecha_inicio") or "").strip()
+    fecha_fin = (request.GET.get("fecha_fin") or "").strip()
+
+    ingresos = []
+    gastos_costos = []
+
+    total_ingresos = Decimal("0")
+    total_gastos_costos = Decimal("0")
+    utilidad_ejercicio = Decimal("0")
+
+    if fecha_inicio and fecha_fin:
+        try:
+            y1, m1, d1 = map(int, fecha_inicio.split("-"))
+            y2, m2, d2 = map(int, fecha_fin.split("-"))
+
+            fecha_ini_obj = date(y1, m1, d1)
+            fecha_fin_obj = date(y2, m2, d2)
+
+            movimientos = (
+                MovimientoContable.objects
+                .filter(
+                    asiento__fecha__gte=fecha_ini_obj,
+                    asiento__fecha__lte=fecha_fin_obj,
+                    cuenta__codigo__regex=r'^[4567]'
+                )
+                .annotate(codigo_2=Substr("cuenta__codigo", 1, 2))
+                .values("codigo_2")
+                .annotate(
+                    total_debito=Coalesce(
+                        Sum("debito"),
+                        Value(0),
+                        output_field=DecimalField(max_digits=18, decimal_places=2)
+                    ),
+                    total_credito=Coalesce(
+                        Sum("credito"),
+                        Value(0),
+                        output_field=DecimalField(max_digits=18, decimal_places=2)
+                    ),
+                )
+                .order_by("codigo_2")
+            )
+
+            codigos_2 = [m["codigo_2"] for m in movimientos if m["codigo_2"]]
+            cuentas_nivel_2 = {}
+            if codigos_2:
+                cuentas_nivel_2 = {
+                    c.codigo: c.nombre
+                    for c in CuentaContable.objects.filter(codigo__in=codigos_2)
+                }
+
+            for mov in movimientos:
+                codigo_2 = mov["codigo_2"]
+                if not codigo_2 or len(codigo_2) < 2:
+                    continue
+
+                primer_digito = codigo_2[0]
+                total_debito = mov["total_debito"] or Decimal("0")
+                total_credito = mov["total_credito"] or Decimal("0")
+                nombre_cuenta = cuentas_nivel_2.get(codigo_2, f"Cuenta {codigo_2}")
+
+                # Naturaleza contable para presentación
+                if primer_digito == "4":
+                    saldo = total_credito - total_debito
+                    ingresos.append({
+                        "codigo": codigo_2,
+                        "nombre": nombre_cuenta,
+                        "saldo": saldo,
+                    })
+                    total_ingresos += saldo
+
+                elif primer_digito in ["5", "6", "7"]:
+                    saldo = total_debito - total_credito
+                    gastos_costos.append({
+                        "codigo": codigo_2,
+                        "nombre": nombre_cuenta,
+                        "saldo": saldo,
+                    })
+                    total_gastos_costos += saldo
+
+            utilidad_ejercicio = total_ingresos - total_gastos_costos
+
+        except Exception as e:
+            print("Error en estado_resultados:", str(e))
+
+    return render(request, "contabilidad/Estado_resultados.html", {
+        "fecha_inicio": fecha_inicio,
+        "fecha_fin": fecha_fin,
+        "ingresos": ingresos,
+        "gastos_costos": gastos_costos,
+        "total_ingresos": total_ingresos,
+        "total_gastos_costos": total_gastos_costos,
+        "utilidad_ejercicio": utilidad_ejercicio,
+    })
 

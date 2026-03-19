@@ -1,0 +1,504 @@
+
+
+
+
+<!DOCTYPE html>
+<html lang="es">
+{% load humanize %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estado de Resultados</title>
+
+    <style>
+        :root{
+            --bg:#f4f7fb;
+            --card:#ffffff;
+            --navy:#0f172a;
+            --blue:#1d4ed8;
+            --blue-soft:#dbeafe;
+            --green:#16a34a;
+            --green-soft:#dcfce7;
+            --red:#dc2626;
+            --red-soft:#fee2e2;
+            --orange:#b45309;
+            --orange-soft:#ffedd5;
+            --gray:#64748b;
+            --border:#dbe3ef;
+            --shadow:0 18px 40px rgba(15,23,42,0.08);
+        }
+
+        *{
+            box-sizing:border-box;
+        }
+
+        body{
+            margin:0;
+            font-family:Arial, Helvetica, sans-serif;
+            background:linear-gradient(180deg, #eef4fb 0%, #f8fafc 100%);
+            color:var(--navy);
+        }
+
+        .wrap{
+            max-width:1450px;
+            margin:0 auto;
+            padding:18px 16px 24px;
+        }
+
+        .hero{
+            background:linear-gradient(135deg, #0f172a 0%, #1d4ed8 100%);
+            color:#fff;
+            border-radius:18px;
+            padding:18px 22px;
+            box-shadow:var(--shadow);
+            margin-bottom:8px;
+        }
+
+        .hero h1{
+            margin:0 0 4px 0;
+            font-size:22px;
+            font-weight:700;
+            letter-spacing:.2px;
+        }
+
+        .hero p{
+            margin:0;
+            font-size:12px;
+            opacity:.88;
+        }
+
+        .filtros-card{
+            background:var(--card);
+            border:1px solid var(--border);
+            border-radius:16px;
+            box-shadow:var(--shadow);
+            padding:12px 14px;
+            margin-top:0;
+            margin-bottom:14px;
+            max-width:520px;
+        }
+
+        .hero + .filtros-card{
+            margin-top:4px;
+        }
+
+        .filtros-grid{
+            display:grid;
+            grid-template-columns: 160px 160px max-content;
+            gap:10px;
+            align-items:end;
+            justify-content:start;
+        }
+
+        .field label{
+            display:block;
+            font-size:11px;
+            font-weight:700;
+            color:var(--gray);
+            margin-bottom:4px;
+        }
+
+        .field input[type="date"]{
+            width:100%;
+            height:34px;
+            border:1px solid var(--border);
+            border-radius:8px;
+            padding:0 10px;
+            font-size:13px;
+            background:#fff;
+            color:var(--navy);
+            outline:none;
+        }
+
+        .field input[type="date"]:focus{
+            border-color:var(--blue);
+            box-shadow:0 0 0 3px rgba(37,99,235,.12);
+        }
+
+        .btn{
+            height:34px;
+            font-size:13px;
+            padding:0 16px;
+            border:none;
+            border-radius:8px;
+            cursor:pointer;
+            font-weight:700;
+            background:linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+            color:#fff;
+            box-shadow:0 10px 22px rgba(22,163,74,.20);
+            width:auto;
+            white-space:nowrap;
+        }
+
+        .btn:hover{
+            transform:translateY(-1px);
+        }
+
+        .info-bar{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap:10px;
+            flex-wrap:wrap;
+            background:var(--card);
+            border:1px solid var(--border);
+            border-radius:12px;
+            padding:10px 14px;
+            box-shadow:var(--shadow);
+            margin-bottom:16px;
+        }
+
+        .info-chip{
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+            padding:6px 10px;
+            border-radius:999px;
+            background:var(--blue-soft);
+            color:var(--blue);
+            font-size:11px;
+            font-weight:700;
+        }
+
+        .resumen{
+            display:grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap:14px;
+            margin-bottom:18px;
+        }
+
+        .resumen-card{
+            background:var(--card);
+            border:1px solid var(--border);
+            border-radius:18px;
+            box-shadow:var(--shadow);
+            padding:16px 18px;
+        }
+
+        .resumen-card .label{
+            font-size:11px;
+            text-transform:uppercase;
+            letter-spacing:.6px;
+            color:var(--gray);
+            margin-bottom:7px;
+            font-weight:700;
+        }
+
+        .resumen-card .valor{
+            font-size:24px;
+            font-weight:800;
+            line-height:1.1;
+        }
+
+        .valor.ingresos{ color:var(--blue); }
+        .valor.gastos{ color:var(--orange); }
+        .valor.utilidad{ color:var(--green); }
+        .valor.perdida{ color:var(--red); }
+
+        .panel{
+            background:var(--card);
+            border:1px solid var(--border);
+            border-radius:22px;
+            box-shadow:var(--shadow);
+            overflow:hidden;
+        }
+
+        .panel-header{
+            padding:16px 20px;
+            font-size:18px;
+            font-weight:800;
+            color:#fff;
+            background:linear-gradient(135deg, #0f172a 0%, #1d4ed8 100%);
+        }
+
+        .panel-body{
+            padding:18px 20px 22px;
+        }
+
+        .section{
+            margin-bottom:18px;
+        }
+
+        .section:last-child{
+            margin-bottom:0;
+        }
+
+        .section-title{
+            font-size:12px;
+            text-transform:uppercase;
+            letter-spacing:.6px;
+            color:var(--gray);
+            font-weight:800;
+            margin-bottom:10px;
+        }
+
+        table{
+            width:100%;
+            border-collapse:collapse;
+        }
+
+        th, td{
+            padding:10px 8px;
+            border-bottom:1px solid #edf2f7;
+            font-size:13px;
+        }
+
+        th{
+            text-align:left;
+            color:var(--gray);
+            font-size:11px;
+            text-transform:uppercase;
+            letter-spacing:.5px;
+        }
+
+        td.num, th.num{
+            text-align:right;
+        }
+
+        tbody tr:hover{
+            background:#f8fbff;
+        }
+
+        .subtotal{
+            background:#f8fafc;
+            font-weight:800;
+        }
+
+        .totales-finales{
+            margin-top:18px;
+            display:grid;
+            grid-template-columns: 1fr 1fr;
+            gap:14px;
+        }
+
+        .total-box{
+            border-radius:16px;
+            padding:14px 16px;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            font-weight:800;
+            font-size:14px;
+        }
+
+        .total-box.ingresos{
+            background:var(--blue-soft);
+            color:var(--blue);
+        }
+
+        .total-box.gastos{
+            background:var(--orange-soft);
+            color:var(--orange);
+        }
+
+        .resultado-final{
+            margin-top:18px;
+            padding:18px 20px;
+            border-radius:18px;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            font-weight:800;
+            font-size:16px;
+        }
+
+        .resultado-final.utilidad{
+            background:var(--green-soft);
+            color:#166534;
+        }
+
+        .resultado-final.perdida{
+            background:var(--red-soft);
+            color:#991b1b;
+        }
+
+        .empty{
+            padding:28px 18px;
+            text-align:center;
+            color:var(--gray);
+            font-size:14px;
+        }
+
+        @media (max-width: 1000px){
+            .resumen{
+                grid-template-columns:1fr;
+            }
+
+            .totales-finales{
+                grid-template-columns:1fr;
+            }
+        }
+
+        @media (max-width: 760px){
+            .filtros-grid{
+                grid-template-columns:1fr;
+            }
+
+            .filtros-card{
+                max-width:100%;
+            }
+
+            .wrap{
+                padding:16px 12px 22px;
+            }
+
+            .hero h1{
+                font-size:20px;
+            }
+
+            .resultado-final{
+                flex-direction:column;
+                align-items:flex-start;
+                gap:8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+
+        <div class="hero">
+            <h1>Estado de Resultados</h1>
+            <p>Reporte ejecutivo consolidado por cuentas agrupadas a dos dígitos para el período seleccionado.</p>
+        </div>
+
+        <div class="filtros-card">
+            <form method="get">
+                <div class="filtros-grid">
+                    <div class="field">
+                        <label for="fecha_inicio">Fecha inicio</label>
+                        <input type="date" name="fecha_inicio" id="fecha_inicio" value="{{ fecha_inicio }}" required>
+                    </div>
+
+                    <div class="field">
+                        <label for="fecha_fin">Fecha fin</label>
+                        <input type="date" name="fecha_fin" id="fecha_fin" value="{{ fecha_fin }}" required>
+                    </div>
+
+                    <button type="submit" class="btn">Generar</button>
+                    <a href="{% url 'reportes_subpanel_contabilidad' %}">← Volver</a>
+                </div>
+            </form>
+        </div>
+
+        {% if fecha_inicio and fecha_fin %}
+            <div class="info-bar">
+                <div class="info-chip">Desde: {{ fecha_inicio }}</div>
+                <div class="info-chip">Hasta: {{ fecha_fin }}</div>
+                <div class="info-chip">Agrupación: cuentas a 2 dígitos</div>
+            </div>
+
+            <div class="resumen">
+                <div class="resumen-card">
+                    <div class="label">Total Ingresos</div>
+                    <div class="valor ingresos">$ {{ total_ingresos|floatformat:2|intcomma }}</div>
+                </div>
+
+                <div class="resumen-card">
+                    <div class="label">Total Gastos y Costos</div>
+                    <div class="valor gastos">$ {{ total_gastos_costos|floatformat:2|intcomma }}</div>
+                </div>
+
+                <div class="resumen-card">
+                    <div class="label">Resultado del Ejercicio</div>
+                    <div class="valor {% if utilidad_ejercicio >= 0 %}utilidad{% else %}perdida{% endif %}">
+                        $ {{ utilidad_ejercicio|floatformat:2|intcomma }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">Estado de Resultados</div>
+
+                <div class="panel-body">
+
+                    <div class="section">
+                        <div class="section-title">Ingresos</div>
+                        {% if ingresos %}
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th style="width:90px;">Código</th>
+                                        <th>Cuenta</th>
+                                        <th class="num">Saldo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in ingresos %}
+                                    <tr>
+                                        <td><strong>{{ item.codigo }}</strong></td>
+                                        <td>{{ item.nombre }}</td>
+                                        <td class="num">$ {{ item.saldo|floatformat:2|intcomma }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                    <tr class="subtotal">
+                                        <td colspan="2">Total Ingresos</td>
+                                        <td class="num">$ {{ total_ingresos|floatformat:2|intcomma }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <div class="empty">No hay ingresos en el período seleccionado.</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">Gastos y Costos</div>
+                        {% if gastos_costos %}
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th style="width:90px;">Código</th>
+                                        <th>Cuenta</th>
+                                        <th class="num">Saldo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in gastos_costos %}
+                                    <tr>
+                                        <td><strong>{{ item.codigo }}</strong></td>
+                                        <td>{{ item.nombre }}</td>
+                                        <td class="num">$ {{ item.saldo|floatformat:2|intcomma }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                    <tr class="subtotal">
+                                        <td colspan="2">Total Gastos y Costos</td>
+                                        <td class="num">$ {{ total_gastos_costos|floatformat:2|intcomma }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <div class="empty">No hay gastos ni costos en el período seleccionado.</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="totales-finales">
+                        <div class="total-box ingresos">
+                            <span>Total Ingresos</span>
+                            <span>$ {{ total_ingresos|floatformat:2|intcomma }}</span>
+                        </div>
+
+                        <div class="total-box gastos">
+                            <span>Total Gastos y Costos</span>
+                            <span>$ {{ total_gastos_costos|floatformat:2|intcomma }}</span>
+                        </div>
+                    </div>
+
+                    <div class="resultado-final {% if utilidad_ejercicio >= 0 %}utilidad{% else %}perdida{% endif %}">
+                        <span>
+                            {% if utilidad_ejercicio >= 0 %}
+                                Utilidad del Ejercicio
+                            {% else %}
+                                Pérdida del Ejercicio
+                            {% endif %}
+                        </span>
+                        <span>$ {{ utilidad_ejercicio|floatformat:2|intcomma }}</span>
+                    </div>
+
+                </div>
+            </div>
+        {% endif %}
+
+    </div>
+</body>
+</html>

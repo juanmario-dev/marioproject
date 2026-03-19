@@ -1,0 +1,500 @@
+
+
+
+
+<!DOCTYPE html>
+<html lang="es">
+{% load humanize %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Balance General</title>
+
+    <style>
+        :root{
+            --bg:#f4f7fb;
+            --card:#ffffff;
+            --navy:#0f172a;
+            --blue:#1d4ed8;
+            --blue-soft:#dbeafe;
+            --green:#16a34a;
+            --green-soft:#dcfce7;
+            --red:#dc2626;
+            --red-soft:#fee2e2;
+            --gray:#64748b;
+            --border:#dbe3ef;
+            --shadow:0 18px 40px rgba(15,23,42,0.08);
+            --radius:18px;
+        }
+
+        *{
+            box-sizing:border-box;
+        }
+
+        body{
+            margin:0;
+            font-family:Arial, Helvetica, sans-serif;
+            background:linear-gradient(180deg, #eef4fb 0%, #f8fafc 100%);
+            color:var(--navy);
+        }
+
+        .wrap{
+            max-width:1500px;
+            margin:0 auto;
+            padding:18px 16px 24px;
+        }
+
+        .hero{
+            background:linear-gradient(135deg, #0f172a 0%, #1d4ed8 100%);
+            color:#fff;
+            border-radius:18px;
+            padding:18px 22px;
+            box-shadow:var(--shadow);
+            margin-bottom:8px;
+        }
+
+        .hero h1{
+            margin:0 0 8px 0;
+            font-size:22px;
+            font-weight:700;
+            letter-spacing:.4px;
+        }
+
+        .hero p{
+            margin:0;
+            font-size:12px;
+            color:rgba(255,255,255,.86);
+            opacity:.85;
+        }
+
+        .filtros-card{
+            background:var(--card);
+            border:1px solid var(--border);
+            border-radius:16px;
+            box-shadow:var(--shadow);
+            padding:14px 16px;
+            margin-bottom:22px;
+        }
+
+        .filtros-grid{
+            display:grid;
+            
+            grid-template-columns: 150px 150px max-content;
+            gap:12px;
+            align-items:end;
+        }
+
+        .field label{
+            display:block;
+            font-size:11px;
+            font-weight:700;
+            color:var(--gray);
+            margin-bottom:4px;
+        }
+
+        .field select{
+            width:100%;
+            height:34px;
+            border:1px solid var(--border);
+            border-radius:8px;
+            padding:0 14px;
+            font-size:13px;
+            background:#fff;
+            color:var(--navy);
+            outline:none;
+        }
+
+        .field select:focus{
+            border-color:var(--blue);
+            box-shadow:0 0 0 3px rgba(37,99,235,.12);
+        }
+
+        .btn{
+            height:34px;
+            border:none;
+            border-radius:8px;
+            padding:0 16px;
+            font-size:14px;
+            font-weight:700;
+            cursor:pointer;
+            background:linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+            color:#fff;
+            box-shadow:0 10px 22px rgba(22,163,74,.20);
+        }
+
+        .btn:hover{
+            transform:translateY(-1px);
+        }
+
+        .info-bar{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap:12px;
+            flex-wrap:wrap;
+            background:var(--card);
+            border:1px solid var(--border);
+            border-radius:18px;
+            padding:16px 20px;
+            box-shadow:var(--shadow);
+            margin-bottom:22px;
+        }
+
+        .info-chip{
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+            padding:10px 14px;
+            border-radius:999px;
+            background:var(--blue-soft);
+            color:var(--blue);
+            font-size:13px;
+            font-weight:700;
+        }
+
+        .resumen{
+            display:grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap:16px;
+            margin-bottom:24px;
+        }
+
+        .resumen-card{
+            background:var(--card);
+            border:1px solid var(--border);
+            border-radius:20px;
+            box-shadow:var(--shadow);
+            padding:18px 20px;
+        }
+
+        .resumen-card .label{
+            font-size:12px;
+            text-transform:uppercase;
+            letter-spacing:.7px;
+            color:var(--gray);
+            margin-bottom:8px;
+            font-weight:700;
+        }
+
+        .resumen-card .valor{
+            font-size:28px;
+            font-weight:800;
+            line-height:1.1;
+        }
+
+        .valor.activo{ color:var(--blue); }
+        .valor.pasivo{ color:#b45309; }
+        .valor.total{ color:var(--green); }
+
+        .balance-grid{
+            display:grid;
+            grid-template-columns: 1fr 1fr;
+            gap:22px;
+        }
+
+        .panel{
+            background:var(--card);
+            border:1px solid var(--border);
+            border-radius:22px;
+            box-shadow:var(--shadow);
+            overflow:hidden;
+        }
+
+        .panel-header{
+            padding:18px 22px;
+            font-size:18px;
+            font-weight:800;
+            color:#fff;
+        }
+
+        .panel-header.activos{
+            background:linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        }
+
+        .panel-header.pp{
+            background:linear-gradient(135deg, #0f766e 0%, #15803d 100%);
+        }
+
+        .section{
+            padding:18px 22px 10px;
+        }
+
+        .section-title{
+            font-size:13px;
+            text-transform:uppercase;
+            letter-spacing:.7px;
+            color:var(--gray);
+            font-weight:800;
+            margin-bottom:10px;
+        }
+
+        table{
+            width:100%;
+            border-collapse:collapse;
+        }
+
+        th, td{
+            padding:11px 8px;
+            border-bottom:1px solid #edf2f7;
+            font-size:14px;
+        }
+
+        th{
+            text-align:left;
+            color:var(--gray);
+            font-size:12px;
+            text-transform:uppercase;
+            letter-spacing:.5px;
+        }
+
+        td.num, th.num{
+            text-align:right;
+        }
+
+        tbody tr:hover{
+            background:#f8fbff;
+        }
+
+        .subtotal{
+            background:#f8fafc;
+            font-weight:800;
+        }
+
+        .grand-total{
+            margin-top:14px;
+            padding:16px 18px;
+            border-radius:16px;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            font-weight:800;
+            font-size:15px;
+        }
+
+        .grand-total.activos{
+            background:var(--blue-soft);
+            color:var(--blue);
+        }
+
+        .grand-total.pp{
+            background:var(--green-soft);
+            color:#166534;
+        }
+
+        .empty{
+            padding:30px 20px;
+            text-align:center;
+            color:var(--gray);
+            font-size:14px;
+        }
+
+        .resultado-op{
+            background:#fff8e1;
+        }
+
+        @media (max-width: 1100px){
+            .balance-grid{
+                grid-template-columns:1fr;
+            }
+
+            .resumen{
+                grid-template-columns:1fr;
+            }
+        }
+
+        @media (max-width: 760px){
+            .filtros-grid{
+                grid-template-columns:1fr;
+            }
+
+            .hero h1{
+                font-size:28px;
+            }
+
+            .wrap{
+                padding:18px 14px 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+
+        <div class="hero">
+            <h1>Balance General</h1>
+            <p>Reporte ejecutivo consolidado por cuentas agrupadas a dos dígitos con fecha de corte mensual.</p>
+        </div>
+
+        <div class="filtros-card">
+            <form method="get">
+                <div class="filtros-grid">
+                    <div class="field">
+                        <label for="anio">Año</label>
+                        <select name="anio" id="anio" required>
+                            <option value="">Seleccione año</option>
+                            {% for a in anios_disponibles %}
+                                <option value="{{ a }}" {% if anio == a|stringformat:"s" %}selected{% endif %}>
+                                    {{ a }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label for="mes">Mes</label>
+                        <select name="mes" id="mes" required>
+                            <option value="">Seleccione mes</option>
+                            {% for num, nombre in meses %}
+                                <option value="{{ num }}" {% if mes == num|stringformat:"s" %}selected{% endif %}>
+                                    {{ nombre }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                      <button type="submit" class="btn">Generar</button>
+                      <a class="btn" href="{% url 'reportes_subpanel_contabilidad' %}">← Volver</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        {% if fecha_corte %}
+            <div class="info-bar">
+                <div class="info-chip">Fecha de corte: {{ fecha_corte }}</div>
+                <div class="info-chip">Agrupación: cuentas a 2 dígitos</div>
+                <div class="info-chip">Resultado operación incluido en patrimonio</div>
+            </div>
+
+            <div class="resumen">
+                <div class="resumen-card">
+                    <div class="label">Total Activos</div>
+                    <div class="valor activo">$ {{ total_activos|floatformat:2|intcomma }}</div>
+                </div>
+
+                <div class="resumen-card">
+                    <div class="label">Total Pasivo + Patrimonio</div>
+                    <div class="valor pasivo">$ {{ total_pasivo_patrimonio|floatformat:2|intcomma }}</div>
+                </div>
+
+                <div class="resumen-card">
+                    <div class="label">Resultado Operación</div>
+                    <div class="valor total">$ {{ resultado_operacion|floatformat:2|intcomma }}</div>
+                </div>
+            </div>
+
+            <div class="balance-grid">
+
+                <!-- ACTIVOS -->
+                <div class="panel">
+                    <div class="panel-header activos">Activos</div>
+
+                    <div class="section">
+                        {% if activos %}
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th style="width:90px;">Código</th>
+                                        <th>Cuenta</th>
+                                        <th class="num">Saldo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in activos %}
+                                    <tr>
+                                        <td><strong>{{ item.codigo }}</strong></td>
+                                        <td>{{ item.nombre }}</td>
+                                        <td class="num">$ {{ item.saldo|floatformat:2|intcomma }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+
+                            <div class="grand-total activos">
+                                <span>Total Activos</span>
+                                <span>$ {{ total_activos|floatformat:2|intcomma }}</span>
+                            </div>
+                        {% else %}
+                            <div class="empty">No hay información de activos para la fecha seleccionada.</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- PASIVOS Y PATRIMONIO -->
+                <div class="panel">
+                    <div class="panel-header pp">Pasivos y Patrimonio</div>
+
+                    <div class="section">
+                        <div class="section-title">Pasivos</div>
+                        {% if pasivos %}
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th style="width:90px;">Código</th>
+                                        <th>Cuenta</th>
+                                        <th class="num">Saldo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in pasivos %}
+                                    <tr>
+                                        <td><strong>{{ item.codigo }}</strong></td>
+                                        <td>{{ item.nombre }}</td>
+                                        <td class="num">$ {{ item.saldo|floatformat:2|intcomma }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                    <tr class="subtotal">
+                                        <td colspan="2">Total Pasivos</td>
+                                        <td class="num">$ {{ total_pasivos|floatformat:2|intcomma }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <div class="empty" style="padding-top:10px;padding-bottom:14px;">
+                                No hay pasivos para la fecha seleccionada.
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="section" style="padding-top:0;">
+                        <div class="section-title">Patrimonio</div>
+                        {% if patrimonio %}
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th style="width:90px;">Código</th>
+                                        <th>Cuenta</th>
+                                        <th class="num">Saldo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in patrimonio %}
+                                    <tr {% if item.nombre == "Resultado operación" %}class="resultado-op"{% endif %}>
+                                        <td><strong>{{ item.codigo|default:"--" }}</strong></td>
+                                        <td>{{ item.nombre }}</td>
+                                        <td class="num">$ {{ item.saldo|floatformat:2|intcomma }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                    <tr class="subtotal">
+                                        <td colspan="2">Total Patrimonio</td>
+                                        <td class="num">$ {{ total_patrimonio|floatformat:2|intcomma }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <div class="grand-total pp">
+                                <span>Total Pasivos + Patrimonio</span>
+                                <span>$ {{ total_pasivo_patrimonio|floatformat:2|intcomma }}</span>
+                            </div>
+                        {% else %}
+                            <div class="empty">No hay patrimonio para la fecha seleccionada.</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+            </div>
+        {% endif %}
+
+    </div>
+</body>
+</html>

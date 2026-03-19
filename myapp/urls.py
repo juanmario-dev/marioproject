@@ -193,6 +193,10 @@ urlpatterns = [
    
     path("contabilidad/reportes-subpanel-cont/", views.reportes_subpanel_contabilidad, name="reportes_subpanel_contabilidad"),
 
+    path("contabilidad/balance-general/", views.balance_general, name="balance_general"),
+    path("contabilidad/estado-resultados/", views.estado_resultados, name="estado_resultados"),
+
+
 ]
 
 

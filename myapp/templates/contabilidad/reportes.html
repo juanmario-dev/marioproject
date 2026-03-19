@@ -58,7 +58,7 @@
     <div class="actions" style="grid-column:1/-1;">
       <button class="btn" type="submit">Aplicar filtros</button>
       <a class="btn" href="{% url 'reportes_export_csv' %}?fecha_desde={{ filtros.fecha_desde }}&fecha_hasta={{ filtros.fecha_hasta }}&doc_id={{ filtros.doc_id }}&cuenta={{ filtros.cuenta }}&tercero={{ filtros.tercero }}&q={{ filtros.q|urlencode }}">Exportar CSV</a>
-      <a class="btn" href="{% url 'contabilidad' %}">← Volver</a>
+      <a class="btn" href="{% url 'reportes_subpanel_contabilidad' %}">← Volver</a>
       <span class="note">Se muestran hasta 1000 filas en pantalla. El CSV exporta todo el rango filtrado.</span>
     </div>
   </form>
