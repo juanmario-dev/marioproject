@@ -9044,7 +9044,7 @@ def balance_general(request):
         "resultado_operacion": resultado_operacion,
     }
 
-    return render(request, "contabilidad/Balance_general.html", context)
+    return render(request, "contabilidad/balance_general.html", context)
 
 
 
@@ -9145,7 +9145,7 @@ def estado_resultados(request):
         except Exception as e:
             print("Error en estado_resultados:", str(e))
 
-    return render(request, "contabilidad/Estado_resultados.html", {
+    return render(request, "contabilidad/estado_resultados.html", {
         "fecha_inicio": fecha_inicio,
         "fecha_fin": fecha_fin,
         "ingresos": ingresos,
