@@ -1,0 +1,472 @@
+
+
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Formulario de creación contable</title>
+
+<style>
+:root{
+  --bg:#f7f8fb;
+  --card:#ffffff;
+  --border:#d8dee9;
+  --text:#0f172a;
+  --muted:#64748b;
+  --blue:#0d6efd;
+  --blue-dark:#0b5ed7;
+  --green:#16a34a;
+  --green-dark:#15803d;
+  --gray-btn:#e5e7eb;
+  --gray-btn-dark:#d1d5db;
+  --danger:#dc2626;
+  --danger-dark:#b91c1c;
+  --shadow:0 10px 25px rgba(2,18,36,.10);
+}
+
+*{ box-sizing:border-box; }
+
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+
+.wrap{
+  max-width:1100px;
+  margin:30px auto;
+  padding:0 16px 24px;
+}
+
+.titulo{
+  background:linear-gradient(90deg,#021224,#0d6efd);
+  color:#fff;
+  padding:16px 20px;
+  border-radius:10px;
+  font-size:18px;
+  font-weight:700;
+  margin-bottom:18px;
+  box-shadow:var(--shadow);
+}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;
+  box-shadow:var(--shadow);
+  padding:22px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(280px, 1fr));
+  gap:16px 18px;
+}
+
+.campo{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.campo-full{
+  grid-column:1 / -1;
+}
+
+label{
+  font-size:13px;
+  font-weight:700;
+  color:#111827;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="file"],
+select{
+  width:100%;
+  padding:10px 12px;
+  border:1px solid var(--border);
+  border-radius:8px;
+  font-size:14px;
+  background:#fff;
+  outline:none;
+  transition:border-color .2s ease, box-shadow .2s ease;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="file"]:focus,
+select:focus{
+  border-color:var(--blue);
+  box-shadow:0 0 0 3px rgba(13,110,253,.12);
+}
+
+.logo-box{
+  margin-top:8px;
+}
+
+.logo-preview{
+  width:150px;
+  min-height:100px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#fff;
+  overflow:hidden;
+  padding:8px;
+}
+
+.logo-preview img{
+  max-width:100%;
+  max-height:110px;
+  object-fit:contain;
+  display:block;
+}
+
+.sin-logo{
+  font-size:12px;
+  color:var(--muted);
+  text-align:center;
+}
+
+.bloque-tabla{
+  margin-top:26px;
+}
+
+.subtitulo{
+  font-size:15px;
+  font-weight:700;
+  color:#111827;
+  margin-bottom:10px;
+}
+
+.tabla-wrap{
+  width:100%;
+  overflow-x:auto;
+  border:1px solid var(--border);
+  border-radius:10px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:500px;
+  background:#fff;
+}
+
+thead{
+  background:#f1f5f9;
+}
+
+th, td{
+  padding:10px 12px;
+  border-bottom:1px solid var(--border);
+  text-align:left;
+  font-size:13px;
+}
+
+th{
+  font-weight:700;
+  color:#0f172a;
+}
+
+tbody tr:nth-child(even){
+  background:#fafafa;
+}
+
+.tabla-input{
+  width:100%;
+  padding:8px 10px;
+  border:1px solid var(--border);
+  border-radius:7px;
+  font-size:13px;
+  outline:none;
+}
+
+.tabla-input:focus{
+  border-color:var(--blue);
+  box-shadow:0 0 0 3px rgba(13,110,253,.10);
+}
+
+.btn{
+  border:none;
+  text-decoration:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:11px 18px;
+  border-radius:8px;
+  font-size:14px;
+  font-weight:700;
+  cursor:pointer;
+  transition:all .2s ease;
+}
+
+.btn-guardar{
+  background:var(--green);
+  color:#fff;
+}
+
+.btn-guardar:hover{
+  background:var(--green-dark);
+}
+
+.btn-volver{
+  background:var(--gray-btn);
+  color:#111827;
+}
+
+.btn-volver:hover{
+  background:var(--gray-btn-dark);
+}
+
+.btn-agregar{
+  background:var(--blue);
+  color:#fff;
+  margin-top:12px;
+}
+
+.btn-agregar:hover{
+  background:var(--blue-dark);
+}
+
+.btn-eliminar{
+  background:var(--danger);
+  color:#fff;
+  padding:8px 12px;
+  font-size:12px;
+  border-radius:7px;
+}
+
+.btn-eliminar:hover{
+  background:var(--danger-dark);
+}
+
+.acciones{
+  margin-top:22px;
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+@media (max-width: 768px){
+  .grid{
+    grid-template-columns:1fr;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="titulo">
+    Formulario de creación contable
+  </div>
+
+  <div class="card">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <div class="grid">
+
+        <div class="campo">
+          <label>Nombre empresa</label>
+          <input type="text" name="nombre_empresa" value="{{ datos.nombre_empresa|default:'' }}">
+        </div>
+
+        <div class="campo">
+          <label>Nit</label>
+          <input type="text" name="nit" value="{{ datos.nit|default:'' }}">
+        </div>
+
+        <div class="campo">
+          <label>Tel 1</label>
+          <input type="text" name="tel1" value="{{ datos.tel1|default:'' }}">
+        </div>
+
+        <div class="campo">
+          <label>Tel 2</label>
+          <input type="text" name="tel2" value="{{ datos.tel2|default:'' }}">
+        </div>
+
+        <div class="campo campo-full">
+          <label>Dirección</label>
+          <input type="text" name="direccion" value="{{ datos.direccion|default:'' }}">
+        </div>
+
+        <div class="campo">
+          <label>Sitio Web</label>
+          <input type="text" name="sitio_web" value="{{ datos.sitio_web|default:'' }}">
+        </div>
+
+        <div class="campo">
+          <label>Correo notificaciones</label>
+          <input type="email" name="correo_notificaciones" value="{{ datos.correo_notificaciones|default:'' }}">
+        </div>
+
+        <div class="campo">
+          <label>Régimen Tributario</label>
+          <select name="regimen_tributario">
+            <option value="">Seleccione</option>
+            <option value="Regimen comun" {% if datos.regimen_tributario == "Regimen comun" %}selected{% endif %}>Regimen comun</option>
+            <option value="Simple" {% if datos.regimen_tributario == "Simple" %}selected{% endif %}>Simple</option>
+            <option value="Gran contribuyente" {% if datos.regimen_tributario == "Gran contribuyente" %}selected{% endif %}>Gran contribuyente</option>
+            <option value="Gran contribuyente autoretenedor" {% if datos.regimen_tributario == "Gran contribuyente autoretenedor" %}selected{% endif %}>Gran contribuyente autoretenedor</option>
+          </select>
+        </div>
+
+        <div class="campo">
+          <label>Régimen tributario ICA</label>
+          <select name="regimen_ica">
+            <option value="">Seleccione</option>
+            <option value="Regimen comun" {% if datos.regimen_ica == "Regimen comun" %}selected{% endif %}>Regimen comun</option>
+            <option value="Gran contribuyente" {% if datos.regimen_ica == "Gran contribuyente" %}selected{% endif %}>Gran contribuyente</option>
+          </select>
+        </div>
+
+        <div class="campo">
+          <label>Camara de Comercio</label>
+          <input type="text" name="camara_comercio" value="{{ datos.camara_comercio|default:'' }}">
+        </div>
+
+        <div class="campo campo-full">
+          <label>Logo</label>
+          <input type="file" name="logo" id="logoInput" accept="image/*">
+
+          <div class="logo-box">
+            <div class="logo-preview" id="logoPreview">
+              {% if datos and datos.logo %}
+                <img src="{{ datos.logo.url }}" alt="Logo">
+              {% else %}
+                <div class="sin-logo">Sin logo cargado</div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="bloque-tabla">
+        <div class="subtitulo">Sucursales</div>
+
+        <div class="tabla-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:160px;">Número</th>
+                <th>Nombre</th>
+                <th style="width:120px;">Acción</th>
+              </tr>
+            </thead>
+            
+             <tbody id="tablaSucursales">
+              {% if sucursales %}
+                {% for sucursal in sucursales %}
+                 <tr>
+                   <td>
+                     <input
+                       type="text"
+                       name="sucursal_numero[]"
+                       class="tabla-input"
+                       value="{{ sucursal.numero }}"
+                     >
+                   </td>
+                   <td>
+                    <input
+                      type="text"
+                      name="sucursal_nombre[]"
+                      class="tabla-input"
+                      value="{{ sucursal.nombre }}"
+                    >
+                   </td>
+                   <td>
+                      <button type="button" class="btn btn-eliminar" onclick="eliminarFila(this)">Quitar</button>
+                   </td>
+                   </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td>
+                    <input type="text" name="sucursal_numero[]" class="tabla-input">
+                  </td>
+                 <td>
+                   <input type="text" name="sucursal_nombre[]" class="tabla-input">
+                 </td>
+                 <td>
+                   <button type="button" class="btn btn-eliminar" onclick="eliminarFila(this)">Quitar</button>
+                 </td>
+                </tr>
+              {% endif %}
+             </tbody>
+
+          </table>
+        </div>
+
+        <button type="button" class="btn btn-agregar" onclick="agregarFila()">Agregar línea</button>
+      </div>
+
+      <div class="acciones">
+        <button type="submit" class="btn btn-guardar">Guardar</button>
+        <a href="javascript:history.back()" class="btn btn-volver">Retroceder</a>
+      </div>
+    </form>
+  </div>
+
+</div>
+
+<script>
+function agregarFila() {
+  const tbody = document.getElementById('tablaSucursales');
+  const fila = document.createElement('tr');
+
+  fila.innerHTML = `
+    <td>
+      <input type="text" name="sucursal_numero[]" class="tabla-input">
+    </td>
+    <td>
+      <input type="text" name="sucursal_nombre[]" class="tabla-input">
+    </td>
+    <td>
+      <button type="button" class="btn btn-eliminar" onclick="eliminarFila(this)">Quitar</button>
+    </td>
+  `;
+
+  tbody.appendChild(fila);
+}
+
+function eliminarFila(boton) {
+  const tbody = document.getElementById('tablaSucursales');
+  const filas = tbody.querySelectorAll('tr');
+
+  if (filas.length > 1) {
+    boton.closest('tr').remove();
+  } else {
+    const inputs = filas[0].querySelectorAll('input');
+    inputs.forEach(input => input.value = '');
+  }
+}
+
+document.getElementById('logoInput').addEventListener('change', function(e) {
+  const preview = document.getElementById('logoPreview');
+  const file = e.target.files[0];
+
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(event) {
+    preview.innerHTML = `<img src="${event.target.result}" alt="Vista previa del logo">`;
+  };
+  reader.readAsDataURL(file);
+});
+</script>
+
+</body>
+</html>

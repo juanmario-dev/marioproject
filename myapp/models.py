@@ -1005,3 +1005,54 @@ class ParametroDesprendibleNomina(models.Model):
 
     def __str__(self):
         return "Parámetros de desprendible de nómina"
+
+
+
+
+# modelo de formulario_contable.html
+
+from django.db import models
+
+
+class empresa_contable(models.Model):
+    nombre_empresa = models.CharField(max_length=200, blank=True, default='')
+    nit = models.CharField(max_length=50, blank=True, default='')
+    tel1 = models.CharField(max_length=50, blank=True, default='')
+    tel2 = models.CharField(max_length=50, blank=True, default='')
+    direccion = models.CharField(max_length=250, blank=True, default='')
+    sitio_web = models.CharField(max_length=250, blank=True, default='')
+    correo_notificaciones = models.EmailField(blank=True, default='')
+
+    regimen_tributario = models.CharField(max_length=100, blank=True, default='')
+    regimen_ica = models.CharField(max_length=100, blank=True, default='')
+
+    camara_comercio = models.CharField(max_length=200, blank=True, default='')
+    logo = models.ImageField(upload_to='logos_contabilidad/', blank=True, null=True)
+
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'empresa contable'
+        verbose_name_plural = 'empresa contable'
+
+    def __str__(self):
+        return self.nombre_empresa or 'configuracion contable'
+
+
+class sucursal_contable(models.Model):
+    empresa = models.ForeignKey(
+        empresa_contable,
+        on_delete=models.CASCADE,
+        related_name='sucursales'
+    )
+    numero = models.CharField(max_length=50, blank=True, default='')
+    nombre = models.CharField(max_length=200, blank=True, default='')
+
+    class Meta:
+        verbose_name = 'sucursal contable'
+        verbose_name_plural = 'sucursales contables'
+        ordering = ['id']
+
+    def __str__(self):
+        return f'{self.numero} - {self.nombre}'
+

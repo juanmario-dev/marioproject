@@ -196,6 +196,8 @@ urlpatterns = [
     path("contabilidad/balance-general/", views.balance_general, name="balance_general"),
     path("contabilidad/estado-resultados/", views.estado_resultados, name="estado_resultados"),
 
+     path('contabilidad/formulario/', views.formulario_contable, name='formulario_contable'),
+
 
 ]
 

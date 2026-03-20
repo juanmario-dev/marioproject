@@ -378,6 +378,83 @@ def cuentas_import_csv(request):
     return render(request, "configuracion/cuentas_import.html", {"form": form})
 
 
+
+
+# view de formulario_contable.html
+
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.db import transaction
+
+from .models import empresa_contable, sucursal_contable
+
+
+@login_required(login_url='login')
+def formulario_contable(request):
+    datos = empresa_contable.objects.first()
+
+    if request.method == 'POST':
+        with transaction.atomic():
+            if datos is None:
+                datos = empresa_contable()
+
+            datos.nombre_empresa = request.POST.get('nombre_empresa', '').strip()
+            datos.nit = request.POST.get('nit', '').strip()
+            datos.tel1 = request.POST.get('tel1', '').strip()
+            datos.tel2 = request.POST.get('tel2', '').strip()
+            datos.direccion = request.POST.get('direccion', '').strip()
+            datos.sitio_web = request.POST.get('sitio_web', '').strip()
+            datos.correo_notificaciones = request.POST.get('correo_notificaciones', '').strip()
+            datos.regimen_tributario = request.POST.get('regimen_tributario', '').strip()
+            datos.regimen_ica = request.POST.get('regimen_ica', '').strip()
+            datos.camara_comercio = request.POST.get('camara_comercio', '').strip()
+
+            logo = request.FILES.get('logo')
+            if logo:
+                datos.logo = logo
+
+            datos.save()
+
+            numeros = request.POST.getlist('sucursal_numero[]')
+            nombres = request.POST.getlist('sucursal_nombre[]')
+
+            sucursal_contable.objects.filter(empresa=datos).delete()
+
+            for numero, nombre in zip(numeros, nombres):
+                numero = (numero or '').strip()
+                nombre = (nombre or '').strip()
+
+                if numero or nombre:
+                    sucursal_contable.objects.create(
+                        empresa=datos,
+                        numero=numero,
+                        nombre=nombre
+                    )
+
+        return redirect('formulario_contable')
+
+    sucursales = []
+    if datos:
+        sucursales = list(datos.sucursales.all())
+
+    return render(
+        request,
+        'contabilidad/formulario_contable.html',
+        {
+            'datos': datos,
+            'sucursales': sucursales,
+        }
+    )
+
+
+
+
+
+
+
+
+
 #______________formularios crear documentos contable
 
 @login_required(login_url='login')
