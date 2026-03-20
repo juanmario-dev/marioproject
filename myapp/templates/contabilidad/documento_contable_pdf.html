@@ -1,0 +1,441 @@
+
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  {% if asiento %}
+    Documento contable {{ asiento.documento.codigo }} - {{ asiento.numero }}
+  {% else %}
+    Documento contable
+  {% endif %}
+</title>
+
+<style>
+  :root{
+    --borde:#cfd6df;
+    --gris:#f4f6f8;
+    --texto:#1f2937;
+    --muted:#6b7280;
+    --verde:#109155;
+  }
+
+  *{ box-sizing:border-box; }
+
+  body{
+    margin:0;
+    padding:24px;
+    font-family:Arial, Helvetica, sans-serif;
+    color:var(--texto);
+    background:#fff;
+    font-size:12px;
+  }
+
+  .contenedor{
+    max-width:1400px;
+    margin:0 auto;
+  }
+
+  .encabezado{
+    border:1px solid var(--borde);
+    border-radius:10px;
+    padding:16px 18px;
+    margin-bottom:14px;
+  }
+
+  .titulo{
+    font-size:22px;
+    font-weight:700;
+    margin:0 0 12px 0;
+    color:#111827;
+  }
+
+  .subtitulo{
+    color:var(--muted);
+    margin:0;
+    font-size:12px;
+  }
+
+  .grid-info{
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap:10px;
+    margin-top:14px;
+  }
+
+  .card{
+    border:1px solid var(--borde);
+    border-radius:8px;
+    padding:10px 12px;
+    background:#fff;
+    min-height:64px;
+  }
+
+  .card .label{
+    font-size:11px;
+    color:var(--muted);
+    margin-bottom:4px;
+  }
+
+  .card .valor{
+    font-size:13px;
+    font-weight:700;
+    word-break:break-word;
+  }
+
+  .descripcion-box{
+    border:1px solid var(--borde);
+    border-radius:8px;
+    padding:10px 12px;
+    margin-top:10px;
+    background:#fff;
+  }
+
+  .descripcion-box .label{
+    font-size:11px;
+    color:var(--muted);
+    margin-bottom:4px;
+  }
+
+  .descripcion-box .valor{
+    font-size:13px;
+    white-space:pre-wrap;
+  }
+
+  .tabla-wrap{
+    margin-top:14px;
+    border:1px solid var(--borde);
+    border-radius:10px;
+    overflow:hidden;
+  }
+
+  table{
+    width:100%;
+    border-collapse:collapse;
+    table-layout:fixed;
+  }
+
+  thead th{
+    background:var(--gris);
+    font-size:11px;
+    padding:8px 6px;
+    border-bottom:1px solid var(--borde);
+    border-right:1px solid var(--borde);
+    text-align:center;
+    vertical-align:middle;
+  }
+
+  tbody td{
+    padding:6px 6px;
+    border-bottom:1px solid var(--borde);
+    border-right:1px solid var(--borde);
+    vertical-align:top;
+    word-wrap:break-word;
+    overflow-wrap:break-word;
+    font-size:11px;
+  }
+
+  tfoot td{
+    padding:8px 6px;
+    font-weight:700;
+    background:#fafafa;
+    border-top:1px solid var(--borde);
+    border-right:1px solid var(--borde);
+    font-size:11px;
+  }
+
+  th:last-child, td:last-child{
+    border-right:none;
+  }
+
+  .center{ text-align:center; }
+  .right{ text-align:right; }
+
+  .col-numero{ width:38px; }
+  .col-cuenta{ width:95px; }
+  .col-tercero{ width:110px; }
+  .col-nombre{ width:180px; }
+  .col-desc{ width:220px; }
+  .col-valor{ width:90px; }
+  .col-cc{ width:85px; }
+  .col-crit{ width:90px; }
+
+  .acciones{
+    margin-bottom:14px;
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+
+  .btn{
+    border:none;
+    border-radius:8px;
+    padding:10px 14px;
+    cursor:pointer;
+    font-weight:700;
+    font-size:12px;
+  }
+
+  .btn-print{
+    background:var(--verde);
+    color:#fff;
+  }
+
+  .btn-close{
+    background:#6b7280;
+    color:#fff;
+  }
+
+  .error-box{
+    border:1px solid #ef4444;
+    background:#fef2f2;
+    color:#991b1b;
+    padding:14px;
+    border-radius:10px;
+    font-size:13px;
+  }
+
+  .firma-area{
+    margin-top:34px;
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap:30px;
+  }
+
+  .firma{
+    text-align:center;
+    padding-top:28px;
+  }
+
+  .firma .linea{
+    border-top:1px solid #444;
+    margin-bottom:6px;
+  }
+
+  .firma .texto{
+    font-size:11px;
+    color:#444;
+  }
+
+  @media print{
+    @page{
+      size: landscape;
+      margin: 10mm;
+    }
+
+    body{
+      padding:0;
+      font-size:10px;
+    }
+
+    .acciones{
+      display:none !important;
+    }
+
+    .contenedor{
+      max-width:none;
+    }
+
+    .encabezado{
+      margin-bottom:10px;
+      padding:10px 12px;
+      border-radius:0;
+    }
+
+    .titulo{
+      font-size:18px;
+      margin-bottom:8px;
+    }
+
+    .subtitulo{
+      font-size:10px;
+    }
+
+    .grid-info{
+      gap:6px;
+      margin-top:10px;
+    }
+
+    .card{
+      padding:6px 8px;
+      min-height:auto;
+      border-radius:0;
+    }
+
+    .card .label,
+    .descripcion-box .label{
+      font-size:9px;
+    }
+
+    .card .valor,
+    .descripcion-box .valor{
+      font-size:10px;
+    }
+
+    .descripcion-box{
+      margin-top:6px;
+      padding:6px 8px;
+      border-radius:0;
+    }
+
+    .tabla-wrap{
+      margin-top:8px;
+      border-radius:0;
+      overflow:visible;
+    }
+
+    thead th,
+    tbody td,
+    tfoot td{
+      font-size:9px;
+      padding:4px 4px;
+    }
+
+    .firma-area{
+      margin-top:20px;
+      gap:16px;
+    }
+
+    .firma{
+      padding-top:20px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="contenedor">
+
+  <div class="acciones">
+    <button class="btn btn-print" onclick="window.print()">Imprimir / Guardar PDF</button>
+    <button class="btn btn-close" onclick="window.close()">Cerrar</button>
+  </div>
+
+  {% if error %}
+    <div class="error-box">
+      {{ error }}
+    </div>
+  {% elif asiento %}
+    <div class="encabezado">
+      <h1 class="titulo">Documento contable</h1>
+      <p class="subtitulo">Comprobante generado desde el módulo de contabilidad</p>
+
+      <div class="grid-info">
+        <div class="card">
+          <div class="label">Fecha</div>
+          <div class="valor">{{ asiento.fecha|date:"Y-m-d" }}</div>
+        </div>
+
+        <div class="card">
+          <div class="label">Tipo de documento</div>
+          <div class="valor">{{ asiento.documento.codigo }} - {{ asiento.documento.nombre }}</div>
+        </div>
+
+        <div class="card">
+          <div class="label">Consecutivo</div>
+          <div class="valor">{{ asiento.numero }}</div>
+        </div>
+
+        <div class="card">
+          <div class="label">Cantidad de movimientos</div>
+          <div class="valor">{{ movimientos|length }}</div>
+        </div>
+      </div>
+
+      <div class="descripcion-box">
+        <div class="label">Descripción encabezado</div>
+        <div class="valor">{{ asiento.descripcion|default:"-" }}</div>
+      </div>
+    </div>
+
+    <div class="tabla-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th class="col-numero">#</th>
+            <th class="col-cuenta">Cuenta</th>
+            <th class="col-tercero">Tercero</th>
+            <th class="col-nombre">Nombre tercero</th>
+            <th class="col-desc">Descripción</th>
+            <th class="col-valor">Débito</th>
+            <th class="col-valor">Crédito</th>
+            <th class="col-cc">CC</th>
+            <th class="col-crit">Criterio 1</th>
+            <th class="col-crit">Criterio 2</th>
+            <th class="col-crit">Criterio 3</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for mov in movimientos %}
+          <tr>
+            <td class="center">{{ forloop.counter }}</td>
+            <td>{{ mov.cuenta.codigo }}</td>
+            <td>
+              {% if mov.tercero %}
+                {{ mov.tercero.numero_identificacion }}
+              {% endif %}
+            </td>
+            <td>
+              {% if mov.tercero %}
+                {{ mov.tercero }}
+              {% endif %}
+            </td>
+            <td>{{ mov.descripcion|default:"-" }}</td>
+            <td class="right">{{ mov.debito|floatformat:2 }}</td>
+            <td class="right">{{ mov.credito|floatformat:2 }}</td>
+            <td class="center">
+              {% if mov.centro_costo %}Sí{% else %}-{% endif %}
+            </td>
+            <td>{{ mov.criterio1|default:"-" }}</td>
+            <td>{{ mov.criterio2|default:"-" }}</td>
+            <td>{{ mov.criterio3|default:"-" }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="11" class="center">No hay movimientos registrados.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="5" class="right">Totales</td>
+            <td class="right">{{ total_debito|floatformat:2 }}</td>
+            <td class="right">{{ total_credito|floatformat:2 }}</td>
+            <td colspan="4"></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <div class="firma-area">
+      <div class="firma">
+        <div class="linea"></div>
+        <div class="texto">Elaboró</div>
+      </div>
+      <div class="firma">
+        <div class="linea"></div>
+        <div class="texto">Revisó</div>
+      </div>
+      <div class="firma">
+        <div class="linea"></div>
+        <div class="texto">Aprobó</div>
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+<script>
+  window.addEventListener('load', function () {
+    setTimeout(function () {
+      window.print();
+    }, 300);
+  });
+</script>
+
+</body>
+</html>
+
+

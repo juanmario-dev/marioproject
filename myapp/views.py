@@ -695,6 +695,72 @@ def asientos_listar(request):
 
 
 
+# funciones para generar documento contable pdf / documento_contable_pdf.html
+
+
+
+from decimal import Decimal
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_GET
+
+
+@login_required(login_url='login')
+@require_GET
+def documento_contable_pdf(request):
+    doc_id = (request.GET.get('doc_id') or '').strip()
+    numero = (request.GET.get('numero') or '').strip()
+
+    if not doc_id:
+        return render(request, 'contabilidad/documento_contable_pdf.html', {
+            'error': 'Falta el tipo de documento.',
+            'asiento': None,
+            'movimientos': [],
+            'total_debito': Decimal('0.00'),
+            'total_credito': Decimal('0.00'),
+        })
+
+    if not numero:
+        return render(request, 'contabilidad/documento_contable_pdf.html', {
+            'error': 'Falta el consecutivo del documento.',
+            'asiento': None,
+            'movimientos': [],
+            'total_debito': Decimal('0.00'),
+            'total_credito': Decimal('0.00'),
+        })
+
+    asiento = get_object_or_404(
+        AsientoContable.objects.select_related('documento'),
+        documento_id=doc_id,
+        numero=numero
+    )
+
+    movimientos = list(
+        MovimientoContable.objects
+        .filter(asiento=asiento)
+        .select_related('cuenta', 'tercero')
+        .order_by('id')
+    )
+
+    total_debito = sum((m.debito for m in movimientos), Decimal('0.00'))
+    total_credito = sum((m.credito for m in movimientos), Decimal('0.00'))
+
+    return render(request, 'contabilidad/documento_contable_pdf.html', {
+        'error': '',
+        'asiento': asiento,
+        'movimientos': movimientos,
+        'total_debito': total_debito,
+        'total_credito': total_credito,
+    })
+
+
+
+
+
+
+
+
+
 # ________funciones para eliminar y consultar documentos contables
 
 
@@ -4039,6 +4105,50 @@ def rc_buscar(request):
     }
 
     return JsonResponse({"ok": True, "recibo": data})
+
+
+
+
+# funcion para generar recibo de caja en pdf / recibo_caja_pdf.html
+
+from decimal import Decimal
+from django.views.decorators.http import require_GET
+from django.shortcuts import get_object_or_404
+
+@login_required(login_url='login')
+@require_GET
+def recibo_caja_pdf(request):
+    consecutivo = (request.GET.get("consecutivo") or "").strip()
+
+    if not consecutivo:
+        return render(request, "facturacion/recibo_caja_pdf.html", {
+            "error": "Falta el consecutivo del recibo de caja.",
+            "recibo": None,
+            "lineas": [],
+            "total_pago": Decimal("0.00"),
+        })
+
+    recibo = get_object_or_404(
+        ReciboCaja.objects.select_related("asiento"),
+        consecutivo=consecutivo
+    )
+
+    lineas = list(
+        ReciboCajaLinea.objects
+        .filter(recibo=recibo)
+        .order_by("id")
+    )
+
+    total_pago = sum((ln.pago for ln in lineas), Decimal("0.00"))
+
+    return render(request, "facturacion/recibo_caja_pdf.html", {
+        "error": "",
+        "recibo": recibo,
+        "lineas": lineas,
+        "total_pago": total_pago,
+    })
+
+
 
 
 

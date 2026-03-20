@@ -137,6 +137,7 @@
   <div class="actions">
     <button class="btn" id="add">Agregar línea</button>
     <button class="btn" id="save">Guardar</button>
+    <button class="btn btn-outline" id="btnPdf" type="button">PDF</button>
     <button class="btn btn-danger" id="delete" style="display:none;">Eliminar</button>
     <input id="csvFile" type="file" accept=".csv" style="display:none">
     <button class="btn" id="btnCsv" type="button">Cargar CSV</button>
@@ -166,6 +167,8 @@
   </div>
 
 <script>
+
+
 // ===== Utilidades =====
 const $ = sel => document.querySelector(sel);
 const tbody = $('#tabla tbody');
@@ -184,37 +187,42 @@ function showError(msg) {
   errorBox.textContent = msg;
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
 function clearError() {
   errorBox.style.display = 'none';
   errorBox.textContent = '';
 }
+
 function formatMiles(numStr) {
   if (!numStr) return '';
   const n = numStr.replace(/\D/g, '');
   return n.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 }
+
 function parseMilesToFloat(numStr) {
   if (!numStr) return 0;
   return parseFloat(numStr.replace(/\./g, '').replace(',', '.')) || 0;
 }
+
 function sumTotals() {
   let d = 0, c = 0;
   tbody.querySelectorAll('tr').forEach(tr => {
     d += parseMilesToFloat(tr.querySelector('.debito').value);
     c += parseMilesToFloat(tr.querySelector('.credito').value);
   });
+
   $('#totalD').textContent = formatMiles(String(Math.round(d)));
   $('#totalC').textContent = formatMiles(String(Math.round(c)));
 }
 
-function numerarFilas(){
-  tbody.querySelectorAll("tr").forEach((tr, i)=>{
-    const c = tr.querySelector(".rownum");
-    if(c) c.textContent = i + 1;
+function numerarFilas() {
+  tbody.querySelectorAll('tr').forEach((tr, i) => {
+    const c = tr.querySelector('.rownum');
+    if (c) c.textContent = i + 1;
   });
 }
 
-function resetForm(keepDoc=false) {
+function resetForm(keepDoc = false) {
   if (!keepDoc) $('#doc').value = '';
   $('#fecha').value = '{{ hoy }}';
   $('#numero').value = '';
@@ -226,7 +234,7 @@ function resetForm(keepDoc=false) {
   $('#delete').style.display = 'none';
 }
 
-function addRow(copyPrev=false) {
+function addRow(copyPrev = false) {
   const tr = document.createElement('tr');
   tr.innerHTML = `
     <td class="rownum"></td>
@@ -239,7 +247,8 @@ function addRow(copyPrev=false) {
     <td><input class="cc" type="text" maxlength="50"></td>
     <td><input class="c1" type="text" maxlength="50"></td>
     <td><input class="c2" type="text" maxlength="50"></td>
-    <td><input class="c3" type="text" maxlength="50"></td>`;
+    <td><input class="c3" type="text" maxlength="50"></td>
+  `;
   tbody.appendChild(tr);
   numerarFilas();
 
@@ -252,16 +261,30 @@ function addRow(copyPrev=false) {
   // Autocompletar cuentas (2+ dígitos)
   cuenta.addEventListener('input', async (e) => {
     const v = e.target.value.trim();
-    if (v.length < 2) { sugg.style.display = 'none'; return; }
+    if (v.length < 2) {
+      sugg.style.display = 'none';
+      return;
+    }
+
     try {
       const rect = cuenta.getBoundingClientRect();
       sugg.style.left = `${rect.left + window.scrollX}px`;
       sugg.style.top = `${rect.bottom + window.scrollY + 2}px`;
+
       const resp = await fetch(`{% url 'api_cuentas' %}?q=${encodeURIComponent(v)}`);
       const data = await resp.json();
-      if (!data.results.length) { sugg.style.display = 'none'; return; }
-      sugg.innerHTML = data.results.map(r => `<div data-cod="${r.codigo}">${r.codigo} — ${r.nombre}</div>`).join('');
+
+      if (!data.results.length) {
+        sugg.style.display = 'none';
+        return;
+      }
+
+      sugg.innerHTML = data.results.map(r =>
+        `<div data-cod="${r.codigo}">${r.codigo} — ${r.nombre}</div>`
+      ).join('');
+
       sugg.style.display = 'block';
+
       sugg.onclick = (ev) => {
         if (ev.target.dataset.cod) {
           cuenta.value = ev.target.dataset.cod;
@@ -269,20 +292,26 @@ function addRow(copyPrev=false) {
           tercero.focus();
         }
       };
-    } catch { sugg.style.display = 'none'; }
+    } catch {
+      sugg.style.display = 'none';
+    }
   });
 
-  // Buscar tercero al TAB/blur
+  // Buscar tercero al blur
   tercero.addEventListener('blur', async () => {
     const id = tercero.value.trim();
-    if (!id) { nombreT.value=''; return; }
+    if (!id) {
+      nombreT.value = '';
+      return;
+    }
+
     const resp = await fetch(`{% url 'api_terceros' %}?id=${encodeURIComponent(id)}`);
     const data = await resp.json();
+
     if (data.found) {
       nombreT.value = data.nombre;
     } else {
       nombreT.value = '';
-      // Doble clic para abrir "Registrar tercero" en nueva pestaña
       tercero.ondblclick = () => window.open("{% url 'registrar_tercero' %}", "_blank");
       tercero.title = "Doble clic para crear tercero";
     }
@@ -293,23 +322,39 @@ function addRow(copyPrev=false) {
     el.value = formatMiles(el.value);
     sumTotals();
   };
-  deb.addEventListener('input', () => { if (deb.value) cre.value=''; fmt(deb); });
-  cre.addEventListener('input', () => { if (cre.value) deb.value=''; fmt(cre); });
-  [deb, cre].forEach(el => el.addEventListener('blur', () => { el.value = formatMiles(el.value); }));
+
+  deb.addEventListener('input', () => {
+    if (deb.value) cre.value = '';
+    fmt(deb);
+  });
+
+  cre.addEventListener('input', () => {
+    if (cre.value) deb.value = '';
+    fmt(cre);
+  });
+
+  [deb, cre].forEach(el => {
+    el.addEventListener('blur', () => {
+      el.value = formatMiles(el.value);
+    });
+  });
 
   // Duplicar valor desde la fila anterior: Ctrl+Shift+D
   tr.addEventListener('keydown', (e) => {
     if (e.ctrlKey && e.shiftKey && e.code === 'KeyD') {
       const prev = tr.previousElementSibling;
       if (!prev) return;
+
       const src = e.target;
       const idx = Array.from(tr.children).findIndex(td => td.contains(src));
       if (idx >= 0) {
         const srcClass = src.className;
-        const prevInput = prev.querySelector(`.${srcClass.replace(' num','')}`);
+        const prevInput = prev.querySelector(`.${srcClass.replace(' num', '')}`);
         if (prevInput) {
           src.value = prevInput.value;
-          if (src.classList.contains('debito') || src.classList.contains('credito')) sumTotals();
+          if (src.classList.contains('debito') || src.classList.contains('credito')) {
+            sumTotals();
+          }
         }
       }
     }
@@ -318,8 +363,9 @@ function addRow(copyPrev=false) {
   if (copyPrev) {
     const prev = tr.previousElementSibling;
     if (prev) {
-      ['tercero','nombre_tercero','cc','c1','c2','c3'].forEach(cls=>{
-        const a = tr.querySelector('.'+cls), b = prev.querySelector('.'+cls);
+      ['tercero', 'nombre_tercero', 'cc', 'c1', 'c2', 'c3'].forEach(cls => {
+        const a = tr.querySelector('.' + cls);
+        const b = prev.querySelector('.' + cls);
         if (a && b) a.value = b.value;
       });
     }
@@ -330,10 +376,13 @@ function addRow(copyPrev=false) {
 
 function validateRow(tr, idx) {
   const need = (cls, msg) => {
-    const el = tr.querySelector('.'+cls);
-    if (!el || !el.value.trim()) throw new Error(`Línea ${idx}: ${msg}`);
+    const el = tr.querySelector('.' + cls);
+    if (!el || !el.value.trim()) {
+      throw new Error(`Línea ${idx}: ${msg}`);
+    }
     return el;
   };
+
   need('cuenta', 'la cuenta contable es obligatoria.');
   need('tercero', 'el tercero es obligatorio.');
   need('desc_linea', 'la descripción es obligatoria.');
@@ -342,17 +391,25 @@ function validateRow(tr, idx) {
   const cre = tr.querySelector('.credito');
   const dv = parseMilesToFloat(deb.value);
   const cv = parseMilesToFloat(cre.value);
+
   if ((dv > 0 && cv > 0) || (dv === 0 && cv === 0)) {
     throw new Error(`Línea ${idx}: diligencie débito o crédito (no ambos ni ambos 0).`);
   }
+
   return true;
 }
 
 $('#add').addEventListener('click', () => {
   const last = tbody.lastElementChild;
   if (last) {
-    try { validateRow(last, tbody.children.length); } catch (e) { showError(e.message); return; }
+    try {
+      validateRow(last, tbody.children.length);
+    } catch (e) {
+      showError(e.message);
+      return;
+    }
   }
+
   clearError();
   addRow(true);
 });
@@ -360,12 +417,12 @@ $('#add').addEventListener('click', () => {
 function gatherPayload() {
   const fecha = $('#fecha').value;
   const documento_id = $('#doc').value;
-  const numero = $('#numero').value.trim(); // si vacío, lo asigna servidor
+  const numero = $('#numero').value.trim();
   const descripcion = $('#desc_header').value.trim();
 
   const lineas = [];
   tbody.querySelectorAll('tr').forEach((tr, i) => {
-    validateRow(tr, i+1);
+    validateRow(tr, i + 1);
     lineas.push({
       cuenta_codigo: tr.querySelector('.cuenta').value.trim(),
       tercero_ident: tr.querySelector('.tercero').value.trim(),
@@ -385,22 +442,38 @@ function gatherPayload() {
 
 $('#save').addEventListener('click', async () => {
   clearError();
+
   try {
     const payload = gatherPayload();
-    if (!payload.fecha) { showError('La fecha es obligatoria.'); return; }
-    if (!payload.documento_id) { showError('Debe seleccionar un tipo de documento.'); return; }
-    if (!tbody.children.length) { showError('Debe ingresar al menos una línea.'); return; }
+
+    if (!payload.fecha) {
+      showError('La fecha es obligatoria.');
+      return;
+    }
+    if (!payload.documento_id) {
+      showError('Debe seleccionar un tipo de documento.');
+      return;
+    }
+    if (!tbody.children.length) {
+      showError('Debe ingresar al menos una línea.');
+      return;
+    }
 
     const resp = await fetch("{% url 'asiento_crear' %}", {
       method: 'POST',
       headers: {
-        'Content-Type':'application/json',
+        'Content-Type': 'application/json',
         'X-CSRFToken': getCookie('csrftoken') || '{{ csrf_token }}'
       },
       body: JSON.stringify(payload)
     });
+
     const data = await resp.json();
-    if (!data.ok) { showError(data.error || 'No se pudo guardar.'); return; }
+
+    if (!data.ok) {
+      showError(data.error || 'No se pudo guardar.');
+      return;
+    }
 
     $('#numero').value = data.numero || '';
     alert('Documento guardado correctamente. Número: ' + (data.numero || '(sin número)'));
@@ -413,10 +486,18 @@ $('#save').addEventListener('click', async () => {
 // ========= Consulta por documento + consecutivo =========
 async function consultarDocumento() {
   clearError();
+
   const docId = $('#doc').value;
   const numero = ($('#numero').value || '').trim();
-  if (!docId) { showError('Seleccione el tipo de documento para consultar.'); return; }
-  if (!numero) { showError('Escriba el número de consecutivo para consultar.'); return; }
+
+  if (!docId) {
+    showError('Seleccione el tipo de documento para consultar.');
+    return;
+  }
+  if (!numero) {
+    showError('Escriba el número de consecutivo para consultar.');
+    return;
+  }
 
   try {
     const url = `{% url 'api_asiento_get' %}?doc_id=${encodeURIComponent(docId)}&numero=${encodeURIComponent(numero)}`;
@@ -424,12 +505,10 @@ async function consultarDocumento() {
     const data = await resp.json();
 
     if (!resp.ok || !data.ok) {
-      // 404 u otro error
       showError(data.error || 'No se encontró el documento solicitado.');
       return;
     }
 
-    // Llenar el formulario con la respuesta
     fillFromAsiento(data.asiento);
     currentLoaded = { doc_id: String(docId), numero: String(numero) };
     $('#delete').style.display = 'inline-block';
@@ -439,17 +518,17 @@ async function consultarDocumento() {
 }
 
 function fillFromAsiento(a) {
-  // Encabezado
   $('#fecha').value = a.fecha || '{{ hoy }}';
   $('#doc').value = a.documento_id || '';
   $('#numero').value = a.numero || '';
   $('#desc_header').value = a.descripcion || '';
 
-  // Líneas
   tbody.innerHTML = '';
+
   (a.lineas || []).forEach(ln => {
     addRow(false);
     const tr = tbody.lastElementChild;
+
     tr.querySelector('.cuenta').value = ln.cuenta_codigo || '';
     tr.querySelector('.tercero').value = ln.tercero_ident || '';
     tr.querySelector('.nombre_tercero').value = ln.nombre_tercero || '';
@@ -461,48 +540,80 @@ function fillFromAsiento(a) {
     tr.querySelector('.c2').value = ln.criterio2 || '';
     tr.querySelector('.c3').value = ln.criterio3 || '';
   });
+
   if (!a.lineas || !a.lineas.length) addRow(false);
   sumTotals();
 }
 
-// Enter en consecutivo + botón Buscar
 $('#numero').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') {
     e.preventDefault();
     consultarDocumento();
   }
 });
+
 $('#btnBuscar').addEventListener('click', consultarDocumento);
 
-// Al cambiar documento, si hay número escrito, puedes consultar con Enter
 $('#doc').addEventListener('change', async () => {
-  // Además, mostramos consecutivo sugerido como placeholder (no consume)
   const docId = $('#doc').value;
   if (!docId) return;
+
   try {
     const url = `{% url 'api_documento_next_number' %}?doc_id=${encodeURIComponent(docId)}`;
     const r = await fetch(url);
     const j = await r.json();
-    if (j.ok && j.sugerido) $('#numero').placeholder = `(Sugerido: ${j.sugerido})`;
+    if (j.ok && j.sugerido) {
+      $('#numero').placeholder = `(Sugerido: ${j.sugerido})`;
+    }
   } catch {}
+});
+
+// ========= PDF =========
+$('#btnPdf').addEventListener('click', () => {
+  clearError();
+
+  const docId = ($('#doc').value || '').trim();
+  const numero = ($('#numero').value || '').trim();
+
+  if (!docId) {
+    showError('Seleccione el tipo de documento antes de generar el PDF.');
+    return;
+  }
+
+  if (!numero) {
+    showError('Escriba o consulte el consecutivo antes de generar el PDF.');
+    return;
+  }
+
+  const url = `{% url 'documento_contable_pdf' %}?doc_id=${encodeURIComponent(docId)}&numero=${encodeURIComponent(numero)}`;
+  window.open(url, '_blank');
 });
 
 // ========= Eliminación con confirmación =========
 const overlay = $('#modalOverlay');
+
 $('#delete').addEventListener('click', () => {
-  if (!currentLoaded) { showError('Primero consulta un documento para poder eliminar.'); return; }
+  if (!currentLoaded) {
+    showError('Primero consulta un documento para poder eliminar.');
+    return;
+  }
+
   $('#modalText').textContent = `¿Eliminar el documento ${currentLoaded.numero} del tipo seleccionado?`;
   overlay.style.display = 'flex';
 });
-$('#modalCancel').addEventListener('click', () => overlay.style.display = 'none');
+
+$('#modalCancel').addEventListener('click', () => {
+  overlay.style.display = 'none';
+});
 
 $('#modalOk').addEventListener('click', async () => {
   if (!currentLoaded) return;
+
   try {
     const resp = await fetch("{% url 'api_asiento_delete' %}", {
       method: 'POST',
       headers: {
-        'Content-Type':'application/json',
+        'Content-Type': 'application/json',
         'X-CSRFToken': getCookie('csrftoken') || '{{ csrf_token }}'
       },
       body: JSON.stringify({
@@ -510,15 +621,18 @@ $('#modalOk').addEventListener('click', async () => {
         numero: currentLoaded.numero
       })
     });
+
     const data = await resp.json();
+
     if (!resp.ok || !data.ok) {
       showError(data.error || 'No se pudo eliminar el documento.');
       overlay.style.display = 'none';
       return;
     }
+
     overlay.style.display = 'none';
     alert('Documento eliminado correctamente.');
-    resetForm(true); // conservamos el tipo de documento seleccionado
+    resetForm(true);
   } catch (e) {
     overlay.style.display = 'none';
     showError('Error eliminando el documento.');
@@ -529,17 +643,18 @@ $('#modalOk').addEventListener('click', async () => {
 addRow(false);
 
 // Cerrar sugerencias al click fuera
-document.addEventListener('click', (e)=>{
-  if (!sugg.contains(e.target)) sugg.style.display = 'none';
+document.addEventListener('click', (e) => {
+  if (!sugg.contains(e.target)) {
+    sugg.style.display = 'none';
+  }
 });
-
-
 
 // ===== Importar CSV (servidor) =====
 $('#btnCsv').addEventListener('click', () => $('#csvFile').click());
 
 $('#csvFile').addEventListener('change', async (e) => {
   clearError();
+
   const f = e.target.files && e.target.files[0];
   if (!f) return;
 
@@ -547,8 +662,17 @@ $('#csvFile').addEventListener('change', async (e) => {
   const fecha = $('#fecha').value;
   const descHdr = ($('#desc_header').value || '').trim();
 
-  if (!docId) { showError('Seleccione el tipo de documento antes de cargar el CSV.'); e.target.value=''; return; }
-  if (!fecha) { showError('Seleccione la fecha antes de cargar el CSV.'); e.target.value=''; return; }
+  if (!docId) {
+    showError('Seleccione el tipo de documento antes de cargar el CSV.');
+    e.target.value = '';
+    return;
+  }
+
+  if (!fecha) {
+    showError('Seleccione la fecha antes de cargar el CSV.');
+    e.target.value = '';
+    return;
+  }
 
   const fd = new FormData();
   fd.append('documento_id', docId);
@@ -559,26 +683,35 @@ $('#csvFile').addEventListener('change', async (e) => {
   try {
     const resp = await fetch("{% url 'asiento_importar_csv' %}", {
       method: 'POST',
-      headers: { 'X-CSRFToken': getCookie('csrftoken') || '{{ csrf_token }}' },
+      headers: {
+        'X-CSRFToken': getCookie('csrftoken') || '{{ csrf_token }}'
+      },
       body: fd
     });
+
     const data = await resp.json();
 
     if (!resp.ok || !data.ok) {
       if (data && data.detalles) {
-        showError((data.error || 'Error en importación') + '\n' + data.detalles.join('\n') + (data.mas_errores ? `\n... y ${data.mas_errores} más.` : ''));
+        showError(
+          (data.error || 'Error en importación') +
+          '\n' +
+          data.detalles.join('\n') +
+          (data.mas_errores ? `\n... y ${data.mas_errores} más.` : '')
+        );
       } else {
         showError(data.error || 'No se pudo importar el CSV.');
       }
-      e.target.value='';
+      e.target.value = '';
       return;
     }
+
     alert('Documento importado correctamente. Número: ' + (data.numero || '(sin número)'));
     window.location.href = "{% url 'asientos_listar' %}";
   } catch {
     showError('Error importando CSV.');
   } finally {
-    e.target.value='';
+    e.target.value = '';
   }
 });
 

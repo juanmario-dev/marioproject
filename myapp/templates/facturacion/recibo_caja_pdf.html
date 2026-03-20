@@ -1,0 +1,421 @@
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  {% if recibo %}
+    Recibo de Caja {{ recibo.consecutivo }}
+  {% else %}
+    Recibo de Caja
+  {% endif %}
+</title>
+
+<style>
+  :root{
+    --navy:#021224;
+    --border:#d8dee9;
+    --bg:#f8fafc;
+    --text:#0f172a;
+    --muted:#64748b;
+    --green:#109155;
+  }
+
+  *{ box-sizing:border-box; }
+
+  body{
+    margin:0;
+    padding:24px;
+    font-family:Arial, Helvetica, sans-serif;
+    background:#fff;
+    color:var(--text);
+    font-size:12px;
+  }
+
+  .wrap{
+    max-width:1400px;
+    margin:0 auto;
+  }
+
+  .actions{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:14px;
+  }
+
+  .btn{
+    border:none;
+    border-radius:10px;
+    padding:10px 14px;
+    cursor:pointer;
+    font-weight:700;
+    font-size:12px;
+  }
+
+  .btn-print{
+    background:var(--green);
+    color:#fff;
+  }
+
+  .btn-close{
+    background:#6b7280;
+    color:#fff;
+  }
+
+  .header{
+    border:1px solid var(--border);
+    border-radius:12px;
+    overflow:hidden;
+    margin-bottom:14px;
+  }
+
+  .header-top{
+    background:var(--navy);
+    color:#fff;
+    padding:16px 18px;
+  }
+
+  .header-top h1{
+    margin:0;
+    font-size:22px;
+    letter-spacing:.5px;
+  }
+
+  .header-top p{
+    margin:6px 0 0 0;
+    font-size:12px;
+    opacity:.9;
+  }
+
+  .header-body{
+    padding:14px 16px;
+    background:#fff;
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap:10px;
+  }
+
+  .card{
+    border:1px solid var(--border);
+    border-radius:10px;
+    background:#fff;
+    padding:10px 12px;
+    min-height:64px;
+  }
+
+  .label{
+    font-size:11px;
+    color:var(--muted);
+    margin-bottom:4px;
+  }
+
+  .value{
+    font-size:13px;
+    font-weight:700;
+    word-break:break-word;
+  }
+
+  .desc-box{
+    margin-top:10px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:10px 12px;
+    background:#fff;
+  }
+
+  .desc-box .value{
+    font-weight:400;
+    white-space:pre-wrap;
+  }
+
+  .table-wrap{
+    border:1px solid var(--border);
+    border-radius:12px;
+    overflow:hidden;
+    background:#fff;
+  }
+
+  table{
+    width:100%;
+    border-collapse:collapse;
+    table-layout:fixed;
+  }
+
+  th, td{
+    border-right:1px solid var(--border);
+    border-bottom:1px solid var(--border);
+    padding:8px 6px;
+    vertical-align:top;
+    word-wrap:break-word;
+    overflow-wrap:break-word;
+    font-size:11px;
+  }
+
+  th{
+    background:#f1f5f9;
+    text-align:left;
+    font-weight:700;
+  }
+
+  th:last-child, td:last-child{
+    border-right:none;
+  }
+
+  tfoot td{
+    background:#fafafa;
+    font-weight:700;
+  }
+
+  .center{ text-align:center; }
+  .right{ text-align:right; }
+
+  .w-1{ width:110px; }
+  .w-2{ width:110px; }
+  .w-3{ width:110px; }
+  .w-4{ width:140px; }
+  .w-5{ width:140px; }
+  .w-6{ width:150px; }
+  .w-7{ width:180px; }
+
+  .firmas{
+    margin-top:34px;
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap:24px;
+  }
+
+  .firma{
+    text-align:center;
+    padding-top:28px;
+  }
+
+  .firma .line{
+    border-top:1px solid #444;
+    margin-bottom:6px;
+  }
+
+  .firma .txt{
+    font-size:11px;
+    color:#444;
+  }
+
+  .error-box{
+    border:1px solid #ef4444;
+    background:#fef2f2;
+    color:#991b1b;
+    padding:14px;
+    border-radius:12px;
+    font-size:13px;
+  }
+
+  @media print{
+    @page{
+      size: landscape;
+      margin:10mm;
+    }
+
+    body{
+      padding:0;
+      font-size:10px;
+    }
+
+    .actions{
+      display:none !important;
+    }
+
+    .wrap{
+      max-width:none;
+    }
+
+    .header{
+      border-radius:0;
+      margin-bottom:10px;
+    }
+
+    .header-top{
+      padding:10px 12px;
+    }
+
+    .header-top h1{
+      font-size:18px;
+    }
+
+    .header-top p{
+      font-size:10px;
+    }
+
+    .header-body{
+      padding:8px 10px;
+    }
+
+    .grid{
+      gap:6px;
+    }
+
+    .card{
+      min-height:auto;
+      border-radius:0;
+      padding:6px 8px;
+    }
+
+    .label{
+      font-size:9px;
+    }
+
+    .value{
+      font-size:10px;
+    }
+
+    .desc-box{
+      margin-top:6px;
+      border-radius:0;
+      padding:6px 8px;
+    }
+
+    th, td{
+      font-size:9px;
+      padding:4px 4px;
+    }
+
+    .firmas{
+      margin-top:18px;
+      gap:16px;
+    }
+
+    .firma{
+      padding-top:20px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="actions">
+    <button class="btn btn-print" onclick="window.print()">Imprimir / Guardar PDF</button>
+    <button class="btn btn-close" onclick="window.close()">Cerrar</button>
+  </div>
+
+  {% if error %}
+    <div class="error-box">
+      {{ error }}
+    </div>
+  {% elif recibo %}
+    <div class="header">
+      <div class="header-top">
+        <h1>RECIBO DE CAJA</h1>
+        <p>Documento generado desde el módulo de tesorería</p>
+      </div>
+
+      <div class="header-body">
+        <div class="grid">
+          <div class="card">
+            <div class="label">Consecutivo</div>
+            <div class="value">{{ recibo.consecutivo }}</div>
+          </div>
+
+          <div class="card">
+            <div class="label">Fecha de elaboración</div>
+            <div class="value">{{ recibo.fecha_elab|date:"Y-m-d" }}</div>
+          </div>
+
+          <div class="card">
+            <div class="label">Estado contable</div>
+            <div class="value">
+              {% if recibo.contabilizado %}Contabilizado{% else %}Sin contabilizar{% endif %}
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="label">Asiento contable</div>
+            <div class="value">
+              {% if recibo.asiento %}
+                {{ recibo.asiento.numero }}
+              {% else %}
+                -
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <div class="desc-box">
+          <div class="label">Descripción</div>
+          <div class="value">{{ recibo.descripcion|default:"-" }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th class="w-1">Fecha de pago</th>
+            <th class="w-2">NIT</th>
+            <th class="w-3">Factura No</th>
+            <th class="w-4">Valor factura</th>
+            <th class="w-4">Pago</th>
+            <th class="w-6">Medio de pago ID</th>
+            <th class="w-7">Cuenta contable</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ln in lineas %}
+          <tr>
+            <td>{{ ln.fecha_pago|date:"Y-m-d"|default:"-" }}</td>
+            <td>{{ ln.nit|default:"-" }}</td>
+            <td>{{ ln.factura_no|default:"-" }}</td>
+            <td class="right">{{ ln.valor_factura|floatformat:2 }}</td>
+            <td class="right">{{ ln.pago|floatformat:2 }}</td>
+            <td class="center">{{ ln.medio_pago_id|default:"-" }}</td>
+            <td>{{ ln.cuenta_contable|default:"-" }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="7" class="center">No hay líneas registradas.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="4" class="right">Total pagos</td>
+            <td class="right">{{ total_pago|floatformat:2 }}</td>
+            <td colspan="2"></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <div class="firmas">
+      <div class="firma">
+        <div class="line"></div>
+        <div class="txt">Elaboró</div>
+      </div>
+      <div class="firma">
+        <div class="line"></div>
+        <div class="txt">Revisó</div>
+      </div>
+      <div class="firma">
+        <div class="line"></div>
+        <div class="txt">Aprobó</div>
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+<script>
+  window.addEventListener('load', function () {
+    setTimeout(function () {
+      window.print();
+    }, 300);
+  });
+</script>
+
+</body>
+</html>

@@ -106,7 +106,7 @@ urlpatterns = [
     path( "facturacion/reporte-cartera/", views.reporte_cartera, name="reporte_cartera"),
     path("facturacion/reporte-cartera/nc/<int:factura_id>/", views.cartera_detalle_nc, name="cartera_detalle_nc"),
     path("facturacion/reporte-cartera/pagos/<str:consecutivo>/", views.cartera_detalle_pagos, name="cartera_detalle_pagos"),
-
+    path('facturacion/tesoreria/recibo-caja/pdf/', views.recibo_caja_pdf, name='recibo_caja_pdf'),
 
     # automatizacion del recibo de caja
     path("terceros/validar-nit/", views.validar_nit, name="validar_nit"),
@@ -196,7 +196,8 @@ urlpatterns = [
     path("contabilidad/balance-general/", views.balance_general, name="balance_general"),
     path("contabilidad/estado-resultados/", views.estado_resultados, name="estado_resultados"),
 
-     path('contabilidad/formulario/', views.formulario_contable, name='formulario_contable'),
+    path('contabilidad/formulario/', views.formulario_contable, name='formulario_contable'),
+    path('contabilidad/registros/pdf/', views.documento_contable_pdf, name='documento_contable_pdf'),
 
 
 ]

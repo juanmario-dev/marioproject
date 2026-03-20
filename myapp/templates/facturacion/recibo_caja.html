@@ -570,9 +570,22 @@
 
 
 
+ 
+
   document.getElementById('btnPDF').addEventListener('click', () => {
-    alert('PDF: pendiente (fase siguiente: generar PDF del recibo).');
-  });
+  const consecutivo = (document.getElementById('consecutivo').value || '').trim();
+
+  if (!consecutivo){
+    alert('❌ Primero debes digitar o cargar un consecutivo.');
+    return;
+  }
+
+  const url = "{% url 'recibo_caja_pdf' %}" + "?consecutivo=" + encodeURIComponent(consecutivo);
+  window.open(url, "_blank");
+});
+
+
+
 
   document.getElementById('btnCsvGen').addEventListener('click', () => {
     alert('Generar archivo CSV: pendiente (fase siguiente: exportar filas a CSV).');
