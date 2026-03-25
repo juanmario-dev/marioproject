@@ -2634,6 +2634,24 @@ from .models import FacturaVenta
 from .models import DatosFacturacion
 
 
+from io import BytesIO
+import os
+
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
+from django.contrib.auth.decorators import login_required
+
+from reportlab.lib.pagesizes import LETTER
+from reportlab.lib import colors
+from reportlab.lib.units import mm
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.enums import TA_CENTER, TA_RIGHT
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
+from reportlab.graphics.barcode import qr, code128
+from reportlab.graphics.shapes import Drawing
+from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT
+
+
 
 def _fmt_cop(x):
     try:
@@ -2665,174 +2683,13 @@ import os
 datos_empresa = DatosFacturacion.objects.first()
 
 
-
-
-# @login_required(login_url="login")
-# def factura_pdf(request, id):
-   
-
-#     print("✅ ENTRO A factura_pdf NUEVA", id)
-
-#     fv = get_object_or_404(
-#         FacturaVenta.objects.prefetch_related("lineas"),
-#         pk=id
-#     )
-
-#     buffer = BytesIO()
-#     doc = SimpleDocTemplate(
-#         buffer,
-#         pagesize=LETTER,
-#         leftMargin=18*mm,
-#         rightMargin=18*mm,
-#         topMargin=18*mm,
-#         bottomMargin=18*mm,
-#         title=f"Factura {fv.consecutivo}",
-#         author="marioproject",
-#     )
-
-#     styles = getSampleStyleSheet()
-#     title = styles["Title"]
-#     normal = styles["Normal"]
-
-#     right = ParagraphStyle(
-#         "Right",
-#         parent=normal,
-#         alignment=TA_RIGHT
-#     )
-
-#     story = []
-
-#     # ======================
-#     # Encabezado
-#     # ======================
-#     story.append(Paragraph("FACTURA DE VENTA", title))
-#     story.append(Spacer(1, 6))
-
-#     # Bloque superior: consecutivo + fechas
-#     head_data = [
-#         ["Consecutivo:", fv.consecutivo, "Fecha factura:", (fv.fecha_factura or "").strftime("%Y-%m-%d") if fv.fecha_factura else ""],
-#         ["Días de pago:", str(fv.dias_pago or 0), "Vencimiento:", (fv.fecha_vencimiento or "").strftime("%Y-%m-%d") if fv.fecha_vencimiento else ""],
-#     ]
-#     t_head = Table(head_data, colWidths=[25*mm, 55*mm, 28*mm, 55*mm])
-#     t_head.setStyle(TableStyle([
-#         ("FONTNAME", (0,0), (-1,-1), "Helvetica"),
-#         ("FONTSIZE", (0,0), (-1,-1), 10),
-#         ("BOTTOMPADDING", (0,0), (-1,-1), 6),
-#     ]))
-#     story.append(t_head)
-#     story.append(Spacer(1, 8))
-
-#     # ======================
-#     # Datos del cliente
-#     # ======================
-#     story.append(Paragraph("Datos del cliente", styles["Heading3"]))
-#     cli_data = [
-#         ["NIT:", fv.nit or "", "Razón social:", fv.razon_social or ""],
-#         ["Correo:", fv.correo or "", "Dirección:", fv.direccion or ""],
-#     ]
-#     t_cli = Table(cli_data, colWidths=[12*mm, 68*mm, 22*mm, 61*mm])
-#     t_cli.setStyle(TableStyle([
-#         ("FONTNAME", (0,0), (-1,-1), "Helvetica"),
-#         ("FONTSIZE", (0,0), (-1,-1), 10),
-#         ("BOTTOMPADDING", (0,0), (-1,-1), 6),
-#         ("LINEBELOW", (0,0), (-1,0), 0.25, colors.lightgrey),
-#     ]))
-#     story.append(t_cli)
-#     story.append(Spacer(1, 10))
-
-#     # ======================
-#     # Tabla de líneas
-#     # ======================
-#     story.append(Paragraph("Detalle", styles["Heading3"]))
-
-#     data = [[
-#         "Descripción", "Cant.", "Precio", "Dto %", "Imp %", "Total"
-#     ]]
-
-#     for ln in fv.lineas.all():
-#         data.append([
-#             (ln.descripcion or "")[:80],
-#             str(ln.cantidad or 0),
-#             _fmt_cop(ln.precio),
-#             str(ln.descuento_pct or 0),
-#             str(ln.impuesto_pct or 0),
-#             _fmt_cop(ln.total),
-#         ])
-
-#     t = Table(
-#         data,
-#         colWidths=[74*mm, 14*mm, 24*mm, 14*mm, 14*mm, 28*mm]
-#     )
-#     t.setStyle(TableStyle([
-#         ("BACKGROUND", (0,0), (-1,0), colors.HexColor("#021224")),
-#         ("TEXTCOLOR", (0,0), (-1,0), colors.white),
-#         ("FONTNAME", (0,0), (-1,0), "Helvetica-Bold"),
-#         ("FONTSIZE", (0,0), (-1,0), 10),
-
-#         ("FONTNAME", (0,1), (-1,-1), "Helvetica"),
-#         ("FONTSIZE", (0,1), (-1,-1), 9),
-
-#         ("GRID", (0,0), (-1,-1), 0.25, colors.lightgrey),
-#         ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
-#         ("ALIGN", (1,1), (-1,-1), "RIGHT"),
-#         ("ALIGN", (0,0), (0,-1), "LEFT"),
-#         ("ROWBACKGROUNDS", (0,1), (-1,-1), [colors.whitesmoke, colors.white]),
-#         ("BOTTOMPADDING", (0,0), (-1,-1), 6),
-#         ("TOPPADDING", (0,0), (-1,-1), 6),
-#     ]))
-#     story.append(t)
-#     story.append(Spacer(1, 10))
-
-#     # ======================
-#     # Totales
-#     # ======================
-#     tot_data = [
-#         ["Subtotal:", _fmt_cop(fv.subtotal)],
-#         ["IVA:", _fmt_cop(fv.iva)],
-#         ["Retenciones:", _fmt_cop(fv.retenciones)],
-#         ["Abonos:", _fmt_cop(fv.abonos)],
-#         ["TOTAL A PAGAR:", _fmt_cop(fv.total_pagar)],
-#     ]
-
-#     t_tot = Table(tot_data, colWidths=[35*mm, 45*mm])
-#     t_tot.setStyle(TableStyle([
-#         ("FONTNAME", (0,0), (-1,-2), "Helvetica"),
-#         ("FONTSIZE", (0,0), (-1,-2), 10),
-#         ("ALIGN", (1,0), (1,-1), "RIGHT"),
-
-#         ("FONTNAME", (0,-1), (-1,-1), "Helvetica-Bold"),
-#         ("FONTSIZE", (0,-1), (-1,-1), 11),
-#         ("LINEABOVE", (0,-1), (-1,-1), 0.8, colors.black),
-#         ("TOPPADDING", (0,-1), (-1,-1), 8),
-#     ]))
-
-#     # alinearlo a la derecha con un contenedor
-#     story.append(Paragraph("<para align=right><b>Totales</b></para>", normal))
-#     story.append(Spacer(1, 4))
-#     story.append(t_tot)
-
-#     doc.build(story)
-
-#     pdf = buffer.getvalue()
-#     buffer.close()
-
-#     resp = HttpResponse(pdf, content_type="application/pdf")
-#     resp["Content-Disposition"] = f'inline; filename="FV_{fv.consecutivo}.pdf"'
-#     return resp
-
-
-
 @login_required(login_url="login")
 def factura_pdf(request, id):
-
-    print("✅ ENTRO A factura_pdf", id)
-
     fv = get_object_or_404(
         FacturaVenta.objects.prefetch_related("lineas"),
         pk=id
     )
 
-    # 🔹 Datos de facturación (empresa)
     datos = DatosFacturacion.objects.first()
 
     buffer = BytesIO()
@@ -2841,248 +2698,372 @@ def factura_pdf(request, id):
         pagesize=LETTER,
         leftMargin=18 * mm,
         rightMargin=18 * mm,
-        topMargin=18 * mm,
-        bottomMargin=18 * mm,
+        topMargin=16 * mm,
+        bottomMargin=16 * mm,
         title=f"Factura {fv.consecutivo}",
         author="marioproject",
     )
 
     styles = getSampleStyleSheet()
-    title = styles["Title"]
-    normal = styles["Normal"]
+
+    AZUL = colors.HexColor("#002060")
+    BORDE = colors.HexColor("#bfc7d5")
+    GRIS_CLARO = colors.HexColor("#f4f6f9")
+    TEXTO = colors.HexColor("#111827")
+
+    normal = ParagraphStyle(
+        "NormalPDF",
+        parent=styles["Normal"],
+        fontName="Helvetica",
+        fontSize=8.2,
+        leading=9.6,
+        textColor=TEXTO,
+        spaceBefore=0,
+        spaceAfter=0,
+    )
+
+    small = ParagraphStyle(
+        "SmallPDF",
+        parent=normal,
+        fontSize=7.4,
+        leading=8.6,
+        textColor=colors.HexColor("#475569"),
+        spaceBefore=0,
+        spaceAfter=0,
+    )
+
+    bold = ParagraphStyle(
+        "BoldPDF",
+        parent=normal,
+        fontName="Helvetica-Bold",
+    )
+
+    subtitulo_blanco = ParagraphStyle(
+        "SubtituloBlancoPDF",
+        parent=normal,
+        fontName="Helvetica-Bold",
+        fontSize=8.2,
+        leading=9,
+        textColor=colors.white,
+        alignment=TA_LEFT,
+    )
+
+    right = ParagraphStyle(
+        "RightPDF",
+        parent=normal,
+        alignment=TA_RIGHT,
+    )
 
     story = []
 
-    logo = ""
-    if datos and datos.logo and os.path.exists(datos.logo.path):
-     logo = Image(datos.logo.path, width=110, height=100)
+    # =========================================================
+    # 1) ENCABEZADO: logo | bloque central | QR
+    # =========================================================
+    logo_flow = ""
+    if datos and getattr(datos, "logo", None):
+        try:
+            if datos.logo and os.path.exists(datos.logo.path):
+                logo_flow = Image(datos.logo.path, width=36 * mm, height=26 * mm)
+        except Exception:
+            logo_flow = ""
 
-    empresa_info = []
-    if datos:
-     empresa_info = [
-        Paragraph(f"<b>{datos.nombre_empresa}</b>", styles["Heading3"]),
-        Paragraph(f"NIT: {datos.nit}", normal),
-        Paragraph(datos.direccion or "", normal),
-        Paragraph(f"Tel: {datos.telefono}", normal),
-        Paragraph(datos.correo or "", normal),
+    centro_header = [
+        Paragraph("<b>Factura de venta</b>", bold),
+        Spacer(1, 1 * mm),
+        Paragraph(f"<b>No consecutivo:</b> {fv.consecutivo or ''}", normal),
+        Paragraph(f"<b>Días de pago:</b> {fv.dias_pago or 0}", normal),
+        Paragraph(
+            f"<b>Fecha de emisión:</b> "
+            f"{fv.fecha_factura.strftime('%Y-%m-%d') if fv.fecha_factura else ''}",
+            normal
+        ),
+        Paragraph(
+            f"<b>Fecha de vencimiento:</b> "
+            f"{fv.fecha_vencimiento.strftime('%Y-%m-%d') if fv.fecha_vencimiento else ''}",
+            normal
+        ),
     ]
-     
-    # ======================
-    # QR (SOLO PARA HEADER)
-    # ======================
-    qr_text = f"FV|{fv.consecutivo}|{fv.nit}|{fv.total_pagar}"
 
+    qr_text = f"FV|{fv.consecutivo}|{fv.nit}|{fv.total_pagar}"
     qr_code = qr.QrCodeWidget(qr_text)
     bounds = qr_code.getBounds()
-    w, h = bounds[2] - bounds[0], bounds[3] - bounds[1]
+    w = bounds[2] - bounds[0]
+    h = bounds[3] - bounds[1]
 
-    qr_size = 100  # tamaño ideal para header
-    qr_header = Drawing(
-       qr_size,
-       qr_size,
-       transform=[qr_size/w, 0, 0, qr_size/h, 0, 0]
+    qr_size = 38 * mm
+    qr_drawing = Drawing(
+        qr_size,
+        qr_size,
+        transform=[qr_size / w, 0, 0, qr_size / h, 0, 0]
     )
-    qr_header.add(qr_code)
+    qr_drawing.add(qr_code)
 
-
-
-    header_table = Table(
-      [[logo, empresa_info, qr_header]],
-      colWidths=[40*mm, 95*mm, 35*mm]
+    header = Table(
+        [[logo_flow, centro_header, qr_drawing]],
+        colWidths=[40 * mm, 84 * mm, 36 * mm]
     )
-
-    header_table.setStyle(TableStyle([
-        ("VALIGN", (0,0), (-1,-1), "TOP"),
-        ("LEFTPADDING", (0,0), (-1,-1), 0),
-        ("RIGHTPADDING", (0,0), (-1,-1), 4),
+    header.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 2),
+        ("TOPPADDING", (0, 0), (-1, -1), 0),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
     ]))
+    story.append(header)
+    story.append(Spacer(1, 2.5 * mm))
 
+    # =========================================================
+    # 2) RESOLUCIÓN DIAN ARRIBA
+    # =========================================================
+    if datos and getattr(datos, "resolucion_dian", None):
+        t_res_dian = Table(
+            [[Paragraph(f"<b>Resolución DIAN:</b> {datos.resolucion_dian}", normal)]],
+            colWidths=[160 * mm]
+        )
+        t_res_dian.setStyle(TableStyle([
+            ("BOX", (0, 0), (-1, -1), 0.5, BORDE),
+            ("BACKGROUND", (0, 0), (-1, -1), colors.white),
+            ("LEFTPADDING", (0, 0), (-1, -1), 6),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+            ("TOPPADDING", (0, 0), (-1, -1), 4),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+        ]))
+        story.append(t_res_dian)
+        story.append(Spacer(1, 3 * mm))
 
-    # header_table = Table(
-    #   [[logo, empresa_info]],
-    #   colWidths=[50*mm, 110*mm]
-    # )
-
-    # header_table.setStyle(TableStyle([
-    #     ("VALIGN", (0,0), (-1,-1), "TOP"),
-    #     ("LEFTPADDING", (0,0), (-1,-1), 0),
-    #     ("RIGHTPADDING", (0,0), (-1,-1), 6),
-    # ]))
-
-    story.append(header_table)
-    story.append(Spacer(1, 10))
-
-
-
-    # if datos.logo:
-    #     logo_path = datos.logo.path
-    #     if os.path.exists(logo_path):
-    #         img = Image(logo_path, width=120, height=50)
-    #         img.hAlign = "LEFT"
-    #         story.append(img)
-    #         story.append(Spacer(1, 6))
-
-
-    # ======================
-    # ENCABEZADO EMPRESA
-    # ======================
-    # if datos:
-    #     story.append(Paragraph(datos.nombre_empresa or "", styles["Heading2"]))
-    #     story.append(Paragraph(f"NIT: {datos.nit or ''}", normal))
-    #     story.append(Paragraph(datos.direccion or "", normal))
-    #     story.append(Paragraph(f"Tel: {datos.telefono or ''}", normal))
-    #     story.append(Spacer(1, 10))
-
-    story.append(Paragraph("FACTURA DE VENTA", title))
-    story.append(Spacer(1, 6))
-
-    # ======================
-    # INFO FACTURA
-    # ======================
-    head_data = [
-        ["Consecutivo:", fv.consecutivo, "Fecha:", fv.fecha_factura.strftime("%Y-%m-%d") if fv.fecha_factura else ""],
-        ["Días de pago:", str(fv.dias_pago or 0), "Vence:", fv.fecha_vencimiento.strftime("%Y-%m-%d") if fv.fecha_vencimiento else ""],
+    # =========================================================
+    # 3) BLOQUES PARALELOS: emisor / comprador
+    # =========================================================
+    emisor_rows = [
+        [Paragraph("Datos del emisor", subtitulo_blanco)],
+        [Paragraph(f"<b>Razón social/nombre:</b> {getattr(datos, 'nombre_empresa', '') if datos else ''}", normal)],
+        [Paragraph(f"<b>Nit:</b> {getattr(datos, 'nit', '') if datos else ''}", normal)],
+        [Paragraph(f"<b>Correo:</b> {getattr(datos, 'correo', '') if datos else ''}", normal)],
+        [Paragraph(f"<b>Dirección:</b> {getattr(datos, 'direccion', '') if datos else ''}", normal)],
+        [Paragraph(f"<b>Teléfono:</b> {getattr(datos, 'telefono', '') if datos else ''}", normal)],
     ]
 
-    t_head = Table(head_data, colWidths=[25*mm, 55*mm, 25*mm, 55*mm])
-    t_head.setStyle(TableStyle([
-        ("FONTNAME", (0,0), (-1,-1), "Helvetica"),
-        ("FONTSIZE", (0,0), (-1,-1), 10),
-        ("BOTTOMPADDING", (0,0), (-1,-1), 6),
-    ]))
-    story.append(t_head)
-    story.append(Spacer(1, 10))
-
-    # ======================
-    # DATOS CLIENTE
-    # ======================
-    story.append(Paragraph("Datos del cliente", styles["Heading3"]))
-
-    cli_data = [
-        ["NIT:", fv.nit or "", "Razón social:", fv.razon_social or ""],
-        ["Correo:", fv.correo or "", "Dirección:", fv.direccion or ""],
+    comprador_rows = [
+        [Paragraph("Datos del comprador", subtitulo_blanco)],
+        [Paragraph(f"<b>Razón social/nombre:</b> {fv.razon_social or ''}", normal)],
+        [Paragraph(f"<b>Nit:</b> {fv.nit or ''}", normal)],
+        [Paragraph(f"<b>Correo:</b> {fv.correo or ''}", normal)],
+        [Paragraph(f"<b>Dirección:</b> {fv.direccion or ''}", normal)],
+        [Paragraph(f"<b>Teléfono:</b> {getattr(fv, 'telefono', '') or ''}", normal)],
     ]
 
-    t_cli = Table(cli_data, colWidths=[15*mm, 65*mm, 25*mm, 55*mm])
-    t_cli.setStyle(TableStyle([
-        ("FONTNAME", (0,0), (-1,-1), "Helvetica"),
-        ("FONTSIZE", (0,0), (-1,-1), 10),
-        ("BOTTOMPADDING", (0,0), (-1,-1), 6),
-        ("LINEBELOW", (0,0), (-1,0), 0.25, colors.lightgrey),
+    emisor = Table(emisor_rows, colWidths=[77 * mm])
+    emisor.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (0, 0), AZUL),
+        ("TEXTCOLOR", (0, 0), (0, 0), colors.white),
+        ("BOX", (0, 0), (-1, -1), 0.5, BORDE),
+        ("INNERGRID", (0, 1), (-1, -1), 0.3, BORDE),
+        ("LEFTPADDING", (0, 0), (-1, -1), 6),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+        ("TOPPADDING", (0, 0), (-1, -1), 4),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
     ]))
-    story.append(t_cli)
-    story.append(Spacer(1, 10))
 
-    # ======================
-    # DETALLE
-    # ======================
-    story.append(Paragraph("Detalle", styles["Heading3"]))
+    comprador = Table(comprador_rows, colWidths=[77 * mm])
+    comprador.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (0, 0), AZUL),
+        ("TEXTCOLOR", (0, 0), (0, 0), colors.white),
+        ("BOX", (0, 0), (-1, -1), 0.5, BORDE),
+        ("INNERGRID", (0, 1), (-1, -1), 0.3, BORDE),
+        ("LEFTPADDING", (0, 0), (-1, -1), 6),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+        ("TOPPADDING", (0, 0), (-1, -1), 4),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+    ]))
 
-    data = [["Descripción", "Cant.", "Precio", "Dto %", "Imp %", "Total"]]
+    bloques = Table([[emisor, comprador]], colWidths=[79 * mm, 79 * mm])
+    bloques.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 4),
+        ("TOPPADDING", (0, 0), (-1, -1), 0),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+    ]))
+    story.append(bloques)
+    story.append(Spacer(1, 3.5 * mm))
+
+    # =========================================================
+    # 4) TÍTULO DETALLE ALINEADO
+    # =========================================================
+    detalle_titulo = Table(
+        [[Paragraph("<b>Detalle de la factura</b>", bold)]],
+        colWidths=[160 * mm],
+        hAlign="CENTER"
+    )
+    detalle_titulo.setStyle(TableStyle([
+        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+        ("TOPPADDING", (0, 0), (-1, -1), 0),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+    ]))
+    story.append(detalle_titulo)
+    story.append(Spacer(1, 1.5 * mm))
+
+    # =========================================================
+    # 5) TABLA DETALLE CENTRADA
+    # =========================================================
+    data = [[
+        Paragraph("<b>Descripción</b>", subtitulo_blanco),
+        Paragraph("<b>Precio</b>", subtitulo_blanco),
+        Paragraph("<b>Cantidad</b>", subtitulo_blanco),
+        Paragraph("<b>Desc. %</b>", subtitulo_blanco),
+        Paragraph("<b>Imp. %</b>", subtitulo_blanco),
+        Paragraph("<b>Total</b>", subtitulo_blanco),
+    ]]
 
     for ln in fv.lineas.all():
         data.append([
-            (ln.descripcion or "")[:80],
-            ln.cantidad or 0,
-            _fmt_cop(ln.precio),
-            ln.descuento_pct or 0,
-            ln.impuesto_pct or 0,
-            _fmt_cop(ln.total),
+            Paragraph((ln.descripcion or "")[:110], normal),
+            Paragraph(_fmt_cop(ln.precio), right),
+            Paragraph(str(ln.cantidad or 0), right),
+            Paragraph(str(ln.descuento_pct or 0), right),
+            Paragraph(str(ln.impuesto_pct or 0), right),
+            Paragraph(_fmt_cop(ln.total), right),
         ])
 
-    t = Table(data, colWidths=[70*mm, 15*mm, 25*mm, 15*mm, 15*mm, 25*mm])
-    t.setStyle(TableStyle([
-        ("BACKGROUND", (0,0), (-1,0), colors.HexColor("#021224")),
-        ("TEXTCOLOR", (0,0), (-1,0), colors.white),
-        ("FONTNAME", (0,0), (-1,0), "Helvetica-Bold"),
-        ("FONTSIZE", (0,0), (-1,0), 10),
-        ("GRID", (0,0), (-1,-1), 0.25, colors.lightgrey),
-        ("ALIGN", (1,1), (-1,-1), "RIGHT"),
-        ("ROWBACKGROUNDS", (0,1), (-1,-1), [colors.whitesmoke, colors.white]),
+    detalle = Table(
+        data,
+        colWidths=[64 * mm, 24 * mm, 14 * mm, 14 * mm, 14 * mm, 30 * mm],
+        repeatRows=1,
+        hAlign="CENTER"
+    )
+    detalle.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), AZUL),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+        ("FONTSIZE", (0, 0), (-1, 0), 8),
+        ("FONTNAME", (0, 1), (-1, -1), "Helvetica"),
+        ("FONTSIZE", (0, 1), (-1, -1), 8),
+        ("BOX", (0, 0), (-1, -1), 0.5, BORDE),
+        ("INNERGRID", (0, 0), (-1, -1), 0.3, BORDE),
+        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, GRIS_CLARO]),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("ALIGN", (1, 1), (-1, -1), "RIGHT"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 5),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 5),
+        ("TOPPADDING", (0, 0), (-1, -1), 4),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
     ]))
-    story.append(t)
-    story.append(Spacer(1, 10))
+    story.append(detalle)
+    story.append(Spacer(1, 3 * mm))
 
-    # ======================
-    # TOTALES
-    # ======================
-    tot_data = [
-        ["Subtotal:", _fmt_cop(fv.subtotal)],
-        ["IVA:", _fmt_cop(fv.iva)],
-        ["Retenciones:", _fmt_cop(fv.retenciones)],
-        ["Abonos:", _fmt_cop(fv.abonos)],
-        ["TOTAL A PAGAR:", _fmt_cop(fv.total_pagar)],
+    # =========================================================
+    # 5.1) RECALCULAR TOTALES DESDE LAS LÍNEAS PARA EL PDF
+    # =========================================================
+    subtotal_pdf = Decimal("0")
+    iva_pdf = Decimal("0")
+
+    for ln in fv.lineas.all():
+        cantidad = Decimal(str(ln.cantidad or 0))
+        precio = Decimal(str(ln.precio or 0))
+        dto_pct = Decimal(str(ln.descuento_pct or 0))
+        imp_pct = Decimal(str(ln.impuesto_pct or 0))
+
+        bruto = cantidad * precio
+        base = bruto - (bruto * dto_pct / Decimal("100"))
+        impuesto = base * imp_pct / Decimal("100")
+
+        subtotal_pdf += base
+        iva_pdf += impuesto
+
+    retenciones_pdf = Decimal(str(fv.retenciones or 0))
+    abonos_pdf = Decimal(str(fv.abonos or 0))
+    total_pagar_pdf = subtotal_pdf + iva_pdf - retenciones_pdf - abonos_pdf
+
+    if total_pagar_pdf < 0:
+        total_pagar_pdf = Decimal("0")
+
+    # =========================================================
+    # 6) TOTALES ALINEADOS CON LA TABLA ANTERIOR
+    # =========================================================
+    totales_data = [
+        [Paragraph("Subtotal", normal), Paragraph(_fmt_cop(subtotal_pdf), right)],
+        [Paragraph("IVA", normal), Paragraph(_fmt_cop(iva_pdf), right)],
+        [Paragraph("Retenciones", normal), Paragraph(_fmt_cop(retenciones_pdf), right)],
+        [Paragraph("Abonos", normal), Paragraph(_fmt_cop(abonos_pdf), right)],
+        [Paragraph("<b>TOTAL A PAGAR</b>", subtitulo_blanco), Paragraph(f"<b>{_fmt_cop(total_pagar_pdf)}</b>", subtitulo_blanco)],
     ]
 
-    t_tot = Table(tot_data, colWidths=[40*mm, 40*mm])
-    t_tot.setStyle(TableStyle([
-        ("FONTNAME", (0,0), (-1,-2), "Helvetica"),
-        ("FONTSIZE", (0,0), (-1,-2), 10),
-        ("ALIGN", (1,0), (1,-1), "RIGHT"),
-        ("FONTNAME", (0,-1), (-1,-1), "Helvetica-Bold"),
-        ("FONTSIZE", (0,-1), (-1,-1), 11),
-        ("LINEABOVE", (0,-1), (-1,-1), 0.8, colors.black),
+    totales = Table(totales_data, colWidths=[36 * mm, 34 * mm], hAlign="LEFT")
+    totales.setStyle(TableStyle([
+        ("BOX", (0, 0), (-1, -1), 0.5, BORDE),
+        ("INNERGRID", (0, 0), (-1, -2), 0.3, BORDE),
+        ("BACKGROUND", (0, 0), (-1, -2), colors.white),
+        ("BACKGROUND", (0, -1), (-1, -1), AZUL),
+        ("TEXTCOLOR", (0, -1), (-1, -1), colors.white),
+        ("LEFTPADDING", (0, 0), (-1, -1), 6),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+        ("TOPPADDING", (0, 0), (-1, -1), 4),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
     ]))
 
-    story.append(Paragraph("<para align=right><b>Totales</b></para>", normal))
-    story.append(t_tot)
-    story.append(Spacer(1, 12))
+    totales_wrap = Table(
+        [["", totales]],
+        colWidths=[90 * mm, 70 * mm],
+        hAlign="CENTER"
+    )
+    totales_wrap.setStyle(TableStyle([
+        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+        ("TOPPADDING", (0, 0), (-1, -1), 0),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+    ]))
+    story.append(totales_wrap)
+    story.append(Spacer(1, 10 * mm))
 
-    # ======================
-    # QR + CÓDIGO DE BARRAS
-    # ======================
-    qr_text = f"FV|{fv.consecutivo}|{fv.nit}|{fv.total_pagar}"
+    # =========================================================
+    # 7) CÓDIGO DE BARRAS CASI A TODO EL ANCHO
+    # =========================================================
+    barcode = code128.Code128(qr_text, barHeight=16 * mm, barWidth=1.0)
+    barcode.hAlign = "CENTER"
 
-    qr_code = qr.QrCodeWidget(qr_text)
-    bounds = qr_code.getBounds()
-    w, h = bounds[2] - bounds[0], bounds[3] - bounds[1]
+    barcode_box = Table([[barcode]], colWidths=[160 * mm], hAlign="CENTER")
+    barcode_box.setStyle(TableStyle([
+        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+        ("TOPPADDING", (0, 0), (-1, -1), 0),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+    ]))
+    story.append(barcode_box)
+    story.append(Spacer(1, 4 * mm))
 
-    qr_size = 80
-    qr_drawing = Drawing(qr_size, qr_size, transform=[qr_size/w, 0, 0, qr_size/h, 0, 0])
-    qr_drawing.add(qr_code)
+    # =========================================================
+    # 8) RESOLUCIONES FINALES
+    # =========================================================
+    resoluciones_rows = []
 
-    # story.append(qr_drawing)
-    # story.append(Spacer(1, 8))
+    if datos and getattr(datos, "resolucion_autoretenedor_dian", None):
+        resoluciones_rows.append([
+            Paragraph(f"<b>Autoretenedor DIAN:</b> {datos.resolucion_autoretenedor_dian}", normal),
+            Paragraph(
+                f"<b>Autoretenedor ICA:</b> {getattr(datos, 'resolucion_autoretenedor_ica', '') or ''}",
+                normal
+            ),
+        ])
 
-    barcode = code128.Code128(qr_text, barHeight=40, barWidth=0.8)
-    story.append(barcode)
+    if resoluciones_rows:
+        t_res_final = Table(resoluciones_rows, colWidths=[78 * mm, 78 * mm], hAlign="CENTER")
+        t_res_final.setStyle(TableStyle([
+            ("BOX", (0, 0), (-1, -1), 0.5, BORDE),
+            ("INNERGRID", (0, 0), (-1, -1), 0.3, BORDE),
+            ("LEFTPADDING", (0, 0), (-1, -1), 6),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+            ("TOPPADDING", (0, 0), (-1, -1), 4),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+        ]))
+        story.append(t_res_final)
 
- 
-
-
-    # ======================
-    # RESOLUCIONES DIAN
-    # ======================
-    if datos:
-       story.append(Spacer(1, 10))
-       story.append(Paragraph("Resoluciones DIAN", styles["Heading3"]))
-
-       if datos.resolucion_dian:
-           story.append(Paragraph(
-              f"<b>Resolución DIAN:</b> {datos_empresa.resolucion_dian}",
-              normal
-            ))
-
-       if datos.resolucion_autoretenedor_dian:
-        story.append(Paragraph(
-            f"<b>Autorretenedor DIAN:</b> {datos_empresa.resolucion_autoretenedor_dian}",
-            normal
-        ))
-
-        if datos.resolucion_autoretenedor_ica:
-           story.append(Paragraph(
-              f"<b>Autorretenedor ICA:</b> {datos_empresa.resolucion_autoretenedor_ica}",
-              normal
-        ))
-    
-
-       # ======================
-    # GENERAR PDF
-    # ======================
     doc.build(story)
-
-
-    
 
     pdf = buffer.getvalue()
     buffer.close()
@@ -3090,6 +3071,10 @@ def factura_pdf(request, id):
     response = HttpResponse(pdf, content_type="application/pdf")
     response["Content-Disposition"] = f'inline; filename="FV_{fv.consecutivo}.pdf"'
     return response
+
+
+
+
 
 
 

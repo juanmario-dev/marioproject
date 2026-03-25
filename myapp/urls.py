@@ -80,7 +80,8 @@ urlpatterns = [
     path('facturacion/facturar/guardar/', views.fv_guardar, name='fv_guardar'),
     path("facturacion/fv/buscar/", views.fv_por_consecutivo, name="fv_por_consecutivo"),
     # path('factura/pdf/<int:factura_id>/', views.fv_pdf, name='fv_pdf'),
-    path("factura/pdf/<int:id>/", views.factura_pdf, name="factura_pdf"),
+
+    path('factura/pdf/<int:id>/', views.factura_pdf, name='factura_pdf'),
 
 
 

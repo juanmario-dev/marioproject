@@ -209,7 +209,7 @@ class ProductoServicio(models.Model):
 
 
 
-# modelo base de datos factura de venta
+# modelo base de datos factura de venta fv_crear.html
 
 from django.db import models
 from django.utils import timezone
