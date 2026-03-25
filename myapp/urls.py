@@ -60,6 +60,8 @@ urlpatterns = [
     # modulo de reportes________________
     path('contabilidad/reportes/', views.reportes_movimientos, name='reportes_movimientos'),
     path('contabilidad/reportes/export/csv/', views.reportes_export_csv, name='reportes_export_csv'),
+    path('contabilidad/bloqueos/cierres/', views.bloqueos_y_cierres_contables, name='bloqueos_y_cierres_contables'),
+
 
 
     # Botones de la interfaz principal de facturacion
@@ -199,6 +201,10 @@ urlpatterns = [
 
     path('contabilidad/formulario/', views.formulario_contable, name='formulario_contable'),
     path('contabilidad/registros/pdf/', views.documento_contable_pdf, name='documento_contable_pdf'),
+
+
+    # path de bloqueos_contables.html
+    path('contabilidad/bloqueos/', views.bloqueos_contables, name='bloqueos_contables'),
 
 
 ]

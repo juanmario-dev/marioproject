@@ -9327,3 +9327,91 @@ def estado_resultados(request):
         "utilidad_ejercicio": utilidad_ejercicio,
     })
 
+
+
+
+# funcion de bloqueos_y_cierres_contables.html
+
+@login_required(login_url='login')
+def bloqueos_y_cierres_contables (request):
+    return render (request, "contabilidad/bloqueos_y_cierres_contables.html")
+
+
+
+# funcion renderiza bloqueos_contables.html
+
+
+from datetime import datetime
+
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+
+from .models import BloqueoContable
+
+
+@login_required(login_url='login')
+def bloqueos_contables(request):
+    modulos = [
+        ("contabilidad", "Contabilidad"),
+        ("facturacion", "Facturación"),
+        ("recibos_caja", "Recibos de caja"),
+        ("nomina", "Nómina"),
+        ("pagos_nomina", "Pagos de nómina"),
+        ("gestion_compras", "Gestión de compras"),
+    ]
+
+    # Crear registros si no existen
+    for codigo, _nombre in modulos:
+        BloqueoContable.objects.get_or_create(modulo=codigo)
+
+    if request.method == "POST":
+        try:
+            for codigo, _nombre in modulos:
+                bloqueo = BloqueoContable.objects.get(modulo=codigo)
+
+                fecha_inicio_str = request.POST.get(f"{codigo}_fecha_inicio", "").strip()
+                fecha_fin_1_str = request.POST.get(f"{codigo}_fecha_fin_1", "").strip()
+                fecha_fin_2_str = request.POST.get(f"{codigo}_fecha_fin_2", "").strip()
+
+                bloqueo.fecha_inicio = (
+                    datetime.strptime(fecha_inicio_str, "%Y-%m-%d").date()
+                    if fecha_inicio_str else None
+                )
+                bloqueo.fecha_fin_1 = (
+                    datetime.strptime(fecha_fin_1_str, "%Y-%m-%d").date()
+                    if fecha_fin_1_str else None
+                )
+                bloqueo.fecha_fin_2 = (
+                    datetime.strptime(fecha_fin_2_str, "%Y-%m-%d").date()
+                    if fecha_fin_2_str else None
+                )
+
+                bloqueo.save()
+
+            messages.success(request, "Los bloqueos contables fueron guardados correctamente.")
+            return redirect("bloqueos_contables")
+
+        except Exception as e:
+            messages.error(request, f"Ocurrió un error al guardar la información: {e}")
+
+    bloqueos_db = {
+        b.modulo: b
+        for b in BloqueoContable.objects.all()
+    }
+
+    context = {
+        "bloqueos": {
+            "contabilidad": bloqueos_db.get("contabilidad"),
+            "facturacion": bloqueos_db.get("facturacion"),
+            "recibos_caja": bloqueos_db.get("recibos_caja"),
+            "nomina": bloqueos_db.get("nomina"),
+            "pagos_nomina": bloqueos_db.get("pagos_nomina"),
+            "gestion_compras": bloqueos_db.get("gestion_compras"),
+        }
+    }
+
+    return render(request, "contabilidad/bloqueos_contables.html", context)
+
+
+

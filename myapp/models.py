@@ -1056,3 +1056,40 @@ class sucursal_contable(models.Model):
     def __str__(self):
         return f'{self.numero} - {self.nombre}'
 
+
+
+# modelo de bloqueos_contables.html
+
+from django.db import models
+
+
+class BloqueoContable(models.Model):
+    MODULO_CHOICES = [
+        ("contabilidad", "Contabilidad"),
+        ("facturacion", "Facturación"),
+        ("recibos_caja", "Recibos de caja"),
+        ("nomina", "Nómina"),
+        ("pagos_nomina", "Pagos de nómina"),
+        ("gestion_compras", "Gestión de compras"),
+    ]
+
+    modulo = models.CharField(
+        max_length=50,
+        choices=MODULO_CHOICES,
+        unique=True
+    )
+    fecha_inicio = models.DateField(null=True, blank=True)
+    fecha_fin_1 = models.DateField(null=True, blank=True)
+    fecha_fin_2 = models.DateField(null=True, blank=True)
+
+    class Meta:
+        db_table = "bloqueos_contables"
+        verbose_name = "Bloqueo contable"
+        verbose_name_plural = "Bloqueos contables"
+        ordering = ["id"]
+
+    def __str__(self):
+        return self.get_modulo_display()
+
+
+

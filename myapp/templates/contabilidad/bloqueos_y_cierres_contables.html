@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -108,44 +109,32 @@ header{
 <body>
 
 <header>
-Módulo Contabilidad
+Bloqueos y cierres contables
 </header>
 
 <div class="container">
 
 <div class="menu">
 
-<a href="{% url 'asiento_crear' %}">
-<span>Registrar Documento</span>
+
+
+<a href="{% url 'bloqueos_contables' %}">
+<span>Bloqueos contables</span>
 </a>
 
-<a href="{% url 'asientos_listar' %}">
-<span>Consultar Documento</span>
+<a href="#">
+<span>Cierres contables</span>
 </a>
 
-<a href="{% url 'registrar_tercero' %}">
-<span>Registrar Terceros</span>
-</a>
-
-<a href="{% url 'configuracion' %}">
-<span>Configuración</span>
-</a>
-
-<a href="{% url 'reportes_subpanel_contabilidad' %}">
-<span>Reportes</span>
-</a>
-
-<a href="{% url 'bloqueos_y_cierres_contables' %}">
-<span> Bloqueos y cierres contables</span>
-</a>
 
 </div>
 
 <div class="back">
-<a href="{% url 'home' %}">← Regresar</a>
+<a href="{% url 'contabilidad' %}">← Regresar</a>
 </div>
 
 </div>
 
 </body>
 </html>
+

@@ -1,0 +1,397 @@
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bloqueos contables</title>
+
+    <style>
+        :root{
+            --bg:#f4f7fb;
+            --card:#ffffff;
+            --navy:#0f172a;
+            --blue:#2563eb;
+            --blue-dark:#1d4ed8;
+            --green:#16a34a;
+            --green-dark:#15803d;
+            --gray:#64748b;
+            --border:#dbe3ef;
+            --shadow:0 14px 30px rgba(15,23,42,0.10);
+            --shadow-soft:0 10px 24px rgba(15,23,42,0.07);
+            --row:#f8fbff;
+        }
+
+        *{
+            box-sizing:border-box;
+        }
+
+        body{
+            margin:0;
+            font-family:Arial, Helvetica, sans-serif;
+            background:linear-gradient(180deg,#eef4fb 0%, #f8fafc 100%);
+            color:var(--navy);
+        }
+
+        .wrap{
+            max-width:1280px;
+            margin:0 auto;
+            padding:4px 18px 20px;
+        }
+
+        .title-box{
+            background:linear-gradient(90deg,#0f172a 0%, #1e3a8a 55%, #2563eb 100%);
+            color:#fff;
+            border-radius:18px;
+            padding:18px 22px;
+            box-shadow:var(--shadow);
+            margin-bottom:2px;
+        }
+
+        .title-box h1{
+            margin:0;
+            font-size:20px;
+            font-weight:600;
+            letter-spacing:.1px;
+        }
+
+        .title-box p{
+            margin:4px 0 0;
+            font-size:13px;
+            line-height:1.55;
+            color:rgba(255,255,255,.92);
+        }
+
+        .flash-messages{
+            margin:10px 0 12px;
+        }
+
+        .flash-message{
+            padding:10px 14px;
+            border-radius:10px;
+            font-size:13px;
+            font-weight:600;
+            margin-bottom:8px;
+        }
+
+        .flash-success{
+            background:#ecfdf5;
+            border:1px solid #bbf7d0;
+            color:#166534;
+        }
+
+        .flash-error{
+            background:#fef2f2;
+            border:1px solid #fecaca;
+            color:#991b1b;
+        }
+
+        .card{
+            background:var(--card);
+            border:1px solid var(--border);
+            border-radius:20px;
+            box-shadow:var(--shadow-soft);
+            overflow:hidden;
+        }
+
+        .card-head{
+            padding:16px 20px;
+            border-bottom:1px solid var(--border);
+            background:linear-gradient(180deg,#ffffff 0%, #f8fbff 100%);
+        }
+
+        .card-head h2{
+            margin:0;
+            font-size:17px;
+            font-weight:700;
+            color:var(--navy);
+        }
+
+        .card-head span{
+            display:block;
+            margin-top:5px;
+            font-size:13px;
+            color:var(--gray);
+        }
+
+        .table-wrap{
+            padding:14px;
+            overflow-x:auto;
+        }
+
+        table{
+            width:90%;
+            min-width:980px;
+            border-collapse:separate;
+            border-spacing:0;
+        }
+
+        thead th{
+            position:sticky;
+            top:0;
+            z-index:2;
+            background:linear-gradient(180deg,#eff6ff 0%, #dbeafe 100%);
+            color:#0f172a;
+            font-size:12px;
+            font-weight:700;
+            text-align:center;
+            padding:8px 6px;
+            border-top:1px solid var(--border);
+            border-bottom:1px solid var(--border);
+        }
+
+        thead th:first-child{
+            border-left:1px solid var(--border);
+            border-top-left-radius:12px;
+        }
+
+        thead th:last-child{
+            border-right:1px solid var(--border);
+            border-top-right-radius:12px;
+        }
+
+        tbody td{
+            padding:6px 8px;
+            border-bottom:1px solid #e8eef6;
+            background:#fff;
+            vertical-align:middle;
+            font-size:12px;
+        }
+
+        tbody tr:nth-child(even) td{
+            background:var(--row);
+        }
+
+        tbody td:first-child{
+            border-left:1px solid #e8eef6;
+            min-width:180px;
+        }
+
+        tbody td:last-child{
+            border-right:1px solid #e8eef6;
+        }
+
+        .badge-modulo{
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+            padding:8px 12px;
+            background:#eef2ff;
+            border:1px solid #dbeafe;
+            color:#1e3a8a;
+            border-radius:999px;
+            font-size:13px;
+            font-weight:700;
+            white-space:nowrap;
+        }
+
+        .dot{
+            width:9px;
+            height:9px;
+            border-radius:50%;
+            background:var(--green);
+            display:inline-block;
+            flex:0 0 9px;
+        }
+
+        input[type="date"]{
+            width:100%;
+            min-width:170px;
+            padding:10px 12px;
+            border:1px solid #cfd8e3;
+            border-radius:10px;
+            background:#fff;
+            color:#0f172a;
+            font-size:13px;
+            outline:none;
+            transition:.18s ease;
+        }
+
+        input[type="date"]:focus{
+            border-color:var(--blue);
+            box-shadow:0 0 0 3px rgba(37,99,235,.12);
+        }
+
+        .note{
+            margin:0 14px 6px;
+            padding:13px 15px;
+            border:1px solid #dbeafe;
+            background:linear-gradient(180deg,#f8fbff 0%, #eef6ff 100%);
+            border-radius:14px;
+            color:#334155;
+            font-size:13px;
+            line-height:1.55;
+        }
+
+        .actions{
+            padding:18px 14px 20px;
+            display:flex;
+            justify-content:flex-end;
+            gap:12px;
+            flex-wrap:wrap;
+        }
+
+        .btn{
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            min-width:140px;
+            padding:12px 18px;
+            border:none;
+            border-radius:12px;
+            text-decoration:none;
+            font-size:14px;
+            font-weight:700;
+            cursor:pointer;
+            transition:.18s ease;
+        }
+
+        .btn-save{
+            background:linear-gradient(90deg,var(--green) 0%, #22c55e 100%);
+            color:#fff;
+            box-shadow:0 10px 20px rgba(22,163,74,.18);
+        }
+
+        .btn-save:hover{
+            transform:translateY(-1px);
+            background:linear-gradient(90deg,var(--green-dark) 0%, #16a34a 100%);
+        }
+
+        .btn-back{
+            background:linear-gradient(90deg,var(--blue) 0%, #3b82f6 100%);
+            color:#fff;
+            box-shadow:0 10px 20px rgba(37,99,235,.18);
+        }
+
+        .btn-back:hover{
+            transform:translateY(-1px);
+            background:linear-gradient(90deg,var(--blue-dark) 0%, #2563eb 100%);
+        }
+
+        @media (max-width: 768px){
+            .title-box h1{
+                font-size:20px;
+            }
+
+            .actions{
+                justify-content:stretch;
+            }
+
+            .btn{
+                width:100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div class="title-box">
+            <h1>Bloqueos contables</h1>
+            <p>
+                Configura los rangos de fechas en los que cada módulo quedará restringido para registrar información.
+                Las fechas pueden dejarse vacías si no deseas aplicar bloqueo en ese campo.
+            </p>
+        </div>
+
+        {% if messages %}
+        <div class="flash-messages">
+            {% for message in messages %}
+                <div class="flash-message {% if message.tags == 'success' %}flash-success{% else %}flash-error{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="card">
+                <div class="card-head">
+                    <h2>Parámetros de bloqueo por módulo</h2>
+                    <span>Selecciona las fechas de inicio y cierre. Todos los campos permiten quedar vacíos.</span>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Módulo</th>
+                                <th>Fecha inicio</th>
+                                <th>Fecha fin 1</th>
+                                <th>Fecha fin 2</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <span class="badge-modulo"><span class="dot"></span>Contabilidad</span>
+                                </td>
+                                <td><input type="date" name="contabilidad_fecha_inicio" value="{{ bloqueos.contabilidad.fecha_inicio|date:'Y-m-d' }}"></td>
+                                <td><input type="date" name="contabilidad_fecha_fin_1" value="{{ bloqueos.contabilidad.fecha_fin_1|date:'Y-m-d' }}"></td>
+                                <td><input type="date" name="contabilidad_fecha_fin_2" value="{{ bloqueos.contabilidad.fecha_fin_2|date:'Y-m-d' }}"></td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <span class="badge-modulo"><span class="dot"></span>Facturación</span>
+                                </td>
+                                <td><input type="date" name="facturacion_fecha_inicio" value="{{ bloqueos.facturacion.fecha_inicio|date:'Y-m-d' }}"></td>
+                                <td><input type="date" name="facturacion_fecha_fin_1" value="{{ bloqueos.facturacion.fecha_fin_1|date:'Y-m-d' }}"></td>
+                                <td><input type="date" name="facturacion_fecha_fin_2" value="{{ bloqueos.facturacion.fecha_fin_2|date:'Y-m-d' }}"></td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <span class="badge-modulo"><span class="dot"></span>Recibos de caja</span>
+                                </td>
+                                <td><input type="date" name="recibos_caja_fecha_inicio" value="{{ bloqueos.recibos_caja.fecha_inicio|date:'Y-m-d' }}"></td>
+                                <td><input type="date" name="recibos_caja_fecha_fin_1" value="{{ bloqueos.recibos_caja.fecha_fin_1|date:'Y-m-d' }}"></td>
+                                <td><input type="date" name="recibos_caja_fecha_fin_2" value="{{ bloqueos.recibos_caja.fecha_fin_2|date:'Y-m-d' }}"></td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <span class="badge-modulo"><span class="dot"></span>Nómina</span>
+                                </td>
+                                <td><input type="date" name="nomina_fecha_inicio" value="{{ bloqueos.nomina.fecha_inicio|date:'Y-m-d' }}"></td>
+                                <td><input type="date" name="nomina_fecha_fin_1" value="{{ bloqueos.nomina.fecha_fin_1|date:'Y-m-d' }}"></td>
+                                <td><input type="date" name="nomina_fecha_fin_2" value="{{ bloqueos.nomina.fecha_fin_2|date:'Y-m-d' }}"></td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <span class="badge-modulo"><span class="dot"></span>Pagos de nómina</span>
+                                </td>
+                                <td><input type="date" name="pagos_nomina_fecha_inicio" value="{{ bloqueos.pagos_nomina.fecha_inicio|date:'Y-m-d' }}"></td>
+                                <td><input type="date" name="pagos_nomina_fecha_fin_1" value="{{ bloqueos.pagos_nomina.fecha_fin_1|date:'Y-m-d' }}"></td>
+                                <td><input type="date" name="pagos_nomina_fecha_fin_2" value="{{ bloqueos.pagos_nomina.fecha_fin_2|date:'Y-m-d' }}"></td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <span class="badge-modulo"><span class="dot"></span>Gestión de compras</span>
+                                </td>
+                                <td><input type="date" name="gestion_compras_fecha_inicio" value="{{ bloqueos.gestion_compras.fecha_inicio|date:'Y-m-d' }}"></td>
+                                <td><input type="date" name="gestion_compras_fecha_fin_1" value="{{ bloqueos.gestion_compras.fecha_fin_1|date:'Y-m-d' }}"></td>
+                                <td><input type="date" name="gestion_compras_fecha_fin_2" value="{{ bloqueos.gestion_compras.fecha_fin_2|date:'Y-m-d' }}"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="note">
+                    <strong>Nota:</strong> este diseño deja listos los campos para capturar fechas o dejarlas vacías.
+                    Después conectamos el guardado en backend y la validación real en cada proceso.
+                </div>
+
+                <div class="actions">
+                    <button type="submit" class="btn btn-save">Guardar</button>
+                    <a href="{% url 'bloqueos_y_cierres_contables' %}" class="btn btn-back">Regresar</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
