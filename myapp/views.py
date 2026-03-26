@@ -3354,11 +3354,21 @@ def _split_ref_nombre(desc: str):
         return (ref.strip() or None, nombre.strip())
     return (None, s)
 
+
 def _next_consecutivo_nc():
-    last = NotaCredito.objects.order_by("-id").first()
-    if not last or not (last.consecutivo or "").isdigit():
-        return "000001"
-    return str(int(last.consecutivo) + 1).zfill(6)
+    usados = set(
+        NotaCredito.objects
+        .filter(consecutivo__regex=r'^\d+$')
+        .values_list("consecutivo", flat=True)
+    )
+
+    n = 1
+    while True:
+        candidato = str(n).zfill(6)
+        if candidato not in usados:
+            return candidato
+        n += 1
+
 
 
 @login_required(login_url="login")
@@ -3372,114 +3382,139 @@ def nc_guardar(request):
     except Exception:
         return JsonResponse({"ok": False, "error": "JSON inválido"}, status=400)
 
-    # =========================
-    # 1) Cabecera NC
-    # =========================
-    consecutivo = (data.get("consecutivo") or "").strip()
-    if not consecutivo:
-        consecutivo = _next_consecutivo_nc()
-    else:
-        if consecutivo.isdigit():
+    try:
+        # =========================
+        # 1) Cabecera NC
+        # =========================
+        consecutivo = (data.get("consecutivo") or "").strip()
+        if consecutivo and consecutivo.isdigit():
             consecutivo = str(int(consecutivo)).zfill(6)
+        else:
+            consecutivo = _next_consecutivo_nc()
 
-    fecha_nc = parse_date((data.get("fecha_nc") or data.get("fecha_factura") or "").strip())
-    if not fecha_nc:
-        return JsonResponse({"ok": False, "error": "Fecha NC es obligatoria"}, status=400)
-    
-    #if fecha_bloqueada_modulo("facturacion", fecha_nc):
-     # return JsonResponse({"ok": False, "error": "fecha nota crédito no permitida"}, status=400)
+        # Si el consecutivo recibido ya existe, generar uno nuevo libre
+        if NotaCredito.objects.filter(consecutivo=consecutivo).exists():
+            consecutivo = _next_consecutivo_nc()
 
-    # factura origen
-    factura_origen = None
-    fv_id = data.get("fv_origen_id") or data.get("factura_origen_id")
-    fv_cons = (data.get("factura_ref") or "").strip()
+        fecha_nc = parse_date((data.get("fecha_nc") or data.get("fecha_factura") or "").strip())
+        if not fecha_nc:
+            return JsonResponse({"ok": False, "error": "Fecha NC es obligatoria"}, status=400)
+        
 
-    if fv_id:
-        try:
-            factura_origen = FacturaVenta.objects.get(id=int(fv_id))
-        except Exception:
-            factura_origen = None
-    elif fv_cons:
-        try:
-            if fv_cons.isdigit():
-                fv_cons = str(int(fv_cons)).zfill(6)
-            factura_origen = FacturaVenta.objects.get(consecutivo=fv_cons)
-        except FacturaVenta.DoesNotExist:
-            factura_origen = None
+        if fecha_bloqueada_modulo("facturacion", fecha_nc):
+           return JsonResponse({
+             "ok": False,
+              "error": "La fecha no está permitida para facturación."
+           }, status=400)
 
-    nc = NotaCredito.objects.create(
-        consecutivo=consecutivo,
-        fecha_nc=fecha_nc,
-        factura_origen=factura_origen,
+        # factura origen
+        factura_origen = None
+        fv_id = data.get("fv_origen_id") or data.get("factura_origen_id")
+        fv_cons = (data.get("factura_ref") or "").strip()
 
-        nit=(data.get("nit") or "").strip(),
-        razon_social=(data.get("razon_social") or "").strip(),
-        correo=(data.get("correo") or "").strip(),
-        direccion=(data.get("direccion") or "").strip(),
+        if fv_id:
+            try:
+                factura_origen = FacturaVenta.objects.get(id=int(fv_id))
+            except Exception:
+                factura_origen = None
+        elif fv_cons:
+            try:
+                if fv_cons.isdigit():
+                    fv_cons = str(int(fv_cons)).zfill(6)
+                factura_origen = FacturaVenta.objects.get(consecutivo=fv_cons)
+            except FacturaVenta.DoesNotExist:
+                factura_origen = None
 
-        motivo=(data.get("motivo") or "").strip(),
+        # =========================
+        # 2) Validar y calcular líneas ANTES de crear la cabecera
+        # =========================
+        lineas = data.get("lineas") or []
+        if not isinstance(lineas, list) or len(lineas) == 0:
+            return JsonResponse({"ok": False, "error": "La NC debe tener al menos 1 línea"}, status=400)
 
-        subtotal=Decimal("0"),
-        iva=Decimal("0"),
-        total=Decimal("0"),
-    )
+        subtotal_calc = Decimal("0")
+        iva_calc = Decimal("0")
+        lineas_preparadas = []
 
-    # =========================
-    # 2) Líneas + cálculo totales
-    # =========================
-    lineas = data.get("lineas") or []
-    if not isinstance(lineas, list) or len(lineas) == 0:
-        return JsonResponse({"ok": False, "error": "La NC debe tener al menos 1 línea"}, status=400)
+        for i, l in enumerate(lineas, start=1):
+            desc = (l.get("descripcion") or "").strip()
+            if not desc:
+                return JsonResponse({"ok": False, "error": f"Línea {i}: descripción vacía"}, status=400)
 
-    subtotal_calc = Decimal("0")
-    iva_calc = Decimal("0")
+            cantidad = _to_decimal_aux2(l.get("cantidad"), "0")
+            precio = _to_decimal_aux2(l.get("precio"), "0")
+            dto_pct = _to_decimal_aux2(l.get("descuento_pct"), "0")
+            imp_pct = _to_decimal_aux2(l.get("impuesto_pct"), "0")
 
-    for i, l in enumerate(lineas, start=1):
-        desc = (l.get("descripcion") or "").strip()
-        if not desc:
-            return JsonResponse({"ok": False, "error": f"Línea {i}: descripción vacía"}, status=400)
+            bruto = cantidad * precio
+            base = bruto - (bruto * dto_pct / Decimal("100"))
+            total = base * (Decimal("1") + (imp_pct / Decimal("100")))
+            impuestos = total - base
 
-        cantidad = _to_decimal(l.get("cantidad"), "0")
-        precio = _to_decimal(l.get("precio"), "0")
-        dto_pct = _to_decimal(l.get("descuento_pct"), "0")
-        imp_pct = _to_decimal(l.get("impuesto_pct"), "0")
+            subtotal_calc += base
+            iva_calc += impuestos
 
-        bruto = cantidad * precio
-        base = bruto - (bruto * dto_pct / Decimal("100"))
-        total = base * (Decimal("1") + (imp_pct / Decimal("100")))
-        impuestos = total - base
+            lineas_preparadas.append({
+                "descripcion": desc,
+                "cantidad": cantidad,
+                "precio": precio,
+                "descuento_pct": dto_pct,
+                "impuesto_pct": imp_pct,
+                "total": total,
+            })
 
-        subtotal_calc += base
-        iva_calc += impuestos
+        total_calc = subtotal_calc + iva_calc
+        if total_calc < 0:
+            total_calc = Decimal("0")
 
-        NotaCreditoLinea.objects.create(
-            nota_credito=nc,
-            descripcion=desc,
-            cantidad=cantidad,
-            precio=precio,
-            descuento_pct=dto_pct,
-            impuesto_pct=imp_pct,
-            total=total,
+        # =========================
+        # 3) Crear cabecera NC
+        # =========================
+        nc = NotaCredito.objects.create(
+            consecutivo=consecutivo,
+            fecha_nc=fecha_nc,
+            factura_origen=factura_origen,
+
+            nit=(data.get("nit") or "").strip(),
+            razon_social=(data.get("razon_social") or "").strip(),
+            correo=(data.get("correo") or "").strip(),
+            direccion=(data.get("direccion") or "").strip(),
+
+            motivo=(data.get("motivo") or "").strip(),
+
+            subtotal=subtotal_calc,
+            iva=iva_calc,
+            total=total_calc,
         )
 
-    total_calc = subtotal_calc + iva_calc
-    if total_calc < 0:
-        total_calc = Decimal("0")
+        # =========================
+        # 4) Crear líneas
+        # =========================
+        for item in lineas_preparadas:
+            NotaCreditoLinea.objects.create(
+                nota_credito=nc,
+                descripcion=item["descripcion"],
+                cantidad=item["cantidad"],
+                precio=item["precio"],
+                descuento_pct=item["descuento_pct"],
+                impuesto_pct=item["impuesto_pct"],
+                total=item["total"],
+            )
 
-    nc.subtotal = subtotal_calc
-    nc.iva = iva_calc
-    nc.total = total_calc
-    nc.save(update_fields=["subtotal", "iva", "total"])
-
-    # =========================
-    # 3) Contabilización NC
-    # =========================
-    try:
+        # =========================
+        # 5) Contabilización NC
+        # =========================
         contabilizar_nota_credito_desde_nc(nc)
-    except Exception as e:
-        return JsonResponse({"ok": False, "error": f"Error contabilizando NC: {str(e)}"}, status=400)
 
-    return JsonResponse({"ok": True, "id": nc.id, "consecutivo": nc.consecutivo})
+        return JsonResponse({
+            "ok": True,
+            "id": nc.id,
+            "consecutivo": nc.consecutivo
+        })
+
+    except Exception as e:
+        print("❌ ERROR nc_guardar:", str(e))
+        return JsonResponse({"ok": False, "error": str(e)}, status=500)
 
 
 def contabilizar_nota_credito_desde_nc(nc):
@@ -7591,6 +7626,22 @@ def ContabilizarNomina(request):
             "ok": False,
             "error": "La fecha de contabilización es obligatoria."
         })
+    
+
+    fecha_contab = parse_date(fecha)
+    if not fecha_contab:
+       return JsonResponse({
+         "ok": False,
+         "error": "La fecha de contabilización no es válida."
+        })
+
+    if fecha_bloqueada_modulo("nomina", fecha_contab):
+        return JsonResponse({
+          "ok": False,
+          "error": "La fecha no está permitida para nómina."
+        })
+
+
 
     if not no_nomina:
         return JsonResponse({
@@ -7921,6 +7972,7 @@ def buscar_cuenta_debito_pago(tipo_nomina_texto):
     return param.cuenta
 
 
+
 @login_required(login_url="login")
 @require_POST
 def Contabilizar_guardar_nominapago(request):
@@ -7948,6 +8000,19 @@ def Contabilizar_guardar_nominapago(request):
             "error": "Debes seleccionar la fecha de contabilización."
         }, status=400)
 
+    fecha_contab = parse_date(fecha_contabilizacion)
+    if not fecha_contab:
+        return JsonResponse({
+            "ok": False,
+            "error": "La fecha de contabilización no es válida."
+        }, status=400)
+
+    if fecha_bloqueada_modulo("pagos_nomina", fecha_contab):
+        return JsonResponse({
+            "ok": False,
+            "error": "La fecha no está permitida para pagos de nómina."
+        }, status=400)
+
     if not filas:
         return JsonResponse({
             "ok": False,
@@ -7968,7 +8033,6 @@ def Contabilizar_guardar_nominapago(request):
             "error": "No existe el tipo de documento contable 'EGR NOM'. Debes crearlo primero."
         }, status=400)
 
-    # Validar primero todas las filas antes de guardar
     movimientos_preparados = []
     guardados_preview = []
 
@@ -8069,7 +8133,6 @@ def Contabilizar_guardar_nominapago(request):
         }, status=400)
 
     with transaction.atomic():
-        # 1) Guardar / actualizar NominaPago
         guardados = 0
         for item in guardados_preview:
             emp = item["emp"]
@@ -8095,11 +8158,10 @@ def Contabilizar_guardar_nominapago(request):
             )
             guardados += 1
 
-        # 2) Crear asiento contable
         desc_header = f"Pago nómina {nomina.consecutivo} {nomina.fecha_ini} {nomina.fecha_fin}"
 
         asiento = AsientoContable(
-            fecha=fecha_contabilizacion,
+            fecha=fecha_contab,
             documento=documento,
             descripcion=desc_header,
         )
@@ -8107,11 +8169,7 @@ def Contabilizar_guardar_nominapago(request):
         asiento.ensure_consecutive()
         asiento.save(update_fields=["numero"])
 
-        # 3) Crear movimientos
         for item in movimientos_preparados:
-            emp = item["emp"]
-
-            # CRÉDITO -> cuenta digitada en Medio de pago
             MovimientoContable.objects.create(
                 asiento=asiento,
                 cuenta=item["cuenta_credito"],
@@ -8125,7 +8183,6 @@ def Contabilizar_guardar_nominapago(request):
                 criterio3="",
             )
 
-            # DÉBITO -> cuenta parametrizada en De pago según tipo de nómina
             MovimientoContable.objects.create(
                 asiento=asiento,
                 cuenta=item["cuenta_debito"],
