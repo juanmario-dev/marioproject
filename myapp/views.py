@@ -2362,6 +2362,57 @@ def contabilizar_factura_venta_desde_fv(fv):
 
 
 
+# funcion reutilizable de bloqueo de fechas en boton de fv_crear.html
+
+from .models import BloqueoContable
+
+
+def fecha_bloqueada_modulo(modulo, fecha_documento):
+    if not fecha_documento:
+        return False
+
+    try:
+        bloqueo = BloqueoContable.objects.get(modulo=modulo)
+    except BloqueoContable.DoesNotExist:
+        return False
+
+    fi = bloqueo.fecha_inicio
+    ff1 = bloqueo.fecha_fin_1
+    ff2 = bloqueo.fecha_fin_2
+
+    # 1) Sin fechas: todo permitido
+    if not fi and not ff1 and not ff2:
+        return False
+
+    # 2) Solo fecha_fin_1: restringe todo hasta fecha_fin_1
+    if not fi and ff1 and not ff2:
+        return fecha_documento <= ff1
+
+    # 3) Solo fecha_fin_2: restringe todo hasta fecha_fin_2
+    if not fi and not ff1 and ff2:
+        return fecha_documento <= ff2
+
+    # 4) Solo fecha_inicio: permitido
+    if fi and not ff1 and not ff2:
+        return False
+
+    # 5) fecha_inicio + fecha_fin_1: restringe entre ambas
+    if fi and ff1 and not ff2:
+        return fi <= fecha_documento <= ff1
+
+    # 6) fecha_inicio + fecha_fin_2, sin fecha_fin_1:
+    # por tu lógica, si no existe fecha_fin_1 no se arma ese rango;
+    # en este caso restringimos hasta fecha_fin_2
+    if fi and not ff1 and ff2:
+        return fecha_documento <= ff2
+
+    # 7) fecha_inicio + fecha_fin_1 + fecha_fin_2:
+    # restringe entre fecha_inicio y fecha_fin_1
+    # y también entre fecha_fin_1 y fecha_fin_2
+    if fi and ff1 and ff2:
+        return (fi <= fecha_documento <= ff1) or (ff1 <= fecha_documento <= ff2)
+
+    return False
 
 
 
@@ -2402,6 +2453,10 @@ def fv_guardar(request):
 
     if not fecha_factura:
         return JsonResponse({"ok": False, "error": "Fecha factura es obligatoria"}, status=400)
+    
+    if fecha_bloqueada_modulo("facturacion", fecha_factura):
+        return JsonResponse({"ok": False, "error": "fecha factura no permitida"}, status=400)
+         
 
     # Creamos la factura con totales en 0 (los calculamos abajo)
     fv = FacturaVenta.objects.create(
@@ -2490,6 +2545,11 @@ def fv_guardar(request):
     # generar_asiento_desde_factura(fv)
 
     return JsonResponse({"ok": True, "id": fv.id, "consecutivo": fv.consecutivo})
+
+
+
+
+
 
 
 from django.http import JsonResponse
@@ -3325,6 +3385,9 @@ def nc_guardar(request):
     fecha_nc = parse_date((data.get("fecha_nc") or data.get("fecha_factura") or "").strip())
     if not fecha_nc:
         return JsonResponse({"ok": False, "error": "Fecha NC es obligatoria"}, status=400)
+    
+    #if fecha_bloqueada_modulo("facturacion", fecha_nc):
+     # return JsonResponse({"ok": False, "error": "fecha nota crédito no permitida"}, status=400)
 
     # factura origen
     factura_origen = None
@@ -3944,6 +4007,7 @@ def _to_decimal_aux3(value) -> Decimal:
 
 
 
+from django.utils.dateparse import parse_date
 
 @login_required(login_url="login")
 @require_POST
@@ -3951,15 +4015,25 @@ def rc_guardar(request):
     try:
         payload = json.loads(request.body.decode("utf-8"))
 
-        fecha_elab = payload.get("fecha_elab")
+        # ✅ Convertimos a fecha real
+        fecha_elab = parse_date((payload.get("fecha_elab") or "").strip())
+
         consecutivo = (payload.get("consecutivo") or "").strip()
         descripcion = (payload.get("descripcion") or "").strip()
         lineas = payload.get("lineas") or []
 
+        fecha_elab = parse_date((payload.get("fecha_elab") or "").strip())
+
         if not consecutivo:
-            return JsonResponse({"ok": False, "error": "Falta consecutivo"}, status=400)
+          return JsonResponse({"ok": False, "error": "Falta consecutivo"}, status=400)
+
         if not fecha_elab:
-            return JsonResponse({"ok": False, "error": "Falta fecha de elaboración"}, status=400)
+          return JsonResponse({"ok": False, "error": "Falta fecha de elaboración"}, status=400)
+
+        if fecha_bloqueada_modulo("recibos_caja", fecha_elab):
+          return JsonResponse({"ok": False, "error": "fecha recibo no permitida"}, status=400)
+        
+
 
         # ✅ CREATE o UPDATE por consecutivo
         rc, created = ReciboCaja.objects.update_or_create(
@@ -3970,7 +4044,7 @@ def rc_guardar(request):
             }
         )
 
-        # ✅ Reemplazamos líneas (simple y confiable por ahora)
+        # ✅ Reemplazamos líneas
         ReciboCajaLinea.objects.filter(recibo=rc).delete()
 
         creadas = 0
@@ -3986,7 +4060,7 @@ def rc_guardar(request):
 
             # ---------------- VALIDACIONES FUERTES ----------------
 
-            # 1) NIT obligatorio (si hay algo en la fila)
+            # 1) NIT obligatorio
             if not nit:
                 return JsonResponse({"ok": False, "error": "Hay una línea sin NIT."}, status=400)
 
@@ -4010,14 +4084,12 @@ def rc_guardar(request):
                     status=400
                 )
 
-            # 6) Valor factura: NO confiar en el front. Guardar el total real de la factura.
+            # 6) Valor factura real
             valor_factura_real = fv.total_pagar or _to_decimal(0)
 
-            # 7) (Recomendado) pago no puede ser negativo
+            # 7) Pago no puede ser negativo
             if pago < 0:
                 return JsonResponse({"ok": False, "error": "El valor del pago no puede ser negativo."}, status=400)
-
-            # (Opcional) permitir pago > saldo? depende tu negocio. Por ahora lo dejamos permitido.
 
             # ---------------- FIN VALIDACIONES ----------------
 
@@ -4026,11 +4098,12 @@ def rc_guardar(request):
                 fecha_pago=ln.get("fecha_pago") or None,
                 nit=nit or None,
                 factura_no=factura_no or None,
-                valor_factura=valor_factura_real,  # 👈 aquí usamos el total real de la factura
+                valor_factura=valor_factura_real,
                 pago=pago,
                 medio_pago_id=ln.get("medio_pago_id") or None,
                 cuenta_contable=(ln.get("cuenta_contable") or "").strip() or None,
             )
+
             creadas += 1
 
         return JsonResponse({
@@ -4043,6 +4116,7 @@ def rc_guardar(request):
 
     except Exception as e:
         return JsonResponse({"ok": False, "error": str(e)}, status=400)
+
 
 
 
@@ -4467,6 +4541,9 @@ def rc_contabilizar(request):
             return JsonResponse({"ok": False, "error": "Falta consecutivo"}, status=400)
         if not fecha_elab:
             return JsonResponse({"ok": False, "error": "Falta fecha de elaboración"}, status=400)
+        
+        if fecha_bloqueada_modulo("recibos_caja", fecha_elab):
+            return JsonResponse({"ok": False, "error": "fecha recibo no permitida"}, status=400)
 
         # =========================
         # 1) Guardar RC (update_or_create) + reemplazar líneas
