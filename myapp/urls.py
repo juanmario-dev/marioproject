@@ -4,7 +4,11 @@ from . import views
 
 urlpatterns = [
     # Página principal
-    path('', views.home, name='home'),
+
+    path('', views.pagina_web, name='pagina_web'),
+    path('home/', views.home, name='home'),
+
+    
 
     path("logout/", views.cerrar_sesion, name="logout"),
 
@@ -205,6 +209,13 @@ urlpatterns = [
 
     # path de bloqueos_contables.html
     path('contabilidad/bloqueos/', views.bloqueos_contables, name='bloqueos_contables'),
+ 
+
+    path('contabilidad/cierres-contables/', views.cierres_contables, name='cierres_contables'),
+
+    path('contabilidad/cierre-contable-periodo/', views.cierre_contable_periodo, name='cierre_contable_periodo'),
+
+    path('contabilidad/cierre-contable-contabilizar/', views.cierre_contable_contabilizar, name='cierre_contable_contabilizar'),
 
 
 ]

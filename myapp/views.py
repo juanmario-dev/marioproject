@@ -69,6 +69,9 @@ from usuarios.decorators import permiso_interfaz_requerido
 
 
 
+def pagina_web(request):
+    return render(request, 'paginaweb.html')
+
 
 from django.contrib.auth import logout
 from django.shortcuts import redirect
@@ -622,6 +625,13 @@ def asiento_crear_ui(request):
         fecha_val = date(yyyy, mm, dd)
     except Exception:
         return JsonResponse({'ok': False, 'error': 'Fecha inválida.'}, status=400)
+    
+    if fecha_bloqueada_modulo("contabilidad", fecha_val):
+        return JsonResponse({
+            'ok': False,
+            'error': 'La fecha no está permitida para contabilidad.'
+        }, status=400)
+
 
     total_d = Decimal('0'); total_c = Decimal('0'); preparados = []
     for idx, ln in enumerate(lineas, start=1):
@@ -9546,6 +9556,354 @@ def bloqueos_contables(request):
     }
 
     return render(request, "contabilidad/bloqueos_contables.html", context)
+
+
+
+
+# cierres_contables.html
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+
+@login_required(login_url='login')
+def cierres_contables(request):
+    return render(request, 'contabilidad/cierres_contables.html', {
+        'titulo': 'Cierres contables',
+    })
+
+
+# boton cargar de cierres_contables.html
+
+
+from decimal import Decimal
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
+from django.db.models import Sum, Q
+from django.db.models.functions import Coalesce
+
+from .models import MovimientoContable
+
+
+@login_required(login_url='login')
+@require_GET
+def cierre_contable_periodo(request):
+    """
+    Construye la tabla preliminar del cierre contable para un período.
+
+    Reglas:
+    - Solo cuentas contables que inician por 4, 5, 6 o 7
+    - Se calcula saldo por cuenta dentro del rango de fechas
+    - Si debito > credito => diferencia en DEBITO
+    - Si credito > debito => diferencia en CREDITO
+    - No se muestran valores negativos
+    - Si al final los totales no cuadran, agrega una fila de ajuste
+      con la cuenta digitada por el usuario en filtros
+    """
+    fecha_inicio = (request.GET.get('fecha_inicio') or '').strip()
+    fecha_fin = (request.GET.get('fecha_fin') or '').strip()
+    cuenta_cierre = (request.GET.get('cuenta_contable') or '').strip()
+    tercero_nit = (request.GET.get('tercero_nit') or '').strip()
+    concepto_cierre = (request.GET.get('concepto_cierre') or '').strip()
+
+    if not fecha_inicio or not fecha_fin:
+        return JsonResponse({
+            'ok': False,
+            'error': 'Debe indicar fecha inicio y fecha fin.'
+        }, status=400)
+
+    if not cuenta_cierre:
+        return JsonResponse({
+            'ok': False,
+            'error': 'Debe indicar la cuenta contable de cierre.'
+        }, status=400)
+
+    movimientos = (
+        MovimientoContable.objects
+        .filter(asiento__fecha__range=[fecha_inicio, fecha_fin])
+        .filter(
+            Q(cuenta__codigo__startswith='4') |
+            Q(cuenta__codigo__startswith='5') |
+            Q(cuenta__codigo__startswith='6') |
+            Q(cuenta__codigo__startswith='7')
+        )
+        .values('cuenta__codigo')
+        .annotate(
+            total_debito=Coalesce(Sum('debito'), Decimal('0.00')),
+            total_credito=Coalesce(Sum('credito'), Decimal('0.00')),
+        )
+        .order_by('cuenta__codigo')
+    )
+
+    filas = []
+    total_debito_tabla = Decimal('0.00')
+    total_credito_tabla = Decimal('0.00')
+
+    for mov in movimientos:
+        cuenta_codigo = mov['cuenta__codigo']
+        total_debito = mov['total_debito'] or Decimal('0.00')
+        total_credito = mov['total_credito'] or Decimal('0.00')
+
+        fila_debito = Decimal('0.00')
+        fila_credito = Decimal('0.00')
+
+        if total_debito > total_credito:
+            fila_debito = total_debito - total_credito
+        elif total_credito > total_debito:
+            fila_credito = total_credito - total_debito
+        else:
+            continue
+
+        filas.append({
+            'cuenta_contable': cuenta_codigo,
+            'tercero_nit': tercero_nit,
+            'concepto': concepto_cierre,
+            'debito': str(int(fila_debito)),
+            'credito': str(int(fila_credito)),
+        })
+
+        total_debito_tabla += fila_debito
+        total_credito_tabla += fila_credito
+
+    diferencia = total_debito_tabla - total_credito_tabla
+
+    if diferencia != Decimal('0.00'):
+        ajuste_debito = Decimal('0.00')
+        ajuste_credito = Decimal('0.00')
+
+        if diferencia > 0:
+            ajuste_credito = diferencia
+        else:
+            ajuste_debito = abs(diferencia)
+
+        filas.append({
+            'cuenta_contable': cuenta_cierre,
+            'tercero_nit': tercero_nit,
+            'concepto': concepto_cierre,
+            'debito': str(int(ajuste_debito)),
+            'credito': str(int(ajuste_credito)),
+            'ajuste': True,
+        })
+
+        total_debito_tabla += ajuste_debito
+        total_credito_tabla += ajuste_credito
+
+    return JsonResponse({
+        'ok': True,
+        'filas': filas,
+        'totales': {
+            'debito': str(int(total_debito_tabla)),
+            'credito': str(int(total_credito_tabla)),
+        }
+    })
+
+
+
+# funcion boton contabilizar en cierres_contables.html
+
+import json
+from decimal import Decimal, InvalidOperation
+
+from django.contrib.auth.decorators import login_required
+from django.db import transaction
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+
+from .models import (
+    AsientoContable,
+    MovimientoContable,
+    DocumentoContable,
+    CuentaContable,
+    Tercero,
+)
+
+
+@login_required(login_url='login')
+@require_POST
+@transaction.atomic
+def cierre_contable_contabilizar(request):
+    """
+    Contabiliza el cierre contable generado en la tabla de cierres.
+
+    Reglas:
+    - Usa DocumentoContable con código CLOSE
+    - Fecha contable: la escogida en la mini-ventana
+    - Descripción encabezado: concepto del cierre
+    - Cada fila del cierre genera una línea contable
+    - Se invierten los valores:
+        * débito de la tabla -> crédito contable
+        * crédito de la tabla -> débito contable
+    - número/consecutivo lo asigna el sistema automáticamente
+    """
+    try:
+        payload = json.loads(request.body.decode('utf-8'))
+    except Exception:
+        return JsonResponse({'ok': False, 'error': 'JSON inválido.'}, status=400)
+
+
+
+    fecha = (payload.get('fecha') or '').strip()
+    descripcion_hdr = (payload.get('descripcion') or '').strip()
+    filas = payload.get('filas') or []
+
+    if not fecha:
+      return JsonResponse({'ok': False, 'error': 'La fecha de contabilización es obligatoria.'}, status=400)
+
+    fecha_dt = parse_date(fecha)
+    if not fecha_dt:
+        return JsonResponse({'ok': False, 'error': 'La fecha de contabilización no es válida.'}, status=400)
+
+    bloqueo = BloqueoContable.objects.filter(modulo='contabilidad').first()
+
+    if bloqueo:
+      en_rango_1 = (
+         bloqueo.fecha_inicio and bloqueo.fecha_fin_1 and
+         bloqueo.fecha_inicio <= fecha_dt <= bloqueo.fecha_fin_1
+       )
+
+      en_rango_2 = (
+         bloqueo.fecha_inicio and bloqueo.fecha_fin_2 and
+         bloqueo.fecha_inicio <= fecha_dt <= bloqueo.fecha_fin_2
+      )
+
+    if en_rango_1 or en_rango_2:
+        return JsonResponse({
+            'ok': False,
+            'error': 'Fecha no permitida.'
+        }, status=400)
+
+
+
+
+
+    if not filas:
+        return JsonResponse({'ok': False, 'error': 'No hay filas para contabilizar.'}, status=400)
+
+    try:
+        documento = DocumentoContable.objects.get(codigo='CLOSE')
+    except DocumentoContable.DoesNotExist:
+        return JsonResponse({
+            'ok': False,
+            'error': 'No existe un DocumentoContable con código CLOSE. Debes crearlo primero.'
+        }, status=400)
+
+    def to_decimal(value):
+        if value is None:
+            return Decimal('0')
+        s = str(value).strip()
+        if not s:
+            return Decimal('0')
+
+        # soporta formatos tipo 1.234 o 1,234.56 o 1234.56
+        s = s.replace(' ', '')
+        if ',' in s and '.' in s:
+            s = s.replace('.', '').replace(',', '.')
+        else:
+            s = s.replace('.', '').replace(',', '.')
+
+        try:
+            return Decimal(s)
+        except (InvalidOperation, ValueError):
+            raise ValueError(f'Valor numérico inválido: {value}')
+
+    lineas_creadas = []
+
+    for i, fila in enumerate(filas, start=1):
+        cuenta_codigo = str(fila.get('cuenta_contable') or '').strip()
+        tercero_ident = str(fila.get('tercero_nit') or '').strip()
+        descripcion = str(fila.get('concepto') or descripcion_hdr or '').strip()
+
+        if not cuenta_codigo:
+            return JsonResponse({'ok': False, 'error': f'Línea {i}: falta cuenta contable.'}, status=400)
+
+        if not tercero_ident:
+            return JsonResponse({'ok': False, 'error': f'Línea {i}: falta tercero nit.'}, status=400)
+
+        if not descripcion:
+            return JsonResponse({'ok': False, 'error': f'Línea {i}: falta descripción.'}, status=400)
+
+        try:
+            valor_debito_tabla = to_decimal(fila.get('debito'))
+            valor_credito_tabla = to_decimal(fila.get('credito'))
+        except ValueError as e:
+            return JsonResponse({'ok': False, 'error': f'Línea {i}: {e}'}, status=400)
+
+        # En la tabla del cierre debe venir solo uno de los dos
+        if (valor_debito_tabla > 0 and valor_credito_tabla > 0) or (
+            valor_debito_tabla == 0 and valor_credito_tabla == 0
+        ):
+            return JsonResponse({
+                'ok': False,
+                'error': f'Línea {i}: debe existir valor en débito o crédito, pero no en ambos.'
+            }, status=400)
+
+        try:
+            cuenta = CuentaContable.objects.get(codigo=cuenta_codigo)
+        except CuentaContable.DoesNotExist:
+            return JsonResponse({
+                'ok': False,
+                'error': f'Línea {i}: no existe la cuenta contable {cuenta_codigo}.'
+            }, status=400)
+
+        try:
+            tercero = Tercero.objects.get(numero_identificacion=tercero_ident)
+        except Tercero.DoesNotExist:
+            return JsonResponse({
+                'ok': False,
+                'error': f'Línea {i}: no existe el tercero con identificación {tercero_ident}.'
+            }, status=400)
+
+        # Inversión solicitada:
+        # débito de tabla -> crédito contable
+        # crédito de tabla -> débito contable
+        debito_contable = valor_credito_tabla
+        credito_contable = valor_debito_tabla
+
+        lineas_creadas.append({
+            'cuenta': cuenta,
+            'tercero': tercero,
+            'descripcion': descripcion,
+            'debito': debito_contable,
+            'credito': credito_contable,
+        })
+
+    total_debito = sum((x['debito'] for x in lineas_creadas), Decimal('0'))
+    total_credito = sum((x['credito'] for x in lineas_creadas), Decimal('0'))
+
+    if total_debito != total_credito:
+        return JsonResponse({
+            'ok': False,
+            'error': f'El cierre no cuadra al invertir valores. Débito={total_debito} Crédito={total_credito}.'
+        }, status=400)
+
+    asiento = AsientoContable(
+        fecha=fecha,
+        documento=documento,
+        descripcion=descripcion_hdr,
+    )
+    asiento.ensure_consecutive()
+    asiento.save()
+
+    for ln in lineas_creadas:
+        MovimientoContable.objects.create(
+            asiento=asiento,
+            cuenta=ln['cuenta'],
+            tercero=ln['tercero'],
+            descripcion=ln['descripcion'],
+            debito=ln['debito'],
+            credito=ln['credito'],
+            centro_costo=False,
+            criterio1='',
+            criterio2='',
+            criterio3='',
+        )
+
+    return JsonResponse({
+        'ok': True,
+        'numero': asiento.numero,
+        'asiento_id': asiento.id,
+        'redirect_url': '/contabilidad/asientos/'
+    })
 
 
 

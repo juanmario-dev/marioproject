@@ -1,0 +1,262 @@
+
+
+
+<!DOCTYPE html>
+<html lang="es" dir="ltr">
+{% load static %}
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>DataCounter</title>
+
+  <link rel="apple-touch-icon" sizes="180x180" href="{% static 'assets/images/favicons/apple-touch-icon.png' %}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{% static 'assets/images/favicons/favicon-32x32.png' %}">
+  <link rel="icon" type="image/png" sizes="16x16" href="{% static 'assets/images/favicons/favicon-16x16.png' %}">
+  <link rel="shortcut icon" type="image/x-icon" href="{% static 'assets/images/favicons/favicon.ico' %}">
+  <link rel="manifest" href="{% static 'assets/images/favicons/manifest.json' %}">
+  <meta name="msapplication-TileImage" content="{% static 'assets/images/favicons/mstile-150x150.png' %}">
+  <meta name="theme-color" content="#ffffff">
+
+  <link href="{% static 'vendors/loaders.css/loaders.min.css' %}" rel="stylesheet" type="text/css">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Madurai:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+  <link href="{% static 'vendors/hamburgers/hamburgers.css' %}" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'vendors/swiper/swiper-bundle.min.css' %}">
+  <link href="{% static 'assets/css/theme.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/css/user.css' %}" rel="stylesheet">
+
+  <style>
+    .navbar-brand{
+      font-weight:700;
+      letter-spacing:.5px;
+    }
+    .hero-subtitle{
+      letter-spacing: 3px;
+    }
+    .module-card{
+      border: 1px solid #e9ecef;
+      border-radius: 14px;
+      padding: 28px 22px;
+      height: 100%;
+      background: #fff;
+      box-shadow: 0 8px 20px rgba(0,0,0,.04);
+      transition: .2s ease;
+    }
+    .module-card:hover{
+      transform: translateY(-4px);
+      box-shadow: 0 14px 28px rgba(0,0,0,.08);
+    }
+    .module-card h4{
+      margin-bottom: 10px;
+    }
+    .module-card p{
+      margin-bottom: 0;
+      color: #6c757d;
+    }
+    .section-soft{
+      background: #f8f9fa;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="main" id="top">
+    <div class="loading" id="preloader">
+      <div class="h-100 d-flex align-items-center justify-content-center bg-1100">
+        <div class="loader">
+          <div class="line-scale-pulse-out">
+            <div></div><div></div><div></div><div></div><div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div data-layout="container">
+      <div class="content">
+
+        <nav class="navbar navbar-top navbar-hideaway navbar-expand-lg position-absolute start-0 end-0 mt-4">
+          <div class="container px-3">
+            <a class="navbar-brand text-white" href="{% url 'pagina_web' %}" style="font-size:38px;">
+             DataCounter Colombia
+           </a>
+
+            <button class="navbar-toggler collapsed" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown"
+                    aria-expanded="false" aria-label="Toggle navigation"
+                    data-hamburger-icon="data-hamburger-icon">
+              <span class="hamburger hamburger--emphatic">
+                <span class="hamburger-box">
+                  <span class="hamburger-inner"></span>
+                </span>
+              </span>
+            </button>
+
+            <div class="collapse navbar-collapse navbar-nav-top w-100" id="navbarNavDropdown">
+              <ul class="navbar-nav ms-auto align-items-lg-center">
+                <li class="nav-item"><a class="nav-link" href="#inicio">Inicio</a></li>
+                <li class="nav-item"><a class="nav-link" href="#modulos">Módulos</a></li>
+                <li class="nav-item"><a class="nav-link" href="#beneficios">Beneficios</a></li>
+                <li class="nav-item ms-lg-3">
+                  <a class="btn btn-outline-white btn-sm fw-bold" href="{% url 'login' %}">Ingresar</a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </nav>
+
+        <div class="swiper-theme-container home-slider" id="inicio">
+          <div class="swiper" data-swiper='{"spaceBetween":30,"autoplay":{"delay":7000,"disabledOnInteraction":false},"loop":true,"loopedSlides":3,"slideToClickedSlide":true,"slidesPerView":1,"effect":"fade"}'>
+            <div class="swiper-wrapper">
+
+              <div class="swiper-slide">
+                <section class="py-0 text-center has-parallax">
+                  <div class="bg-holder overlay overlay-1" style="background-image:url({% static 'assets/images/mario.jpg' %});"></div>
+                  <div class="container">
+                    <div class="row py-8 align-items-center banner">
+                      <div class="col">
+                        <h6 class="text-uppercase text-white fs-10 fs-lg-9 hero-subtitle">software contable y administrativo</h6>
+                        <h1 class="text-white fs-4 fs-lg-2 text-capitalize">
+                          Controla tu <em>empresa</em> con DataCounter
+                        </h1>
+                        <p class="text-white mt-3 fs-8">
+                          Contabilidad, facturación, nómina y procesos administrativos en un solo sistema.
+                        </p>
+                        <a class="btn btn-outline-white btn-lg mt-4" href="{% url 'login' %}">Ingresar al sistema</a>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              </div>
+
+              <div class="swiper-slide">
+                <section class="py-0 text-center has-parallax">
+                  <div class="bg-holder overlay overlay-1" style="background-image:url({% static 'assets/images/mario2.jpg' %});"></div>
+                  <div class="container">
+                    <div class="row py-8 align-items-center banner">
+                      <div class="col">
+                        <h6 class="text-uppercase text-white fs-10 fs-lg-9 hero-subtitle">solución empresarial moderna</h6>
+                        <h1 class="text-white fs-4 fs-lg-2 text-capitalize">
+                          Más orden, más control, <em>menos reprocesos</em>
+                        </h1>
+                        <p class="text-white mt-3 fs-8">
+                          Automatiza tareas clave y mejora la gestión de la información financiera.
+                        </p>
+                        <a class="btn btn-outline-white btn-lg mt-4" href="{% url 'login' %}">Ingresar</a>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              </div>
+
+            </div>
+
+            <div class="swiper-nav">
+              <div class="swiper-button-next swiper-button-white"><span class="fas fa-chevron-right nav-icon"></span></div>
+              <div class="swiper-button-prev swiper-button-white"><span class="fas fa-chevron-left nav-icon"></span></div>
+            </div>
+          </div>
+        </div>
+
+        <section class="text-center text-lg-start py-7 py-md-9 bg-white" id="modulos">
+          <div class="container">
+            <div class="row mb-5">
+              <div class="col-lg-4">
+                <h3 class="text-primary ls-1">
+                  Un sistema para la gestión <em>integral</em> de tu empresa
+                </h3>
+              </div>
+              <div class="col-lg-8">
+                <p>
+                  DataCounter está pensado para centralizar procesos administrativos y contables
+                  en una sola plataforma, con una experiencia clara, profesional y orientada al control.
+                </p>
+              </div>
+            </div>
+
+            <div class="row g-4">
+              <div class="col-md-6 col-xl-3">
+                <div class="module-card">
+                  <h4>Contabilidad</h4>
+                  <p>Registro de documentos, asientos, cierres contables y control del movimiento financiero.</p>
+                </div>
+              </div>
+              <div class="col-md-6 col-xl-3">
+                <div class="module-card">
+                  <h4>Facturación</h4>
+                  <p>Gestión de ventas, cartera, notas crédito y documentos comerciales de forma organizada.</p>
+                </div>
+              </div>
+              <div class="col-md-6 col-xl-3">
+                <div class="module-card">
+                  <h4>Nómina</h4>
+                  <p>Administración de personal, conceptos, desprendibles y procesos de pago con mayor control.</p>
+                </div>
+              </div>
+              <div class="col-md-6 col-xl-3">
+                <div class="module-card">
+                  <h4>Tesorería</h4>
+                  <p>Seguimiento de recibos, medios de pago y movimientos de recaudo integrados al sistema.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="has-parallax text-center py-10" id="beneficios">
+          <div class="bg-holder overlay overlay-2" style="background-image:url({% static 'assets/images/mario2.jpg' %});"></div>
+          <div class="container">
+            <div class="row justify-content-center">
+              <div class="col-lg-9">
+                <h1 class="text-white fs-5 fs-lg-2 mb-4">
+                  Una plataforma pensada para trabajar con más <em>claridad</em> y seguridad
+                </h1>
+                <p class="text-white fs-8 mb-5">
+                  Mejora la organización de tu operación, consulta información clave en menos tiempo
+                  y lleva tus procesos con una estructura mucho más profesional.
+                </p>
+                <a class="btn btn-outline-white btn-lg" href="{% url 'login' %}">Ingresar al sistema</a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <footer class="py-4 text-center position-relative">
+          <div class="bg-holder overlay overlay-2" style="background-image: url({% static 'assets/images/mario2.jpg' %}); background-position: center;"></div>
+          <div class="container position-relative">
+            <div class="row align-items-center">
+              <div class="col-lg-6 text-lg-start mb-2 mb-lg-0">
+                <div class="text-400">&copy; DataCounter 2026 | Solución contable y administrativa</div>
+              </div>
+              <div class="col-lg-6 text-lg-end">
+                <a class="d-inline-block mx-2 text-400" href="#inicio">Inicio</a>
+                <a class="d-inline-block mx-2 text-400" href="#modulos">Módulos</a>
+                <a class="d-inline-block mx-2 text-400" href="#beneficios">Beneficios</a>
+                <a class="d-inline-block mx-2 text-400" href="{% url 'login' %}">Ingresar</a>
+              </div>
+            </div>
+          </div>
+        </footer>
+
+      </div>
+    </div>
+  </main>
+
+  <script src="{% static 'vendors/popper/popper.min.js' %}"></script>
+  <script src="{% static 'vendors/bootstrap/bootstrap.min.js' %}"></script>
+  <script src="{% static 'vendors/is/is.min.js' %}"></script>
+  <script src="{% static 'vendors/bigpicture/BigPicture.js' %}"></script>
+  <script src="{% static 'vendors/swiper/swiper-bundle.min.js' %}"></script>
+  <script src="{% static 'vendors/rellax/rellax.js' %}"></script>
+  <script src="{% static 'vendors/fontawesome/all.min.js' %}"></script>
+  <script src="{% static 'vendors/lodash/lodash.min.js' %}"></script>
+  <script src="{% static 'vendors/imagesloaded/imagesloaded.pkgd.js' %}"></script>
+  <script src="{% static 'vendors/gsap/gsap.js' %}"></script>
+  <script src="{% static 'vendors/gsap/customEase.js' %}"></script>
+  <script src="{% static 'vendors/gsap/drawSVGPlugin.js' %}"></script>
+  <script src="{% static 'vendors/gsap/TweenMax.min.js' %}"></script>
+  <script src="{% static 'assets/js/theme.js' %}"></script>
+</body>
+</html>
+
