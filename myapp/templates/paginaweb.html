@@ -1,262 +1,1447 @@
 
 
-
 <!DOCTYPE html>
-<html lang="es" dir="ltr">
+<html lang="es">
 {% load static %}
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <title>DataCounter</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DataCounter Colombia</title>
 
   <link rel="apple-touch-icon" sizes="180x180" href="{% static 'assets/images/favicons/apple-touch-icon.png' %}">
   <link rel="icon" type="image/png" sizes="32x32" href="{% static 'assets/images/favicons/favicon-32x32.png' %}">
   <link rel="icon" type="image/png" sizes="16x16" href="{% static 'assets/images/favicons/favicon-16x16.png' %}">
   <link rel="shortcut icon" type="image/x-icon" href="{% static 'assets/images/favicons/favicon.ico' %}">
-  <link rel="manifest" href="{% static 'assets/images/favicons/manifest.json' %}">
-  <meta name="msapplication-TileImage" content="{% static 'assets/images/favicons/mstile-150x150.png' %}">
   <meta name="theme-color" content="#ffffff">
 
-  <link href="{% static 'vendors/loaders.css/loaders.min.css' %}" rel="stylesheet" type="text/css">
-  <link rel="preconnect" href="https://fonts.gstatic.com">
-  <link href="https://fonts.googleapis.com/css2?family=Hind+Madurai:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
-  <link href="{% static 'vendors/hamburgers/hamburgers.css' %}" rel="stylesheet">
-  <link rel="stylesheet" href="{% static 'vendors/swiper/swiper-bundle.min.css' %}">
-  <link href="{% static 'assets/css/theme.css' %}" rel="stylesheet">
-  <link href="{% static 'assets/css/user.css' %}" rel="stylesheet">
-
   <style>
-    .navbar-brand{
+
+/* SECCIÓN SOFTWARE ERP */
+
+.software-section{
+  background:#ffffff;
+  padding:95px 0 90px;
+}
+
+.software-head{
+  text-align:center;
+  margin-bottom:48px;
+}
+
+.software-title{
+  font-size:clamp(28px, 3.4vw, 42px);
+  color:#111111;
+  font-weight:700;
+  margin-bottom:10px;
+  letter-spacing:.2px;
+}
+
+.software-subtitle{
+  font-size:17px;
+  color:#4b5563;
+  max-width:760px;
+  margin:0 auto;
+  line-height:1.65;
+}
+
+.software-grid{
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:28px;
+}
+
+.software-card{
+  background:#ffffff;
+  border:1px solid #e5e7eb;
+  border-radius:22px;
+  overflow:hidden;
+  box-shadow:0 14px 34px rgba(15,23,42,.06);
+  transition:.22s ease;
+}
+
+.software-card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 18px 42px rgba(15,23,42,.10);
+}
+
+.software-card-image{
+  width:100%;
+  height:220px;
+  object-fit:cover;
+  object-position:center;
+  display:block;
+}
+
+.software-card-body{
+  padding:22px 22px 24px;
+}
+
+.software-card-title{
+  font-size:22px;
+  color:#111111;
+  font-weight:700;
+  margin-bottom:10px;
+  line-height:1.2;
+}
+
+.software-card-text{
+  font-size:15px;
+  color:#4b5563;
+  line-height:1.7;
+}
+
+@media (max-width: 980px){
+  .software-grid{
+    grid-template-columns:repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 680px){
+  .software-section{
+    padding:75px 0 70px;
+  }
+
+  .software-grid{
+    grid-template-columns:1fr;
+  }
+
+  .software-card-image{
+    height:210px;
+  }
+
+  .software-title{
+    font-size:30px;
+  }
+
+  .software-subtitle{
+    font-size:15px;
+  }
+}
+
+
+
+
+
+
+    /* SECCION NOSOTROS */
+
+.nosotros-section{
+  background:#ffffff;
+  padding:90px 0 80px;
+}
+
+.nosotros-title{
+  text-align:center;
+  font-size:clamp(26px, 3vw, 34px);
+  color:#111827;
+  font-weight:700;
+  margin-bottom:50px;
+}
+
+.nosotros-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:50px;
+}
+
+.nosotros-card{
+  padding:35px 30px;
+  border-radius:18px;
+  border:1px solid #e5e7eb;
+  background:#ffffff;
+  box-shadow:0 10px 30px rgba(0,0,0,.05);
+}
+
+.nosotros-card h3{
+  font-size:24px;
+  margin-bottom:18px;
+  color:#111827;
+}
+
+.nosotros-card p{
+  color:#374151;
+  line-height:1.7;
+  font-size:16px;
+}
+
+/* Responsive */
+
+@media (max-width: 900px){
+
+.nosotros-grid{
+  grid-template-columns:1fr;
+  gap:30px;
+}
+
+}
+
+    .services-container{
+      position:relative;
+    }
+
+    .services-title{
+      text-align:center;
+      color:#ffffff;
+      font-size:32px;
       font-weight:700;
       letter-spacing:.5px;
+      margin:0 0 10px 0;
     }
-    .hero-subtitle{
-      letter-spacing: 3px;
+
+    .services-content{
+      display:grid;
+      grid-template-columns:1.12fr 1fr;
+      gap:18px;
+      align-items:stretch;
+      position:relative;
+      left:-70px;
+      width:calc(100% + 70px);
     }
-    .module-card{
-      border: 1px solid #e9ecef;
-      border-radius: 14px;
-      padding: 28px 22px;
-      height: 100%;
-      background: #fff;
-      box-shadow: 0 8px 20px rgba(0,0,0,.04);
-      transition: .2s ease;
+
+    .services-image-box{
+      position:relative;
+      min-height:500px;
+      display:flex;
+      align-items:stretch;
+      justify-content:flex-start;
+      overflow:visible;
     }
-    .module-card:hover{
-      transform: translateY(-4px);
-      box-shadow: 0 14px 28px rgba(0,0,0,.08);
+
+    .services-image{
+      width:100%;
+      max-width:760px;
+      height:100%;
+      min-height:500px;
+      object-fit:cover;
+      object-position:center;
+      border-radius:18px;
+      box-shadow:0 20px 40px rgba(0,0,0,.22);
+      display:block;
     }
-    .module-card h4{
-      margin-bottom: 10px;
+
+    .services-text{
+      color:white;
+      padding-left:10px;
+      padding-right:0;
+      display:flex;
+      align-items:stretch;
     }
-    .module-card p{
-      margin-bottom: 0;
-      color: #6c757d;
+
+    .services-grid{
+      width:100%;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:18px;
+      align-content:stretch;
     }
+
+    .service-item{
+      background:rgba(255,255,255,.10);
+      border:1px solid rgba(255,255,255,.13);
+      padding:22px 20px;
+      border-radius:18px;
+      backdrop-filter:blur(2px);
+      display:flex;
+      flex-direction:column;
+      justify-content:flex-start;
+      min-height:150px;
+    }
+
+    .service-item h3{
+      font-size:22px;
+      margin-bottom:10px;
+      line-height:1.2;
+      color:#ffffff;
+    }
+
+    .service-item p{
+      font-size:15px;
+      line-height:1.65;
+      color:rgba(255,255,255,.92);
+      margin:0;
+    }
+
+    .brand-box{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-start;
+    }
+
+    .brand-mini{
+      font-size:12px;
+      color:#64748b;
+      margin-top:3px;
+      font-weight:600;
+      letter-spacing:.5px;
+    }
+
+    :root{
+      --primary:#0f172a;
+      --primary-2:#1e293b;
+      --accent:#169873;
+      --accent-dark:#10765a;
+      --soft:#f6f8fb;
+      --text:#111827;
+      --muted:#64748b;
+      --white:#ffffff;
+      --border:#e5e7eb;
+      --shadow:0 16px 40px rgba(15,23,42,.08);
+      --max:1120px;
+    }
+
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+    }
+
+    html{
+      scroll-behavior:smooth;
+    }
+
+    body{
+      font-family: Arial, Helvetica, sans-serif;
+      color:var(--text);
+      background:#ffffff;
+      line-height:1.5;
+    }
+
+    a{
+      text-decoration:none;
+      color:inherit;
+    }
+
+    img{
+      max-width:100%;
+      display:block;
+    }
+
+    .container{
+      width:min(var(--max), calc(100% - 32px));
+      margin:0 auto;
+    }
+
+    /* BARRA SUPERIOR */
+    .topbar{
+      background:#ffffff;
+      border-bottom:1px solid #eef2f7;
+      position:sticky;
+      top:0;
+      z-index:100;
+    }
+
+    .topbar .container{
+      width:min(var(--max), calc(100% - 10px));
+    }
+
+    .topbar-inner{
+      min-height:80px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:20px;
+      padding:10px 0;
+    }
+
+    .brand-wrap{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      min-width:0;
+      flex-shrink:0;
+      margin-left:-75px;
+    }
+
+    .brand-logo{
+      height:60px;
+      width:auto;
+      object-fit:contain;
+    }
+
+    .topbar-right{
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      gap:28px;
+      flex:1;
+      min-width:0;
+      flex-wrap:wrap;
+    }
+
+    .language-inline{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      color:#334155;
+      font-size:15px;
+      font-weight:700;
+      transition:.2s ease;
+      white-space:nowrap;
+    }
+
+    .language-inline:hover{
+      color:var(--accent);
+    }
+
+    .language-select{
+      border:none;
+      background:transparent;
+      font-size:15px;
+      font-weight:700;
+      color:#334155;
+      outline:none;
+      cursor:pointer;
+      font-family:inherit;
+    }
+
+    .language-select:hover{
+      color:var(--accent);
+    }
+
+    .topbar-links{
+      display:flex;
+      align-items:center;
+      gap:28px;
+      flex-wrap:wrap;
+    }
+
+    .topbar-links a{
+      color:#334155;
+      font-size:15px;
+      font-weight:700;
+      transition:.2s ease;
+      white-space:nowrap;
+    }
+
+    .topbar-links a:hover{
+      color:var(--accent);
+    }
+
+    .menu-toggle{
+      display:none;
+      width:42px;
+      height:42px;
+      border:1px solid #dbe4ee;
+      border-radius:10px;
+      background:#fff;
+      cursor:pointer;
+      position:relative;
+      flex-shrink:0;
+    }
+
+    .menu-toggle span,
+    .menu-toggle::before,
+    .menu-toggle::after{
+      content:"";
+      position:absolute;
+      left:10px;
+      width:20px;
+      height:2px;
+      background:#111827;
+      transition:.25s ease;
+    }
+
+    .menu-toggle span{ top:19px; }
+    .menu-toggle::before{ top:13px; }
+    .menu-toggle::after{ top:25px; }
+
+    .menu-mobile{
+      display:none;
+      padding:0 0 14px;
+    }
+
+    .menu-mobile-inner{
+      background:#ffffff;
+      border:1px solid #e8edf3;
+      border-radius:16px;
+      padding:10px;
+      box-shadow:var(--shadow);
+    }
+
+    .menu-mobile a{
+      display:block;
+      padding:12px 10px;
+      border-radius:10px;
+      font-weight:700;
+      color:#334155;
+      font-size:15px;
+    }
+
+    .menu-mobile a:hover{
+      background:#f8fafc;
+      color:var(--accent);
+    }
+
+    .menu-mobile-language{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:12px 10px;
+      color:#334155;
+      font-size:15px;
+      font-weight:700;
+      border-radius:10px;
+    }
+
+    .menu-mobile-language select{
+      border:none;
+      background:transparent;
+      font-size:15px;
+      font-weight:700;
+      color:#334155;
+      outline:none;
+      cursor:pointer;
+      font-family:inherit;
+    }
+
+    .menu-mobile.show{
+      display:block;
+    }
+
+    /* HERO / SLIDER */
+    .hero{
+      background:#fff;
+      padding:24px 0 0;
+    }
+
+    .hero .container{
+      width:min(1160px, calc(100% - 24px));
+    }
+
+    .hero-shell{
+      position:relative;
+      border-radius:0;
+      overflow:hidden;
+      box-shadow:0 18px 45px rgba(15,23,42,.12);
+      width:calc(100% + 40px);
+      margin-left:-30px;
+      margin-right:-30px;
+    }
+
+    .slides{
+      position:relative;
+      width:100%;
+      height:62vh;
+      min-height:430px;
+      max-height:620px;
+      background:#0b1120;
+    }
+
+    .slide{
+      position:absolute;
+      inset:0;
+      opacity:0;
+      visibility:hidden;
+      transition:opacity .8s ease, visibility .8s ease;
+    }
+
+    .slide.active{
+      opacity:1;
+      visibility:visible;
+    }
+
+    .slide-bg{
+      position:absolute;
+      inset:0;
+      background-size:cover;
+      background-position:center;
+      background-repeat:no-repeat;
+      transform:scale(1.02);
+    }
+
+    .slide-overlay{
+      position:absolute;
+      inset:0;
+      background:linear-gradient(90deg, rgba(0,0,0,.60) 0%, rgba(0,0,0,.42) 45%, rgba(0,0,0,.30) 100%);
+    }
+
+    .hero-content{
+      position:relative;
+      z-index:2;
+      height:62vh;
+      min-height:430px;
+      max-height:620px;
+      display:flex;
+      align-items:center;
+      padding:40px 0;
+    }
+
+    .hero-box{
+      max-width:600px;
+      color:#fff;
+      padding-left:8px;
+    }
+
+    .hero-kicker{
+      display:inline-block;
+      margin-bottom:14px;
+      text-transform:uppercase;
+      letter-spacing:2.4px;
+      font-size:11px;
+      font-weight:700;
+      opacity:.96;
+    }
+
+    .hero-title{
+      font-size:clamp(30px, 4vw, 52px);
+      line-height:1.08;
+      font-weight:700;
+      margin-bottom:10px;
+    }
+
+    .hero-title em{
+      font-style:normal;
+      color:#dcfce7;
+    }
+
+    .hero-text{
+      font-size:clamp(14px, 1.35vw, 18px);
+      max-width:540px;
+      color:rgba(255,255,255,.92);
+    }
+
+    .hero-actions{
+      margin-top:24px;
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .btn-primary,
+    .btn-secondary{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:168px;
+      padding:12px 20px;
+      border-radius:999px;
+      font-size:14px;
+      font-weight:700;
+      transition:.2s ease;
+    }
+
+    .btn-primary{
+      background:#fff;
+      color:#111827;
+      border:1px solid #fff;
+    }
+
+    .btn-primary:hover{
+      transform:translateY(-2px);
+      box-shadow:0 12px 28px rgba(255,255,255,.18);
+    }
+
+    .btn-secondary{
+      background:transparent;
+      color:#fff;
+      border:1px solid rgba(255,255,255,.8);
+    }
+
+    .btn-secondary:hover{
+      background:rgba(255,255,255,.10);
+    }
+
+    .hero-arrow{
+      position:absolute;
+      top:50%;
+      transform:translateY(-50%);
+      z-index:3;
+      width:46px;
+      height:46px;
+      border:none;
+      border-radius:50%;
+      background:rgba(255,255,255,.14);
+      color:#fff;
+      font-size:21px;
+      cursor:pointer;
+      backdrop-filter:blur(5px);
+      transition:.2s ease;
+    }
+
+    .hero-arrow:hover{
+      background:rgba(255,255,255,.24);
+    }
+
+    .hero-arrow.prev{ left:16px; }
+    .hero-arrow.next{ right:16px; }
+
+    .hero-dots{
+      position:absolute;
+      left:50%;
+      bottom:18px;
+      transform:translateX(-50%);
+      z-index:3;
+      display:flex;
+      gap:8px;
+    }
+
+    .dot{
+      width:11px;
+      height:11px;
+      border-radius:50%;
+      border:none;
+      background:rgba(255,255,255,.45);
+      cursor:pointer;
+      transition:.2s ease;
+    }
+
+    .dot.active{
+      background:#fff;
+      transform:scale(1.12);
+    }
+
+    /* SECCIONES */
+    .section{
+      padding:78px 0;
+    }
+
+    .section-light{
+      background:#fff;
+    }
+
     .section-soft{
-      background: #f8f9fa;
+      background:var(--soft);
+    }
+
+    .section-head{
+      display:grid;
+      grid-template-columns:1.05fr 1.2fr;
+      gap:30px;
+      align-items:start;
+      margin-bottom:40px;
+    }
+
+    .section-head h2{
+      font-size:clamp(28px, 3.6vw, 46px);
+      line-height:1.1;
+      color:#111827;
+    }
+
+    .section-head p{
+      font-size:17px;
+      color:var(--muted);
+    }
+
+    .cards{
+      display:grid;
+      grid-template-columns:repeat(4, 1fr);
+      gap:22px;
+    }
+
+    .card{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:20px;
+      padding:28px 22px;
+      box-shadow:var(--shadow);
+      transition:.2s ease;
+    }
+
+    .card:hover{
+      transform:translateY(-4px);
+    }
+
+    .card h3{
+      font-size:23px;
+      margin-bottom:10px;
+      color:#111827;
+    }
+
+    .card p{
+      color:var(--muted);
+      font-size:15px;
+    }
+
+    /* NUEVA SECCIÓN SERVICIOS */
+    .services-section{
+      background: linear-gradient(135deg,#0d8f6d,#0a6f56);
+      padding:110px 0 120px;
+      overflow:hidden;
+    }
+
+    .highlight{
+      background:#1c2523;
+      color:#fff;
+      border-radius:28px;
+      padding:60px 34px;
+      text-align:center;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .highlight::before{
+      content:"";
+      position:absolute;
+      width:300px;
+      height:300px;
+      border-radius:50%;
+      background:rgba(255,255,255,.05);
+      top:-120px;
+      right:-80px;
+    }
+
+    .highlight::after{
+      content:"";
+      position:absolute;
+      width:220px;
+      height:220px;
+      border-radius:50%;
+      background:rgba(255,255,255,.04);
+      left:-60px;
+      bottom:-90px;
+    }
+
+    .highlight > *{
+      position:relative;
+      z-index:2;
+    }
+
+    .highlight h2{
+      font-size:clamp(28px, 3.8vw, 48px);
+      line-height:1.12;
+      margin-bottom:16px;
+    }
+
+    .highlight p{
+      max-width:820px;
+      margin:0 auto 26px;
+      color:rgba(255,255,255,.88);
+      font-size:17px;
+    }
+
+    .footer{
+      background:#074635;
+      color:#cbd5e1;
+      padding:126px 0;
+    }
+
+    .footer-inner{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:18px;
+      flex-wrap:wrap;
+    }
+
+    .footer-links{
+      display:flex;
+      gap:18px;
+      flex-wrap:wrap;
+    }
+
+    .footer-links a:hover{
+      color:#fff;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 980px){
+      .topbar-right{
+        display:none;
+      }
+
+      .menu-toggle{
+        display:block;
+      }
+
+      .section-head{
+        grid-template-columns:1fr;
+      }
+
+      .cards{
+        grid-template-columns:repeat(2, 1fr);
+      }
+
+      .topbar-inner{
+        min-height:auto;
+        padding:12px 0;
+      }
+
+      .brand-logo{
+        height:50px;
+      }
+
+      .services-content{
+        grid-template-columns:1fr;
+        gap:35px;
+        left:0;
+        width:100%;
+      }
+
+      .services-image-box{
+        min-height:auto;
+      }
+
+      .services-image{
+        max-width:100%;
+        min-height:unset;
+        height:420px;
+      }
+
+      .services-text{
+        padding-left:0;
+      }
+
+      .services-grid{
+        grid-template-columns:1fr 1fr;
+      }
+    }
+
+    @media (max-width: 680px){
+      .container{
+        width:min(var(--max), calc(100% - 20px));
+      }
+
+      .brand-logo{
+        height:44px;
+      }
+
+      .slides,
+      .hero-content{
+        height:54vh;
+        min-height:360px;
+      }
+
+      .hero-box{
+        max-width:92%;
+        padding-left:0;
+      }
+
+      .hero-title{
+        font-size:30px;
+      }
+
+      .hero-text{
+        font-size:14px;
+      }
+
+      .hero-kicker{
+        font-size:10px;
+        letter-spacing:2px;
+      }
+
+      .hero-actions{
+        gap:10px;
+      }
+
+      .btn-primary,
+      .btn-secondary{
+        min-width:150px;
+        padding:11px 16px;
+        font-size:13px;
+      }
+
+      .hero-arrow{
+        width:40px;
+        height:40px;
+        font-size:18px;
+      }
+
+      .hero-arrow.prev{ left:8px; }
+      .hero-arrow.next{ right:8px; }
+
+      .cards{
+        grid-template-columns:1fr;
+      }
+
+      .highlight{
+        padding:48px 22px;
+      }
+
+      .services-grid{
+        grid-template-columns:1fr;
+      }
+
+      .services-title{
+        margin-bottom:35px;
+      }
+
+      .services-image{
+        height:320px;
+      }
     }
   </style>
 </head>
-
 <body>
-  <main class="main" id="top">
-    <div class="loading" id="preloader">
-      <div class="h-100 d-flex align-items-center justify-content-center bg-1100">
-        <div class="loader">
-          <div class="line-scale-pulse-out">
-            <div></div><div></div><div></div><div></div><div></div>
+
+  <header class="topbar">
+    <div class="container">
+      <div class="topbar-inner">
+        <a class="brand-wrap" href="{% url 'pagina_web' %}">
+          <img class="brand-logo" src="{% static 'assets/images/blancocolombia3.png' %}" alt="DataCounter Colombia">
+          <span class="brand-mini">Software administrativo y contable ERP y servicios integrales</span>
+        </a>
+
+        <div class="topbar-right">
+          <div class="language-inline">
+            <span>Idioma</span>
+            <select class="language-select" aria-label="Seleccionar idioma">
+              <option selected>Español</option>
+              <option>English</option>
+            </select>
+          </div>
+
+          <div class="topbar-links">
+            <a href="#nosotros">Nosotros</a>
+            <a href="#servicios">Servicios</a>
+            <a href="#software">ERP</a>
+            <a href="#modulos">Contacto</a>
+            <a href="{% url 'login' %}">Ingresar</a>
+          </div>
+        </div>
+
+        <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">
+          <span></span>
+        </button>
+      </div>
+
+      <div class="menu-mobile" id="mobileMenu">
+        <div class="menu-mobile-inner">
+          <div class="menu-mobile-language">
+            <span>Idioma</span>
+            <select aria-label="Seleccionar idioma">
+              <option selected>Español</option>
+              <option>English</option>
+            </select>
+          </div>
+          <a href="{% url 'login' %}">Ingresar</a>
+          <a href="#inicio">Nosotros</a>
+          <a href="#servicios">Servicios</a>
+          <a href="#modulos">ERP</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero" id="inicio">
+    <div class="container">
+      <div class="hero-shell">
+        <div class="slides" id="slider">
+
+          <div class="slide active">
+            <div class="slide-bg" style="background-image:url('{% static "assets/images/shutterstock_1.jpg" %}');"></div>
+            <div class="slide-overlay"></div>
+            <div class="container hero-content">
+              <div class="hero-box">
+                <span class="hero-kicker">software contable y administrativo</span>
+                <h1 class="hero-title">Controla tu <em>empresa</em> con nuestro DataCounter ERP</h1>
+                <p class="hero-text">
+                  Contabilidad, cartera, tesorería, facturación, nómina y procesos administrativos en un solo sistema,
+                  solución empresarial moderna.
+                </p>
+                <div class="hero-actions">
+                  <a class="btn-primary" href="{% url 'login' %}">Ingresar al sistema</a>
+                  <a class="btn-secondary" href="#modulos">Ver módulos</a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="slide">
+            <div class="slide-bg" style="background-image:url('{% static "assets/images/mario2.jpg" %}');"></div>
+            <div class="slide-overlay"></div>
+            <div class="container hero-content">
+              <div class="hero-box">
+                <span class="hero-kicker">Asesoría contable y financiera</span>
+                <h1 class="hero-title">Outsourcing contable, <em>consultoria financiera y asesoría tributaria</em></h1>
+                <p class="hero-text">
+                  Toma la mejores decisiones con nuestro equipo de profesionales.
+                </p>
+                <div class="hero-actions">
+                  <a class="btn-primary" href="{% url 'login' %}">Ingresar</a>
+                  <a class="btn-secondary" href="#beneficios">Conocer beneficios</a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="slide">
+            <div class="slide-bg" style="background-image:url('{% static "assets/images/elements-header.jpg" %}');"></div>
+            <div class="slide-overlay"></div>
+            <div class="container hero-content">
+              <div class="hero-box">
+                <span class="hero-kicker">Más orden, más control, menos procesos</span>
+                <h1 class="hero-title">Revisoría fiscal y aseguramiento, <em> audotoría externa</em></h1>
+                <p class="hero-text">
+                  Aseguramos la información y levantamos procesos.
+                </p>
+                <div class="hero-actions">
+                  <a class="btn-primary" href="{% url 'login' %}">Ingresar</a>
+                  <a class="btn-secondary" href="#beneficios">Conocer beneficios</a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button class="hero-arrow prev" id="prevBtn" aria-label="Imagen anterior">&#10094;</button>
+          <button class="hero-arrow next" id="nextBtn" aria-label="Imagen siguiente">&#10095;</button>
+
+          <div class="hero-dots" id="heroDots">
+            <button class="dot active" aria-label="Ir a imagen 1"></button>
+            <button class="dot" aria-label="Ir a imagen 2"></button>
+            <button class="dot" aria-label="Ir a imagen 3"></button>
           </div>
         </div>
       </div>
     </div>
+  </section>
 
-    <div data-layout="container">
-      <div class="content">
+  <section class="section section-light" id="modulos">
+    <div class="container">
+      <div class="section-head">
+        <h2>Un sistema para la gestión integral de tu empresa</h2>
+        <p>
+          DataCounter está pensado para centralizar procesos administrativos y contables
+          en una sola plataforma, con una experiencia clara, profesional y orientada al control.
+        </p>
+      </div>
 
-        <nav class="navbar navbar-top navbar-hideaway navbar-expand-lg position-absolute start-0 end-0 mt-4">
-          <div class="container px-3">
-            <a class="navbar-brand text-white" href="{% url 'pagina_web' %}" style="font-size:38px;">
-             DataCounter Colombia
-           </a>
+      <div class="cards">
+        <article class="card">
+          <h3>Contabilidad</h3>
+          <p>Registro de documentos, asientos, cierres contables y control del movimiento financiero.</p>
+        </article>
 
-            <button class="navbar-toggler collapsed" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown"
-                    aria-expanded="false" aria-label="Toggle navigation"
-                    data-hamburger-icon="data-hamburger-icon">
-              <span class="hamburger hamburger--emphatic">
-                <span class="hamburger-box">
-                  <span class="hamburger-inner"></span>
-                </span>
-              </span>
-            </button>
+        <article class="card">
+          <h3>Facturación</h3>
+          <p>Gestión de ventas, cartera, notas crédito y documentos comerciales de forma organizada.</p>
+        </article>
 
-            <div class="collapse navbar-collapse navbar-nav-top w-100" id="navbarNavDropdown">
-              <ul class="navbar-nav ms-auto align-items-lg-center">
-                <li class="nav-item"><a class="nav-link" href="#inicio">Inicio</a></li>
-                <li class="nav-item"><a class="nav-link" href="#modulos">Módulos</a></li>
-                <li class="nav-item"><a class="nav-link" href="#beneficios">Beneficios</a></li>
-                <li class="nav-item ms-lg-3">
-                  <a class="btn btn-outline-white btn-sm fw-bold" href="{% url 'login' %}">Ingresar</a>
-                </li>
-              </ul>
+        <article class="card">
+          <h3>Nómina</h3>
+          <p>Administración de personal, conceptos, desprendibles y procesos de pago con mayor control.</p>
+        </article>
+
+        <article class="card">
+          <h3>Tesorería</h3>
+          <p>Seguimiento de recibos, medios de pago y movimientos de recaudo integrados al sistema.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  
+
+  <section class="nosotros-section" id="nosotros">
+  <div class="container">
+
+    <h2 class="nosotros-title">Nosotros</h2>
+
+    <div class="nosotros-grid">
+
+      <div class="nosotros-card">
+        <h3>Misión</h3>
+        <p>
+          Brindar soluciones integrales empresariales mediante el desarrollo de 
+          software ERP y servicios profesionales en outsourcing contable, 
+          consultoría financiera y tributaria, y revisoría fiscal, apoyando a 
+          las organizaciones en la optimización de sus procesos, el 
+          fortalecimiento del control financiero y la toma de decisiones 
+          estratégicas, a través de tecnología innovadora, conocimiento 
+          especializado y un acompañamiento cercano y confiable.
+        </p>
+      </div>
+
+      <div class="nosotros-card">
+        <h3>Visión</h3>
+        <p>
+          Ser una firma líder en soluciones empresariales y tecnológicas, 
+          reconocida por integrar software ERP y servicios profesionales 
+          de alto nivel, contribuyendo al crecimiento sostenible de las 
+          organizaciones en Colombia y Latinoamérica, mediante innovación 
+          constante, excelencia en el servicio y generación de valor para 
+          nuestros clientes.
+        </p>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+
+
+
+
+
+
+
+
+
+  <section class="services-section" id="servicios">
+    <div class="container services-container">
+
+      <h2 class="services-title">Servicios</h2>
+
+      <div class="services-content">
+        <div class="services-image-box">
+          <img 
+            src="{% static 'assets/images/shutterstock_4.jpg' %}" 
+            class="services-image"
+            alt="Servicios DataCounter"
+          >
+        </div>
+
+        <div class="services-text">
+          <div class="services-grid">
+            <div class="service-item">
+              <h3>Outsourcing contable</h3>
+              <p>
+                Texto de prueba para describir este servicio empresarial, resaltando orden,
+                control y acompañamiento profesional en cada proceso.
+              </p>
             </div>
-          </div>
-        </nav>
 
-        <div class="swiper-theme-container home-slider" id="inicio">
-          <div class="swiper" data-swiper='{"spaceBetween":30,"autoplay":{"delay":7000,"disabledOnInteraction":false},"loop":true,"loopedSlides":3,"slideToClickedSlide":true,"slidesPerView":1,"effect":"fade"}'>
-            <div class="swiper-wrapper">
-
-              <div class="swiper-slide">
-                <section class="py-0 text-center has-parallax">
-                  <div class="bg-holder overlay overlay-1" style="background-image:url({% static 'assets/images/mario.jpg' %});"></div>
-                  <div class="container">
-                    <div class="row py-8 align-items-center banner">
-                      <div class="col">
-                        <h6 class="text-uppercase text-white fs-10 fs-lg-9 hero-subtitle">software contable y administrativo</h6>
-                        <h1 class="text-white fs-4 fs-lg-2 text-capitalize">
-                          Controla tu <em>empresa</em> con DataCounter
-                        </h1>
-                        <p class="text-white mt-3 fs-8">
-                          Contabilidad, facturación, nómina y procesos administrativos en un solo sistema.
-                        </p>
-                        <a class="btn btn-outline-white btn-lg mt-4" href="{% url 'login' %}">Ingresar al sistema</a>
-                      </div>
-                    </div>
-                  </div>
-                </section>
-              </div>
-
-              <div class="swiper-slide">
-                <section class="py-0 text-center has-parallax">
-                  <div class="bg-holder overlay overlay-1" style="background-image:url({% static 'assets/images/mario2.jpg' %});"></div>
-                  <div class="container">
-                    <div class="row py-8 align-items-center banner">
-                      <div class="col">
-                        <h6 class="text-uppercase text-white fs-10 fs-lg-9 hero-subtitle">solución empresarial moderna</h6>
-                        <h1 class="text-white fs-4 fs-lg-2 text-capitalize">
-                          Más orden, más control, <em>menos reprocesos</em>
-                        </h1>
-                        <p class="text-white mt-3 fs-8">
-                          Automatiza tareas clave y mejora la gestión de la información financiera.
-                        </p>
-                        <a class="btn btn-outline-white btn-lg mt-4" href="{% url 'login' %}">Ingresar</a>
-                      </div>
-                    </div>
-                  </div>
-                </section>
-              </div>
-
+            <div class="service-item">
+              <h3>Asesoría tributaria</h3>
+              <p>
+                Texto de prueba para explicar soluciones orientadas al cumplimiento normativo,
+                planeación fiscal y atención oportuna a cada necesidad.
+              </p>
             </div>
 
-            <div class="swiper-nav">
-              <div class="swiper-button-next swiper-button-white"><span class="fas fa-chevron-right nav-icon"></span></div>
-              <div class="swiper-button-prev swiper-button-white"><span class="fas fa-chevron-left nav-icon"></span></div>
+            <div class="service-item">
+              <h3>Consultoría financiera</h3>
+              <p>
+                Texto de prueba para mostrar apoyo en análisis financiero, toma de decisiones
+                y fortalecimiento de la estructura administrativa.
+              </p>
+            </div>
+
+            <div class="service-item">
+              <h3>Revisoría fiscal</h3>
+              <p>
+                Texto de prueba para presentar acompañamiento integral en supervisión,
+                evaluación de procesos y aseguramiento de la información.
+              </p>
             </div>
           </div>
         </div>
+      </div>
 
-        <section class="text-center text-lg-start py-7 py-md-9 bg-white" id="modulos">
-          <div class="container">
-            <div class="row mb-5">
-              <div class="col-lg-4">
-                <h3 class="text-primary ls-1">
-                  Un sistema para la gestión <em>integral</em> de tu empresa
-                </h3>
-              </div>
-              <div class="col-lg-8">
-                <p>
-                  DataCounter está pensado para centralizar procesos administrativos y contables
-                  en una sola plataforma, con una experiencia clara, profesional y orientada al control.
-                </p>
-              </div>
-            </div>
+    </div>
+  </section>
 
-            <div class="row g-4">
-              <div class="col-md-6 col-xl-3">
-                <div class="module-card">
-                  <h4>Contabilidad</h4>
-                  <p>Registro de documentos, asientos, cierres contables y control del movimiento financiero.</p>
-                </div>
-              </div>
-              <div class="col-md-6 col-xl-3">
-                <div class="module-card">
-                  <h4>Facturación</h4>
-                  <p>Gestión de ventas, cartera, notas crédito y documentos comerciales de forma organizada.</p>
-                </div>
-              </div>
-              <div class="col-md-6 col-xl-3">
-                <div class="module-card">
-                  <h4>Nómina</h4>
-                  <p>Administración de personal, conceptos, desprendibles y procesos de pago con mayor control.</p>
-                </div>
-              </div>
-              <div class="col-md-6 col-xl-3">
-                <div class="module-card">
-                  <h4>Tesorería</h4>
-                  <p>Seguimiento de recibos, medios de pago y movimientos de recaudo integrados al sistema.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
 
-        <section class="has-parallax text-center py-10" id="beneficios">
-          <div class="bg-holder overlay overlay-2" style="background-image:url({% static 'assets/images/mario2.jpg' %});"></div>
-          <div class="container">
-            <div class="row justify-content-center">
-              <div class="col-lg-9">
-                <h1 class="text-white fs-5 fs-lg-2 mb-4">
-                  Una plataforma pensada para trabajar con más <em>claridad</em> y seguridad
-                </h1>
-                <p class="text-white fs-8 mb-5">
-                  Mejora la organización de tu operación, consulta información clave en menos tiempo
-                  y lleva tus procesos con una estructura mucho más profesional.
-                </p>
-                <a class="btn btn-outline-white btn-lg" href="{% url 'login' %}">Ingresar al sistema</a>
-              </div>
-            </div>
-          </div>
-        </section>
 
-        <footer class="py-4 text-center position-relative">
-          <div class="bg-holder overlay overlay-2" style="background-image: url({% static 'assets/images/mario2.jpg' %}); background-position: center;"></div>
-          <div class="container position-relative">
-            <div class="row align-items-center">
-              <div class="col-lg-6 text-lg-start mb-2 mb-lg-0">
-                <div class="text-400">&copy; DataCounter 2026 | Solución contable y administrativa</div>
-              </div>
-              <div class="col-lg-6 text-lg-end">
-                <a class="d-inline-block mx-2 text-400" href="#inicio">Inicio</a>
-                <a class="d-inline-block mx-2 text-400" href="#modulos">Módulos</a>
-                <a class="d-inline-block mx-2 text-400" href="#beneficios">Beneficios</a>
-                <a class="d-inline-block mx-2 text-400" href="{% url 'login' %}">Ingresar</a>
-              </div>
-            </div>
-          </div>
-        </footer>
 
+  <section class="software-section" id="software">
+  <div class="container">
+
+    <div class="software-head">
+      <h2 class="software-title">ERP contable y administrativo</h2>
+      <p class="software-subtitle">
+        Conoce algunos de nuestros módulos básicos y las soluciones que integran
+        nuestra plataforma para optimizar el control, la operación y la gestión de tu empresa.
+      </p>
+    </div>
+
+    <div class="software-grid">
+
+      <article class="software-card">
+        <img 
+          src="{% static 'assets/images/shutterstock_3.jpg' %}" 
+          alt="Módulo Contabilidad"
+          class="software-card-image"
+        >
+        <div class="software-card-body">
+          <h3 class="software-card-title">Contabilidad</h3>
+          <p class="software-card-text">
+            Control de hechos económicos, manejo bajo NIIF, centros de costos,
+            balances, auxiliares y reportes ajustados a las necesidades de la organización.
+          </p>
+        </div>
+      </article>
+
+      <article class="software-card">
+        <img 
+          src="{% static 'assets/images/shutterstock_5.jpg' %}" 
+          alt="Módulo Facturación"
+          class="software-card-image"
+        >
+        <div class="software-card-body">
+          <h3 class="software-card-title">Facturación</h3>
+          <p class="software-card-text">
+            Facturación electrónica, POS, control de inventarios, gestión de clientes,
+            productos, descuentos, cartera y procesos comerciales integrados.
+          </p>
+        </div>
+      </article>
+
+      <article class="software-card">
+        <img 
+          src="{% static 'assets/images/shutterstock_6.jpg' %}" 
+          alt="Módulo Tesorería"
+          class="software-card-image"
+        >
+        <div class="software-card-body">
+          <h3 class="software-card-title">Tesorería</h3>
+          <p class="software-card-text">
+            Gestión de pagos, recaudos, cartera masiva, integraciones operativas
+            y reportes que facilitan el seguimiento financiero y la toma de decisiones.
+          </p>
+        </div>
+      </article>
+
+      <article class="software-card">
+        <img 
+          src="{% static 'assets/images/mario.jpg' %}" 
+          alt="Módulo Nómina"
+          class="software-card-image"
+        >
+        <div class="software-card-body">
+          <h3 class="software-card-title">Nómina</h3>
+          <p class="software-card-text">
+            Nómina electrónica, novedades, liquidaciones, seguridad social,
+            desprendibles y reportes para una administración más precisa del talento humano.
+          </p>
+        </div>
+      </article>
+
+      <article class="software-card">
+        <img 
+          src="{% static 'assets/images/mario2.jpg' %}" 
+          alt="Gestión de compras"
+          class="software-card-image"
+        >
+        <div class="software-card-body">
+          <h3 class="software-card-title">Gestión de compras</h3>
+          <p class="software-card-text">
+            Administración de proveedores, anticipos, seguimiento de compras
+            y reportes clave para fortalecer el control y apoyar decisiones oportunas.
+          </p>
+        </div>
+      </article>
+
+      <article class="software-card">
+        <img 
+          src="{% static 'assets/images/verdecolombianegro.png' %}" 
+          alt="Otros servicios"
+          class="software-card-image"
+        >
+        <div class="software-card-body">
+          <h3 class="software-card-title">Otros</h3>
+          <p class="software-card-text">
+            Levantamiento de procesos, elaboración de manuales,
+            parametrizaciones y desarrollos específicos de acuerdo con las necesidades del cliente.
+          </p>
+        </div>
+      </article>
+
+    </div>
+
+  </div>
+</section>
+
+  <section class="section section-soft" id="beneficios">
+    <div class="container">
+      <div class="highlight">
+        <h2>Una plataforma pensada para trabajar con más claridad y seguridad</h2>
+        <p>
+          Mejora la organización de tu operación, consulta información clave en menos tiempo
+          y lleva tus procesos con una estructura mucho más profesional.
+        </p>
+        <a class="btn-primary" href="{% url 'login' %}">Ingresar al sistema</a>
       </div>
     </div>
-  </main>
+  </section>
 
-  <script src="{% static 'vendors/popper/popper.min.js' %}"></script>
-  <script src="{% static 'vendors/bootstrap/bootstrap.min.js' %}"></script>
-  <script src="{% static 'vendors/is/is.min.js' %}"></script>
-  <script src="{% static 'vendors/bigpicture/BigPicture.js' %}"></script>
-  <script src="{% static 'vendors/swiper/swiper-bundle.min.js' %}"></script>
-  <script src="{% static 'vendors/rellax/rellax.js' %}"></script>
-  <script src="{% static 'vendors/fontawesome/all.min.js' %}"></script>
-  <script src="{% static 'vendors/lodash/lodash.min.js' %}"></script>
-  <script src="{% static 'vendors/imagesloaded/imagesloaded.pkgd.js' %}"></script>
-  <script src="{% static 'vendors/gsap/gsap.js' %}"></script>
-  <script src="{% static 'vendors/gsap/customEase.js' %}"></script>
-  <script src="{% static 'vendors/gsap/drawSVGPlugin.js' %}"></script>
-  <script src="{% static 'vendors/gsap/TweenMax.min.js' %}"></script>
-  <script src="{% static 'assets/js/theme.js' %}"></script>
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-inner">
+        <div>&copy; DataCounter 2026 | Solución contable y administrativa</div>
+
+        <div class="footer-links">
+          <a href="#inicio">Inicio</a>
+          <a href="#servicios">Servicios</a>
+          <a href="#software">ERP</a>
+          <a href="{% url 'login' %}">Ingresar</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    const dots = document.querySelectorAll('.dot');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const menuToggle = document.getElementById('menuToggle');
+    const mobileMenu = document.getElementById('mobileMenu');
+
+    let currentSlide = 0;
+    let autoSlide;
+
+    function showSlide(index){
+      slides.forEach((slide, i) => {
+        slide.classList.toggle('active', i === index);
+      });
+
+      dots.forEach((dot, i) => {
+        dot.classList.toggle('active', i === index);
+      });
+
+      currentSlide = index;
+    }
+
+    function nextSlide(){
+      const next = (currentSlide + 1) % slides.length;
+      showSlide(next);
+    }
+
+    function prevSlideFn(){
+      const prev = (currentSlide - 1 + slides.length) % slides.length;
+      showSlide(prev);
+    }
+
+    function startAutoSlide(){
+      stopAutoSlide();
+      autoSlide = setInterval(nextSlide, 7000);
+    }
+
+    function stopAutoSlide(){
+      if(autoSlide){
+        clearInterval(autoSlide);
+      }
+    }
+
+    if(nextBtn){
+      nextBtn.addEventListener('click', () => {
+        nextSlide();
+        startAutoSlide();
+      });
+    }
+
+    if(prevBtn){
+      prevBtn.addEventListener('click', () => {
+        prevSlideFn();
+        startAutoSlide();
+      });
+    }
+
+    dots.forEach((dot, index) => {
+      dot.addEventListener('click', () => {
+        showSlide(index);
+        startAutoSlide();
+      });
+    });
+
+    if(menuToggle){
+      menuToggle.addEventListener('click', () => {
+        mobileMenu.classList.toggle('show');
+      });
+    }
+
+    if(mobileMenu){
+      mobileMenu.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+          mobileMenu.classList.remove('show');
+        });
+      });
+    }
+
+    startAutoSlide();
+  </script>
+
 </body>
 </html>
-
