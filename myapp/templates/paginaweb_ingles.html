@@ -1,5 +1,7 @@
 
 
+
+
 <!DOCTYPE html>
 <html lang="es">
 {% load static %}
@@ -1215,22 +1217,22 @@ img{
       <div class="topbar-inner">
         <a class="brand-wrap" href="{% url 'pagina_web' %}">
           <img class="brand-logo" src="{% static 'assets/images/blancocolombia3.png' %}" alt="DataCounter Colombia">
-          <span class="brand-mini">Software administrativo y contable ERP y servicios integrales</span>
+          <span class="brand-mini">Administrative and Accounting ERP Software and Integrated Services</span>
         </a>
 
         <div class="topbar-right">
           <div class="language-inline">
-             <a href="{% url 'pagina_web' %}">Español</a>
-             <span>|</span>
-             <a href="{% url 'pagina_web_ingles' %}">English</a>
+            <a href="{% url 'pagina_web' %}">Spanish</a>
+            <span>|</span>
+            <a href="{% url 'pagina_web_ingles' %}">English</a>
           </div>
 
           <div class="topbar-links">
-            <a href="#nosotros">Nosotros</a>
-            <a href="#servicios">Servicios</a>
+            <a href="#nosotros">About Us</a>
+            <a href="#servicios">Services</a>
             <a href="#software">ERP</a>
-            <a href="#contacto">Contacto</a>
-            <a href="{% url 'login' %}">Ingresar</a>
+            <a href="#contacto">Contact</a>
+            <a href="{% url 'login' %}">Login</a>
           </div>
         </div>
 
@@ -1241,16 +1243,16 @@ img{
 
       <div class="menu-mobile" id="mobileMenu">
         <div class="menu-mobile-inner">
-         <div class="menu-mobile-language">
-           <a href="{% url 'pagina_web' %}">Español</a>
-           <a href="{% url 'pagina_web_ingles' %}">English</a>
-         </div>
+          <div class="menu-mobile-language">
+          <a href="{% url 'pagina_web' %}">Spanish</a>
+          <a href="{% url 'pagina_web_ingles' %}">English</a>
+        </div>
 
-          <a href="{% url 'login' %}">Ingresar</a>
-          <a href="#nosotros">Nosotros</a>
-          <a href="#servicios">Servicios</a>
+          <a href="{% url 'login' %}">Login</a>
+          <a href="#nosotros">About Us</a>
+          <a href="#servicios">Services</a>
           <a href="#software">ERP</a>
-          <a href="#contacto">Contacto</a>
+          <a href="#contacto">Contact</a>
         </div>
       </div>
     </div>
@@ -1266,15 +1268,15 @@ img{
             <div class="slide-overlay"></div>
             <div class="container hero-content">
               <div class="hero-box">
-                <span class="hero-kicker">software contable y administrativo</span>
-                <h1 class="hero-title">Controla tu <em>empresa</em> con nuestro DataCounter ERP</h1>
+                <span class="hero-kicker">Administrative and accounting software</span>
+                <h1 class="hero-title">Take control of <em>your business</em> with DataCounter ERP</h1>
                 <p class="hero-text">
-                  Contabilidad, cartera, tesorería, facturación, nómina y procesos administrativos en un solo sistema,
-                  solución empresarial moderna.
+                  Accounting, accounts receivable, tresury, invoicing, payroll and administrative process in a single system,
+                  a modern business solution.
                 </p>
                 <div class="hero-actions">
-                  <a class="btn-primary" href="{% url 'login' %}">Ingresar al sistema</a>
-                  <a class="btn-secondary" href="#modulos">Ver módulos</a>
+                  <a class="btn-primary" href="{% url 'login' %}">Login</a>
+                  <a class="btn-secondary" href="#modulos">View modules</a>
                 </div>
               </div>
             </div>
@@ -1285,14 +1287,14 @@ img{
             <div class="slide-overlay"></div>
             <div class="container hero-content">
               <div class="hero-box">
-                <span class="hero-kicker">Asesoría contable y financiera</span>
-                <h1 class="hero-title">Outsourcing contable, <em>consultoria financiera y asesoría tributaria</em></h1>
+                <span class="hero-kicker">Accounting and financial advisory</span>
+                <h1 class="hero-title">Accounting outsourcing, <em>Financial consulting and tax advisory</em></h1>
                 <p class="hero-text">
-                  Toma la mejores decisiones con nuestro equipo de profesionales.
+                  Make better decisions with our team of professionals.
                 </p>
                 <div class="hero-actions">
-                  <a class="btn-primary" href="{% url 'login' %}">Ingresar</a>
-                  <a class="btn-secondary" href="#beneficios">Conocer beneficios</a>
+                  <a class="btn-primary" href="{% url 'login' %}">Login</a>
+                  <a class="btn-secondary" href="#beneficios">Discover benefits</a>
                 </div>
               </div>
             </div>
@@ -1303,14 +1305,14 @@ img{
             <div class="slide-overlay"></div>
             <div class="container hero-content">
               <div class="hero-box">
-                <span class="hero-kicker">Más orden, más control, menos procesos</span>
-                <h1 class="hero-title">Revisoría fiscal y aseguramiento, <em> audotoría externa</em></h1>
+                <span class="hero-kicker">More organization, more control, fewer processes</span>
+                <h1 class="hero-title">Payroll and human resources outsourcing, <em>connect with the top professionals through us</em></h1>
                 <p class="hero-text">
-                  Aseguramos la información y levantamos procesos.
+                  We ensure information reliability and strengthen business processes.  
                 </p>
                 <div class="hero-actions">
-                  <a class="btn-primary" href="{% url 'login' %}">Ingresar</a>
-                  <a class="btn-secondary" href="#beneficios">Conocer beneficios</a>
+                  <a class="btn-primary" href="{% url 'login' %}">Login</a>
+                  <a class="btn-secondary" href="#beneficios">Discover benefits</a>
                 </div>
               </div>
             </div>
@@ -1332,32 +1334,31 @@ img{
   <section class="section section-light" id="modulos">
     <div class="container">
       <div class="section-head">
-        <h2>Un sistema para la gestión integral de tu empresa</h2>
+        <h2>A system for the comprehensive management of your business</h2>
         <p>
-          DataCounter está pensado para centralizar procesos administrativos y contables
-          en una sola plataforma, con una experiencia clara, profesional y orientada al control.
+          DataCounter is designed to centralize administrative and accounting processes in a single platform, offering a clear, professional, and control-focused experience.
         </p>
       </div>
 
       <div class="cards">
         <article class="card">
-          <h3>Contabilidad</h3>
+          <h3>Accounting</h3>
           <p>Registro de documentos, asientos, cierres contables y control del movimiento financiero.</p>
         </article>
 
         <article class="card">
-          <h3>Facturación</h3>
-          <p>Gestión de ventas, cartera, notas crédito y documentos comerciales de forma organizada.</p>
+          <h3>Invoicing</h3>
+          <p>Sales management, accounts receivable, credit notes, and commercial documents in a structured and organized way.</p>
         </article>
 
         <article class="card">
-          <h3>Nómina</h3>
+          <h3>Payroll</h3>
           <p>Administración de personal, conceptos, desprendibles y procesos de pago con mayor control.</p>
         </article>
 
         <article class="card">
-          <h3>Tesorería</h3>
-          <p>Seguimiento de recibos, medios de pago y movimientos de recaudo integrados al sistema.</p>
+          <h3>Tresury</h3>
+          <p>Tracking of receipts, payment methods, and collection transactions integrated into the system.</p>
         </article>
       </div>
     </div>
@@ -1366,32 +1367,21 @@ img{
   <section class="nosotros-section" id="nosotros">
     <div class="container">
 
-      <h2 class="nosotros-title">Nosotros</h2>
+      <h2 class="nosotros-title">About Us</h2>
 
       <div class="nosotros-grid">
 
         <div class="nosotros-card">
-          <h3>Misión</h3>
+          <h3>Mission</h3>
           <p>
-            Brindar soluciones integrales empresariales mediante el desarrollo de 
-            software ERP y servicios profesionales en outsourcing contable, 
-            consultoría financiera y tributaria, y revisoría fiscal, apoyando a 
-            las organizaciones en la optimización de sus procesos, el 
-            fortalecimiento del control financiero y la toma de decisiones 
-            estratégicas, a través de tecnología innovadora, conocimiento 
-            especializado y un acompañamiento cercano y confiable.
+         To provide comprehensive business solutions through the development of ERP software and professional services in accounting outsourcing, financial and tax consulting, and statutory auditing, supporting organizations in optimizing their processes, strengthening financial control, and making strategic decisions through innovative technology, specialized expertise, and close, reliable support.
           </p>
         </div>
 
         <div class="nosotros-card">
-          <h3>Visión</h3>
+          <h3>Vision</h3>
           <p>
-            Ser una firma líder en soluciones empresariales y tecnológicas, 
-            reconocida por integrar software ERP y servicios profesionales 
-            de alto nivel, contribuyendo al crecimiento sostenible de las 
-            organizaciones en Colombia y Latinoamérica, mediante innovación 
-            constante, excelencia en el servicio y generación de valor para 
-            nuestros clientes.
+          To be a leading firm in business and technological solutions, recognized for integrating ERP software and high-level professional services, contributing to the sustainable growth of organizations in Colombia and Latin America through continuous innovation, service excellence, and value creation for our clients.
           </p>
         </div>
 
@@ -1403,7 +1393,7 @@ img{
   <section class="services-section" id="servicios">
     <div class="container services-container">
 
-      <h2 class="services-title">Servicios</h2>
+      <h2 class="services-title">Services</h2>
 
       <div class="services-content">
         <div class="services-image-box">
@@ -1417,34 +1407,30 @@ img{
         <div class="services-text">
           <div class="services-grid">
             <div class="service-item">
-              <h3>Outsourcing contable</h3>
+              <h3>Accounting outsourcing</h3>
               <p>
-                Texto de prueba para describir este servicio empresarial, resaltando orden,
-                control y acompañamiento profesional en cada proceso.
+                Sample text to describe this business service, highlighting organization, control, and professional support in every process.
               </p>
             </div>
 
             <div class="service-item">
-              <h3>Asesoría tributaria</h3>
+              <h3>Tax advisory</h3>
               <p>
-                Texto de prueba para explicar soluciones orientadas al cumplimiento normativo,
-                planeación fiscal y atención oportuna a cada necesidad.
+                Sample text to describe solutions focused on regulatory compliance with government entities such as the DIAN, tax planning, and timely support for every business need.
               </p>
             </div>
 
             <div class="service-item">
-              <h3>Consultoría financiera</h3>
+              <h3>Financial advisory</h3>
               <p>
-                Texto de prueba para mostrar apoyo en análisis financiero, toma de decisiones
-                y fortalecimiento de la estructura administrativa.
+                Sample text to highlight support in financial analysis, decision-making, and strengthening of the administrative structure.
               </p>
             </div>
 
             <div class="service-item">
-              <h3>Revisoría fiscal</h3>
+              <h3>Statutory auditing</h3>
               <p>
-                Texto de prueba para presentar acompañamiento integral en supervisión,
-                evaluación de procesos y aseguramiento de la información.
+              Sample text to present comprehensive support in supervision, process evaluation, and information assurance.
               </p>
             </div>
           </div>
@@ -1458,10 +1444,9 @@ img{
     <div class="container">
 
       <div class="software-head">
-        <h2 class="software-title">ERP contable y administrativo</h2>
+        <h2 class="software-title">Administrative and accounting ERP</h2>
         <p class="software-subtitle">
-          Conoce algunos de nuestros módulos básicos y las soluciones que integran
-          nuestra plataforma para optimizar el control, la operación y la gestión de tu empresa.
+         Discover some of our core modules and the solutions that integrate our platform to optimize control, operations, and business management.
         </p>
       </div>
 
@@ -1474,10 +1459,9 @@ img{
             class="software-card-image"
           >
           <div class="software-card-body">
-            <h3 class="software-card-title">Contabilidad</h3>
+            <h3 class="software-card-title">Accounting</h3>
             <p class="software-card-text">
-              Control de hechos económicos, manejo bajo NIIF, centros de costos,
-              balances, auxiliares y reportes ajustados a las necesidades de la organización.
+              Control of financial transactions, IFRS-compliant management, cost centers, financial statements, subsidiary ledgers, and reports tailored to the organization's needs.
             </p>
           </div>
         </article>
@@ -1489,10 +1473,9 @@ img{
             class="software-card-image"
           >
           <div class="software-card-body">
-            <h3 class="software-card-title">Facturación</h3>
+            <h3 class="software-card-title">Invoicing</h3>
             <p class="software-card-text">
-              Facturación electrónica, POS, control de inventarios, gestión de clientes,
-              productos, descuentos, cartera y procesos comerciales integrados.
+              Electronic invoicing, POS, inventory control, customer management, products, discounts, accounts receivable, and integrated commercial processes.
             </p>
           </div>
         </article>
@@ -1504,10 +1487,9 @@ img{
             class="software-card-image"
           >
           <div class="software-card-body">
-            <h3 class="software-card-title">Tesorería</h3>
+            <h3 class="software-card-title">Treasury</h3>
             <p class="software-card-text">
-              Gestión de pagos, recaudos, cartera masiva, integraciones operativas
-              y reportes que facilitan el seguimiento financiero y la toma de decisiones.
+             Payment management, collections, bulk accounts receivable processing, operational integrations, and reports that facilitate financial monitoring and decision-making.
             </p>
           </div>
         </article>
@@ -1519,10 +1501,9 @@ img{
             class="software-card-image"
           >
           <div class="software-card-body">
-            <h3 class="software-card-title">Nómina</h3>
+            <h3 class="software-card-title">Payroll</h3>
             <p class="software-card-text">
-              Nómina electrónica, novedades, liquidaciones, seguridad social,
-              desprendibles y reportes para una administración más precisa del talento humano.
+              Electronic payroll, adjustments, settlements, social security, payslips, and reports for more accurate human talent management.
             </p>
           </div>
         </article>
@@ -1534,10 +1515,9 @@ img{
             class="software-card-image"
           >
           <div class="software-card-body">
-            <h3 class="software-card-title">Gestión de compras</h3>
+            <h3 class="software-card-title">Procurement Management</h3>
             <p class="software-card-text">
-              Administración de proveedores, anticipos, seguimiento de compras
-              y reportes clave para fortalecer el control y apoyar decisiones oportunas.
+             Supplier management, advances, purchase tracking, and key reports to strengthen control and support timely decision-making.
             </p>
           </div>
         </article>
@@ -1549,10 +1529,9 @@ img{
             class="software-card-image"
           >
           <div class="software-card-body">
-            <h3 class="software-card-title">Otros</h3>
+            <h3 class="software-card-title">Others</h3>
             <p class="software-card-text">
-              Levantamiento de procesos, elaboración de manuales,
-              parametrizaciones y desarrollos específicos de acuerdo con las necesidades del cliente.
+             Process mapping, manual development, system parameterization, and custom developments according to the client’s needs.
             </p>
           </div>
         </article>
@@ -1570,52 +1549,54 @@ img{
       </div>
 
       <div class="contact-form-box">
-        <h2 class="contact-title">Contacto</h2>
+        <h2 class="contact-title">Contact</h2>
         <p class="contact-text">
-          Déjanos tus datos y uno de nuestros asesores se contactará contigo para ampliarte la información.
+          Leave your details and one of our advisors will contact you to provide further information.
         </p>
 
         <form>
           <div class="contact-grid">
             <div class="contact-field">
-              <label for="nombre">Nombre</label>
-              <input type="text" id="nombre" name="nombre" placeholder="Ingresa tu nombre">
+              <label for="nombre">Names</label>
+              <input type="text" id="nombre" name="nombre" placeholder="Enter your name">
             </div>
 
             <div class="contact-field">
-              <label for="apellido">Apellido</label>
-              <input type="text" id="apellido" name="apellido" placeholder="Ingresa tu apellido">
+              <label for="apellido">Country</label>
+              <input type="text" id="apellido" name="apellido" placeholder="Enter your country">
             </div>
 
             <div class="contact-field">
-              <label for="correo">Correo electrónico</label>
-              <input type="email" id="correo" name="correo" placeholder="ejemplo@correo.com">
+              <label for="correo">Email</label>
+              <input type="email" id="correo" name="correo" placeholder="exampleo@correo.com">
             </div>
 
             <div class="contact-field">
-              <label for="telefono">Teléfono</label>
-              <input type="text" id="telefono" name="telefono" placeholder="Ingresa tu teléfono">
+              <label for="telefono">Tel</label>
+              <input type="text" id="telefono" name="telefono" placeholder="Enter your telephono or cel number">
             </div>
 
             <div class="contact-field full">
-              <label for="mensaje">Mensaje</label>
-              <textarea id="mensaje" name="mensaje" placeholder="Escribe tu mensaje"></textarea>
+              <label for="mensaje">Menssage</label>
+              <textarea id="mensaje" name="mensaje" placeholder="Write your message"></textarea>
             </div>
           </div>
 
           <div class="contact-actions">
-            <button type="submit" class="contact-btn">Enviar</button>
-              <a href="https://wa.me/573018446415?text=Hola,%20quiero%20recibir%20informaci%C3%B3n%20sobre%20DataCounter" 
-                class="whatsapp-btn" 
-                target="_blank">
+            <button type="submit" class="contact-btn">Send</button>
 
-                <svg class="whatsapp-icon" viewBox="0 0 32 32" aria-hidden="true">
-                <path d="M19.11 17.21c-.29-.15-1.7-.84-1.97-.93-.26-.1-.45-.15-.65.14-.19.29-.74.93-.91 1.12-.17.19-.34.22-.63.08-.29-.15-1.24-.46-2.36-1.46-.87-.78-1.46-1.74-1.63-2.03-.17-.29-.02-.45.13-.6.13-.13.29-.34.43-.51.14-.17.19-.29.29-.48.1-.19.05-.36-.02-.51-.07-.15-.65-1.57-.89-2.15-.24-.57-.49-.49-.65-.5h-.55c-.19 0-.5.07-.77.36-.26.29-1 1-.96 2.44.05 1.44 1.03 2.83 1.18 3.03.14.19 2.02 3.09 4.89 4.33.68.29 1.21.46 1.62.59.68.22 1.3.19 1.79.12.55-.08 1.7-.69 1.94-1.35.24-.66.24-1.22.17-1.34-.07-.12-.26-.19-.55-.34z"/>
-                </svg>
+           <a href="https://wa.me/573018446415?text=Hola,%20quiero%20recibir%20informaci%C3%B3n%20sobre%20DataCounter" 
+             class="whatsapp-btn" 
+             target="_blank">
 
-                    WhatsApp
+             <svg class="whatsapp-icon" viewBox="0 0 32 32" aria-hidden="true">
+             <path d="M19.11 17.21c-.29-.15-1.7-.84-1.97-.93-.26-.1-.45-.15-.65.14-.19.29-.74.93-.91 1.12-.17.19-.34.22-.63.08-.29-.15-1.24-.46-2.36-1.46-.87-.78-1.46-1.74-1.63-2.03-.17-.29-.02-.45.13-.6.13-.13.29-.34.43-.51.14-.17.19-.29.29-.48.1-.19.05-.36-.02-.51-.07-.15-.65-1.57-.89-2.15-.24-.57-.49-.49-.65-.5h-.55c-.19 0-.5.07-.77.36-.26.29-1 1-.96 2.44.05 1.44 1.03 2.83 1.18 3.03.14.19 2.02 3.09 4.89 4.33.68.29 1.21.46 1.62.59.68.22 1.3.19 1.79.12.55-.08 1.7-.69 1.94-1.35.24-.66.24-1.22.17-1.34-.07-.12-.26-.19-.55-.34z"/>
+             </svg>
 
-              </a>
+             WhatsApp
+
+            </a>
+
           </div>
         </form>
       </div>
@@ -1626,12 +1607,11 @@ img{
   <section class="section section-soft" id="beneficios">
     <div class="container">
       <div class="highlight">
-        <h2>Una plataforma pensada para trabajar con más claridad y seguridad</h2>
+        <h2>A platform designed to work with greater clarity and security.</h2>
         <p>
-          Mejora la organización de tu operación, consulta información clave en menos tiempo
-          y lleva tus procesos con una estructura mucho más profesional.
+         Improve the organization of your operations, access key information in less time, and manage your processes with a much more professional structure.
         </p>
-        <a class="btn-primary" href="{% url 'login' %}">Ingresar al sistema</a>
+        <a class="btn-primary" href="{% url 'login' %}">Login to the system</a>
       </div>
     </div>
   </section>
@@ -1645,14 +1625,14 @@ img{
   <footer class="footer">
     <div class="container">
       <div class="footer-inner">
-        <div>&copy; DataCounter 2026 | Solución contable y administrativa</div>
+        <div>&copy; DataCounter 2026 | Administrative and accounting solutions</div>
 
         <div class="footer-links">
-          <a href="#inicio">Inicio</a>
-          <a href="#servicios">Servicios</a>
+          <a href="#inicio">Home</a>
+          <a href="#servicios">Services</a>
           <a href="#software">ERP</a>
-          <a href="#contacto">Contacto</a>
-          <a href="{% url 'login' %}">Ingresar</a>
+          <a href="#contacto">Contact</a>
+          <a href="{% url 'login' %}">Login</a>
         </div>
       </div>
     </div>

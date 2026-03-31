@@ -6,6 +6,7 @@ urlpatterns = [
     # Página principal
 
     path('', views.pagina_web, name='pagina_web'),
+    path('en/', views.pagina_web_ingles, name='pagina_web_ingles'),
     path('home/', views.home, name='home'),
 
     

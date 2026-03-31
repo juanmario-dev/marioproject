@@ -73,6 +73,13 @@ def pagina_web(request):
     return render(request, 'paginaweb.html')
 
 
+
+def pagina_web_ingles(request):
+    return render(request, 'paginaweb_ingles.html')
+
+
+
+
 from django.contrib.auth import logout
 from django.shortcuts import redirect
 
