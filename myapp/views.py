@@ -2757,7 +2757,7 @@ from reportlab.graphics.shapes import Drawing
 from reportlab.platypus import Image
 import os
 
-datos_empresa = DatosFacturacion.objects.first()
+# datos_empresa = DatosFacturacion.objects.first()
 
 
 @login_required(login_url="login")
